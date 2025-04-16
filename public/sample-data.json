@@ -1,0 +1,63 @@
+[
+    {
+      "id": "kit_001",
+      "name": "808 Warfare Kit",
+      "price": 25,
+      "category": "kit",
+      "description": "A hard-hitting 808 kit perfect for trap beats. Includes 20+ WAV samples.",
+      "image_url": "https://cdn.example.com/img/808-kit.jpg",
+      "audio_url": "https://cdn.example.com/audio/808-preview.mp3",
+      "is_exclusive": false
+    },
+    {
+      "id": "beat_001",
+      "name": "Moonlight Beat",
+      "price": 30,
+      "category": "beat",
+      "description": "Ambient melodic beat in the style of Drake x Travis Scott.",
+      "image_url": "https://cdn.example.com/img/beat.jpg",
+      "audio_url": "https://cdn.example.com/audio/moonlight.mp3",
+      "is_exclusive": true
+    },
+    {
+      "id": "pack_001",
+      "name": "Lofi Texture Pack",
+      "price": 18,
+      "category": "pack",
+      "description": "Drum loops and textures designed for chill lofi production.",
+      "image_url": "https://cdn.example.com/img/lofi-pack.jpg",
+      "audio_url": "https://cdn.example.com/audio/lofi-preview.mp3",
+      "is_exclusive": false
+    },
+    {
+      "id": "plugin_001",
+      "name": "SkyVerb VST",
+      "price": 59,
+      "category": "plugin",
+      "description": "A custom reverb plugin with dreamy analog textures.",
+      "image_url": "https://cdn.example.com/img/skyverb.jpg",
+      "audio_url": "",
+      "is_exclusive": true
+    },
+    {
+      "id": "merch_001",
+      "name": "Producer Hoodie - Black",
+      "price": 45,
+      "category": "merch",
+      "description": "Premium heavyweight hoodie with 'PRODUCER' embroidered front logo.",
+      "image_url": "https://cdn.example.com/img/hoodie.jpg",
+      "audio_url": "",
+      "is_exclusive": false
+    },
+    {
+        "id": "suite_001",
+        "name": "Fresh Squeezed Suite",
+        "price": 45,
+        "category": "suite",
+        "description": "Premium pack of samples and a 2hr educational course on how to make dark melodies.",
+        "image_url": "https://cdn.example.com/img/dark-forest.jpg",
+        "audio_url": "",
+        "is_exclusive": false
+      }
+  ]
+  

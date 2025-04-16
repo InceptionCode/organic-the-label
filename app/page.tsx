@@ -1,9 +1,32 @@
+'use client'
+
+import Dialog from "@/ui-components/dialog";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const onConfirm = () => router.push('/login')
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Dialog isOpen dialogTitle="Start Free Membership" 
+            titleIcon={
+              <ExclamationTriangleIcon 
+                aria-hidden="true" 
+                className="size-6 text-yellow-600" />
+              } 
+            confirmText="Sign Up"
+            onConfirm={onConfirm}
+          >
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <p className="text-black font-semibold text-center">
+              Sign up and receive exclusive content, discounts and <span className="font-bold">more...</span>
+            </p>
+          </div>
+        </Dialog>
         <Image
           className="dark:invert"
           src="/next.svg"
