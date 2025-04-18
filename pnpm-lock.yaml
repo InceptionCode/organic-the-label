@@ -53,6 +53,9 @@ importers:
       react-hook-form:
         specifier: ^7.55.0
         version: 7.55.0(react@19.1.0)
+      react-zorm:
+        specifier: ^0.9.0
+        version: 0.9.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2)
       stripe:
         specifier: ^18.0.0
         version: 18.0.0
@@ -2895,6 +2898,13 @@ packages:
 
   react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+
+  react-zorm@0.9.0:
+    resolution: {integrity: sha512-esuEiNUuj+JfI4Lz5o36KgT2JNN/NTNeO/70FghbRSBjCxRKeEtjO4KXP7SOMzbOa6rhOFNiP+goPXOUTLG/pw==}
+    peerDependencies:
+      react: '>=17.0.0'
+      react-dom: '>=17.0.0'
+      zod: '>=3.0.0'
 
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
@@ -6269,6 +6279,12 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
+
+  react-zorm@0.9.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      zod: 3.24.2
 
   react@19.1.0: {}
 

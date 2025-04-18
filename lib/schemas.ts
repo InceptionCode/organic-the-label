@@ -37,6 +37,23 @@ export const UserPreferencesSchema = z.object({
 
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>
 
+export const UserSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  avatar_url: z.string().optional(),
+  created_at: z.string()
+})
+
+export type User = z.infer<typeof UserSchema>
+
+export const LoginFormSchema = z.object({
+  email: z.string().email("Please enter a valid email").trim(),
+  username: z.string().trim().optional(),
+  password: z.string()
+              .min(8, 'Password must be at least 8 characters long.')
+              .trim()
+              .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
+})
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------

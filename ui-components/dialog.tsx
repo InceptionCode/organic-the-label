@@ -16,7 +16,7 @@ export type DialogProps = React.PropsWithChildren<{
   cancelText?: string;
 } & typeof HeadlessDialog>
 
-const Dialog = ({ 
+export const Dialog = ({ 
   children, 
   onClose, 
   onConfirm,
@@ -98,5 +98,3 @@ const Dialog = ({
 }
 
 Dialog.displayName = 'Dialog'
-
-export default Dialog
