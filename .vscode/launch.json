@@ -1,0 +1,82 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Next.js: debug server-side",
+        "type": "node-terminal",
+        "request": "launch",
+        "cwd": "${workspaceFolder}",
+        "command": "pnpm dev",
+        "sourceMaps": true,
+        "sourceMapPathOverrides": {
+          "/turbopack/[project]/*": "${workspaceFolder}/*"
+        },
+        "skipFiles": [
+          "<node_internals>/**",
+          "${workspaceFolder}/node_modules/**",
+          "**/next/dist/**",
+          "**/webpack/**",
+        ],
+      },
+      {
+        "type": "chrome",
+        "request": "launch",
+        "name": "Next.js: debug client-side",
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}",
+        "sourceMaps": true,
+        "sourceMapPathOverrides": {
+          "/turbopack/[project]/*": "${webRoot}/*",
+          "webpack://nextjs-app-14/./*": "${workspaceFolder}/*",
+          "webpack://_N_E/./*": "${workspaceFolder}/*"
+        },
+        "skipFiles": [
+          "<node_internals>/**",
+          "${workspaceFolder}/node_modules/**",
+          "**/next/dist/**",
+          "**/webpack/**",
+        ],
+        "resolveSourceMapLocations": [
+          "!**/node_modules/**",
+          "!**/tensorflow/**",
+          "!**/hot-reloader-client*",
+          "!**/runtime-backend-dom*",
+          "!**/turbopack/dev/runtime/**"
+        ],
+        "trace": true,
+      },
+      {
+        "name": "Next.js: debug full stack",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+        "args": ["dev"],
+        "runtimeArgs": ["--inspect"],
+        "sourceMaps": true,
+        "serverReadyAction": {
+          "action": "debugWithChrome",
+          "killOnServerStop": true,
+          "pattern": "- Local:.+(https?://.+)",
+          "uriFormat": "%s",
+          "webRoot": "${workspaceFolder}"
+        },
+         "sourceMapPathOverrides": {
+          "/turbopack/[project]/*": "${webRoot}/*"
+        },
+        "skipFiles": [
+          "<node_internals>/**",
+          "${workspaceFolder}/node_modules/**",
+          "**/next/dist/**",
+          "**/webpack/**",
+        ],
+        "resolveSourceMapLocations": [
+          "!**/node_modules/**",
+          "!**/tensorflow/**",
+          "!**/hot-reloader-client*",
+          "!**/runtime-backend-dom*",
+          "!**/turbopack/dev/runtime/**"
+        ],
+        "trace": true,
+      }
+    ]
+  }

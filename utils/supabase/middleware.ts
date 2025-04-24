@@ -1,6 +1,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+// NOTE: Add logger for server operations
 // NOTE: Set Roles and Policies for tables and general access on supabase.
+// NOTE: Add recaptcha confirm for NEW anon users. Confirmed anon users should almost never see recaptcha again.
+
+export const privateRoutes: string[] = []
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -36,15 +41,35 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
+
+  if (!user) {
+    try {
+      const { error } = await supabase.auth.signInAnonymously()
+
+      if (error) {
+        console.error(error)
+        return NextResponse.json({
+          ok: false,
+          message: 'Failed to authenticate user',
+          error
+        }, { status: 401 })
+      }
+
+    } catch (e) {
+      console.error(e)
+      return NextResponse.json({
+        ok: false,
+        message: 'Failed to authenticate user',
+        error: e
+      }, { status: 401 })
+    }
+  }
+  // NOTE: Revisit redirect and authorization logic when membership becomes a thing.
+  if (privateRoutes.includes(request.nextUrl.pathname) && user?.is_anonymous) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+
     return NextResponse.redirect(url)
   }
 

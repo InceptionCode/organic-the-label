@@ -46,14 +46,37 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>
 
-export const LoginFormSchema = z.object({
+export const SigninFormSchema = z.object({
   email: z.string().email("Please enter a valid email").trim(),
-  username: z.string().trim().optional(),
   password: z.string()
-              .min(8, 'Password must be at least 8 characters long.')
-              .trim()
-              .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
+    .min(8, 'Password must be at least 8 characters long.')
+    .trim()
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
 })
+
+export const SignupFormSchema = z.object({
+  email: z.string().email("Please enter a valid email").trim(),
+  username: z.string()
+    .trim()
+    .refine((uname) => /^[a-zA-Z0-9._-]+$/.test(uname), "Username must NOT contain special characters"),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long.')
+    .trim()
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number."),
+  confirmPassword: z.string()
+    .min(8, 'Password must be at least 8 characters long.')
+    .trim()
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
+}).superRefine(({ confirmPassword, password }, ctx) => {
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Password and confirm password must match',
+      path: ['confirmPassword']
+    })
+  }
+})
+
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------

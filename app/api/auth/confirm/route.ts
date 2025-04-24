@@ -1,7 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest } from 'next/server'
 
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase/server-base'
 import { redirect } from 'next/navigation'
 
 export async function GET(request: NextRequest) {
@@ -17,8 +17,10 @@ export async function GET(request: NextRequest) {
       type,
       token_hash,
     })
+
     if (!error) {
       // redirect user to specified redirect URL or root of app
+      // TODO: Present toast message if confirmation fails
       redirect(next)
     }
   }

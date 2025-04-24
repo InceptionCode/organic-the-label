@@ -2,15 +2,12 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
-const publicRoutes = [
-  '/', 
-  '/store'
-]
-
 export async function middleware(request: NextRequest) {
-  if (!publicRoutes.includes(request.nextUrl.pathname)) {
-    return await updateSession(request)
-  }
+  // if (!publicRoutes.includes(request.nextUrl.pathname)) {
+  //   return await updateSession(request)
+  // }
+
+  return await updateSession(request)
 }
 
 export const config = {
