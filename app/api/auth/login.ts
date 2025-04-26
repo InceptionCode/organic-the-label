@@ -1,12 +1,21 @@
-'use server'
+'use client'
 
 import { SigninFormSchema, SignupFormSchema } from "@/lib/schemas"
 import { parseForm } from "react-zorm"
-import { createSupabaseServerClient } from "@/lib/supabase/server-base"
 import { redirect } from "next/navigation"
+import { AuthError } from "@supabase/supabase-js"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
 
-export const signinAction = async (_: unknown, formData: FormData) => {
-    const supabase = await createSupabaseServerClient()
+export type LoginActionState = {
+    ok: boolean;
+    error: {
+        message: string;
+        error: AuthError | unknown | null;
+    }
+}
+
+export const signinAction = async (_: unknown, formData: FormData): Promise<LoginActionState> => {
+    const supabase = await createSupabaseBrowserClient()
 
     console.info('instantiated supabase client')
 
@@ -37,8 +46,8 @@ export const signinAction = async (_: unknown, formData: FormData) => {
     redirect('/account')
 }
 
-export const signupAction = async (_: unknown, formData: FormData) => {
-    const supabase = await createSupabaseServerClient()
+export const signupAction = async (_: unknown, formData: FormData): Promise<LoginActionState> => {
+    const supabase = await createSupabaseBrowserClient()
 
     console.info('instantiated supabase client')
 

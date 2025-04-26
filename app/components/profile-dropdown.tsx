@@ -1,8 +1,11 @@
+import useSignOut from '@/utils/hooks/use-sign-out';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import Link from 'next/link';
 
 // NOTE: Finish designing profile dropdown and add logout route that signs out of supabase and removes the cookie session.
 export const ProfileDropdown = () => {
+  const { signOutHandler } = useSignOut();
+
   return (
     <Menu as="div" className="relative ml-3">
       <div>
@@ -37,12 +40,12 @@ export const ProfileDropdown = () => {
           </Link>
         </MenuItem>
         <MenuItem>
-          <Link
-            href="#"
+          <button
+            onClick={signOutHandler}
             className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
           >
             Sign out
-          </Link>
+          </button>
         </MenuItem>
       </MenuItems>
     </Menu>

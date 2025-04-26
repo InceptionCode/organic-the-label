@@ -111,6 +111,9 @@ importers:
       cypress:
         specifier: ^14.3.0
         version: 14.3.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0

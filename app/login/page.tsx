@@ -6,8 +6,8 @@ import { SigninFormSchema } from '@/lib/schemas';
 import { TextField, Button } from '@/ui-components';
 import { useZorm } from 'react-zorm';
 import Link from 'next/link';
-
-// NOTE: Fully design login and signup page. Include error handling and error boundary. Display toast for login failure.
+// TODO: Provide a reset password link
+// NOTE: Fully design login and signup page. Include error handling and error boundary. Display toast for login failure. Include magic link and Google sign in
 export default function Login() {
   const zo = useZorm('login', SigninFormSchema);
   const disabled = zo.validation?.success === false;

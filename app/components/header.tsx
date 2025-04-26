@@ -6,7 +6,6 @@ import { Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/o
 import Link from 'next/link';
 import { ProfileDropdown } from './profile-dropdown';
 import { useAuthStore } from '@/store/auth-context';
-
 /*
 - Store link
 - Logo home link
@@ -15,6 +14,7 @@ Links will be flagged active
 - Conditional Sign In / Account button and link.
 */
 
+// TODO: Fix UI/ user data not updating when user logins.
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }

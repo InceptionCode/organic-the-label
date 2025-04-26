@@ -38,10 +38,15 @@ export const UserPreferencesSchema = z.object({
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>
 
 export const UserSchema = z.object({
-  id: z.string(),
   username: z.string(),
+  created_at: z.string(),
+  confirmed_at: z.string(),
+  isAnon: z.boolean(),
+  id: z.string().optional(),
+  updated_at: z.string().optional(),
+  last_signed_in: z.string().optional(),
   avatar_url: z.string().optional(),
-  created_at: z.string()
+  preferences: UserPreferencesSchema.optional()
 })
 
 export type User = z.infer<typeof UserSchema>

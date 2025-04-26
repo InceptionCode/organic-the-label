@@ -2,29 +2,39 @@
 
 import { useAuthStore } from '@/store/auth-context';
 import { Dialog } from '@/ui-components';
+import { useStorage } from '@/utils/hooks/use-storage';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const router = useRouter();
-  const onConfirm = () => router.push('/login');
+  const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
+    initMethod: 'get',
+  });
+
+  const onConfirm = () => {
+    router.push('/login');
+    setStorage('session', 'showSignUpCTA', 'false');
+  };
 
   const user = useAuthStore((state) => state.user);
+  const showSignUpCTA = initCTAFlag === 'true';
 
-  // TODO: Fix issue where auth store isn't callable & the initial Dialog state is open when it should be false
-  // NOTE: Consider adding a localStorage flag that prevents an Anon user from continuously seeing the CTA
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
         <Dialog
-          isOpen={!user || user?.isAnon}
+          isOpen={showSignUpCTA && (!user || user?.isAnon)}
           dialogTitle="Start Free Membership"
           titleIcon={
             <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-yellow-600" />
           }
           confirmText="Sign Up"
           onConfirm={onConfirm}
+          onClose={() => {
+            setStorage('session', 'showSignUpCTA', 'false');
+          }}
         >
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <p className="text-black font-semibold text-center">
