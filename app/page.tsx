@@ -1,16 +1,29 @@
 'use client';
 
 import { useAuthStore } from '@/store/auth-context';
-import { Dialog } from '@/ui-components';
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/ui-components';
 import { useStorage } from '@/utils/hooks/use-storage';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
   const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
     initMethod: 'get',
+    item: 'true',
   });
 
   const onConfirm = () => {
@@ -18,30 +31,54 @@ export default function Home() {
     setStorage('session', 'showSignUpCTA', 'false');
   };
 
-  const user = useAuthStore((state) => state.user);
-  const showSignUpCTA = initCTAFlag === 'true';
+  const onClose = () => {
+    setOpen(false);
+    setStorage('session', 'showSignUpCTA', 'false');
+  };
+
+  const [open, setOpen] = useState<boolean>();
+
+  useEffect(() => {
+    const showSignUpCTA = initCTAFlag === 'true';
+    const defaultOpen = showSignUpCTA && (!user || user?.isAnon);
+
+    setOpen(defaultOpen);
+  }, [initCTAFlag, user]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Dialog
-          isOpen={showSignUpCTA && (!user || user?.isAnon)}
-          dialogTitle="Start Free Membership"
-          titleIcon={
-            <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-yellow-600" />
-          }
-          confirmText="Sign Up"
-          onConfirm={onConfirm}
-          onClose={() => {
-            setStorage('session', 'showSignUpCTA', 'false');
-          }}
-        >
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <p className="text-black font-semibold text-center">
+        <Dialog open={open}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <ExclamationTriangleIcon aria-hidden="true" className="size-6 text-yellow-600" />
+              <DialogTitle>Start Free Membership</DialogTitle>
+            </DialogHeader>
+            <DialogDescription className="text-black font-semibold text-center">
               Sign up and receive exclusive content, discounts and{' '}
               <span className="font-bold">more...</span>
-            </p>
-          </div>
+            </DialogDescription>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  className="mt-3 inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs ring-1 ring-gray-300 ring-inset hover:cursor-pointer sm:mt-0 sm:w-auto"
+                  onClick={onClose}
+                >
+                  Close
+                </Button>
+              </DialogClose>
+
+              <Button
+                type="button"
+                onClick={() => onConfirm()}
+                className="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs sm:ml-3 sm:w-auto hover:cursor-pointer"
+              >
+                Signup
+              </Button>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
 
         <Image

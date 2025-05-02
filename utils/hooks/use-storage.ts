@@ -4,31 +4,35 @@ import isEmpty from "lodash/isEmpty";
 import { useEffect, useState } from "react";
 
 const setStorage = (type: 'session' | 'local', key: string, item?: string) => {
+  if (typeof window === 'undefined') return null
+
   if (isEmpty(item)) {
     console.error('You must provide an item to fetch from storage')
     return null
   }
 
   if (type === 'session') {
-    sessionStorage.setItem(key, String(item))
+    window.sessionStorage.setItem(key, String(item))
   }
 
   if (type === 'local') {
-    localStorage.setItem(key, String(item))
+    window.localStorage.setItem(key, String(item))
   }
 
   return item
 }
 
 const getStorage = (type: 'session' | 'local', key: string, defaultValue?: string) => {
+  if (typeof window === 'undefined') return null
+
   let item = null
 
   if (type === 'session') {
-    item = sessionStorage.getItem(key)
+    item = window.sessionStorage.getItem(key)
   }
 
   if (type === 'local') {
-    item = localStorage.getItem(key)
+    item = window.localStorage.getItem(key)
   }
 
   if (isEmpty(item) && !isEmpty(defaultValue)) {

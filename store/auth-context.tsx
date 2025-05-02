@@ -8,7 +8,6 @@ import isEmpty from 'lodash/isEmpty';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client-base';
 import { User } from '@supabase/supabase-js';
 import { defaultUserState } from '@/lib/store/authStore';
-import { useStorage } from '@/utils/hooks/use-storage';
 
 export type AuthStoreApi = ReturnType<typeof createAuthStore>;
 
@@ -19,9 +18,6 @@ export const AuthStoreProvider = ({ initialUser, children }: AuthProviderProps) 
   const supabase = createSupabaseBrowserClient();
 
   const storeRef = useRef<AuthStoreApi | null>(null);
-  const { initItem: initCTAFlag, setStorage } = useStorage('session', 'showSignUpCTA', {
-    initMethod: 'get',
-  });
 
   const setUpdatedUser = (user?: User) => ({
     username: user?.user_metadata.username || user?.email,
@@ -77,10 +73,6 @@ export const AuthStoreProvider = ({ initialUser, children }: AuthProviderProps) 
 
   if (isEmpty(storeRef.current)) {
     storeRef.current = createAuthStore({ user: initialUser });
-
-    if (initialUser?.isAnon && !initCTAFlag) {
-      setStorage('session', 'showSignUpCTA', 'true');
-    }
   }
 
   return <AuthStoreContext.Provider value={storeRef.current}>{children}</AuthStoreContext.Provider>;

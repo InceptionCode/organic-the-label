@@ -82,6 +82,24 @@ export const SignupFormSchema = z.object({
   }
 })
 
+const mergeSignUpForm = SignupFormSchema._def.schema.pick({ confirmPassword: true })
+export const UpdateUserFormSchema = SigninFormSchema.extend({
+  username: z.string().optional(),
+  email: z.string().optional(),
+  avatar_url: z.string().optional()
+}).merge(mergeSignUpForm)
+  .superRefine(({ confirmPassword, password }, ctx) => {
+    if (confirmPassword !== password) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Password and confirm password must match',
+        path: ['confirmPassword']
+      })
+    }
+  })
+
+export type UpdateUserForm = z.infer<typeof UpdateUserFormSchema>
+
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------

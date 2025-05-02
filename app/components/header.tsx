@@ -14,7 +14,6 @@ Links will be flagged active
 - Conditional Sign In / Account button and link.
 */
 
-// TODO: Fix UI/ user data not updating when user logins.
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }

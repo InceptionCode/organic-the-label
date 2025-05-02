@@ -1,4 +1,4 @@
-import Link from "next/link"
+import Link from 'next/link';
 /*
 - Store link
 - Logo home link
@@ -6,14 +6,14 @@ import Link from "next/link"
 Links will be flagged active 
 - Conditional Sign In / Account button and link.
 */
-export const Footer = (props) => {
-    return (
-        <footer>
-            <nav>
-                <Link href="/explore">[Logo]</Link>
-                <Link href="/about">About</Link>
-                <Link href="/support">Support</Link>
-            </nav>
-        </footer>
-    )
-}
+export const Footer = () => {
+  return (
+    <footer>
+      <nav>
+        <Link href="/explore">[Logo]</Link>
+        <Link href="/about">About</Link>
+        <Link href="/support">Support</Link>
+      </nav>
+    </footer>
+  );
+};

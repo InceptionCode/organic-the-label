@@ -1,31 +1,56 @@
-import {
-  Button as HeadlessButton,
-  type ButtonProps as HeadlessButtonProps,
-} from '@headlessui/react';
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-export type ButtonProps = {
-  type?: 'submit' | 'reset' | 'button' | undefined;
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  kind: 'primary' | 'success' | 'warning' | 'info';
-  children: string;
-} & HeadlessButtonProps;
+import { cn } from '@/lib/utils';
 
-export const Button = ({ type, onClick, kind, children, ...props }: ButtonProps) => {
-  const buttonColor = {
-    primary: { inactive: 'bg-red-600', active: 'bg-red-500' },
-    success: { inactive: 'bg-green-600', active: 'bg-green-500' },
-    warning: { inactive: 'bg-yellow-600', active: 'bg-yellow-500' },
-    info: { inactive: 'bg-white', active: 'bg-gray-600' },
-  };
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all hover:cursor-pointer disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  {
+    variants: {
+      variant: {
+        default: 'bg-red-600 text-white-foreground shadow-xs hover:bg-red-600/80',
+        destructive:
+          'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
+        outline:
+          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+        ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
+        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        icon: 'size-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
+
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  }) {
+  const Comp = asChild ? Slot : 'button';
 
   return (
-    <HeadlessButton
-      type={type}
-      onClick={onClick}
-      className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold ${buttonColor[kind].inactive} text-white shadow-xs hover:${buttonColor[kind].active} sm:ml-3 sm:w-auto hover:cursor-pointer`}
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
-    >
-      {children}
-    </HeadlessButton>
+    />
   );
-};
+}
+
+export { Button, buttonVariants };
