@@ -161,8 +161,9 @@ Organic The Label is a community-driven platform that connects music producers a
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
+- **UI Library**: React 19
 - **Styling**: Tailwind CSS
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL)
