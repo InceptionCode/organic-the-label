@@ -4,14 +4,15 @@ A dynamic, personalized platform for music producers and artists featuring exclu
 
 ## About
 
-Organic The Label is a community-driven platform that connects music producers and artists. The website features a personalized "explore" page that serves as the home screen, designed to encourage users to sign up for the email list and accept personalization by subscribing to a free membership tier. 
+Organic The Label is a community-driven platform that connects music producers and artists. The website features a personalized "explore" page that serves as the home screen, designed to encourage users to sign up for the email list and accept personalization by subscribing to a free membership tier.
 
 **Key Features:**
+
 - **Personalized Explore/Home Page**: Dynamic homepage showing recent producer and artist news, forum/discord discussions, and the latest kits, packs, and resources
 - **Free Subscription Incentives**: Exclusive advice, tips, educational videos, free resources, and reminders for future events and deals
 - **Producer & Artist Discovery**: Tools to find and connect with producers and artists
 - **YouTube Integration**: Dedicated pages for deeper discussions and details behind YouTube posts
-- **Store Pages**: 
+- **Store Pages**:
   - General store page
   - Separate pages for "Kits, Packs, & Banks" (digital products)
   - Physical merchandise store
@@ -29,12 +30,14 @@ Organic The Label is a community-driven platform that connects music producers a
 ### Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd organic-the-label
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    # or
@@ -42,25 +45,27 @@ Organic The Label is a community-driven platform that connects music producers a
    ```
 
 3. **Set up environment variables**
-   
+
    Create a `.env.local` file in the root directory with the following variables:
+
    ```env
    # Supabase
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   
+
    # Stripe
    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
    STRIPE_SECRET_KEY=your_stripe_secret_key
    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-   
+
    # Database (if using Turso)
    TURSO_DATABASE_URL=your_turso_database_url
    TURSO_AUTH_TOKEN=your_turso_auth_token
    ```
 
 4. **Run the development server**
+
    ```bash
    pnpm dev
    # or
@@ -68,12 +73,13 @@ Organic The Label is a community-driven platform that connects music producers a
    ```
 
    The dev server will:
+
    - Generate seed data automatically
    - Start the Next.js development server with Turbopack
    - Run on [http://localhost:3000](http://localhost:3000)
 
 5. **Open your browser**
-   
+
    Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Available Scripts

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm generate-seed && NODE_OPTIONS='--inspect' next dev --turbopack",
+    "dev": "NODE_ENV=development pnpm generate-seed && NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
     "generate-seed": "ts-node seed.ts",
     "start": "next start",
