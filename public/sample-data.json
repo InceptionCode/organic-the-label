@@ -1,5 +1,6 @@
 [
     {
+      "created_at": "2025-01-01T00:00:00Z",
       "id": "001",
       "name": "808 Warfare Kit",
       "price": 25,
@@ -20,6 +21,7 @@
       "is_exclusive": true
     },
     {
+      "created_at": "2025-01-01T00:00:00Z",
       "id": "003",
       "name": "Lofi Texture Pack",
       "price": 18,
@@ -30,6 +32,7 @@
       "is_exclusive": false
     },
     {
+      "created_at": "2025-01-01T00:00:00Z",
       "id": "004",
       "name": "SkyVerb VST",
       "price": 59,
@@ -40,6 +43,7 @@
       "is_exclusive": true
     },
     {
+      "created_at": "2025-01-01T00:00:00Z",
       "id": "005",
       "name": "Producer Hoodie - Black",
       "price": 45,
@@ -50,6 +54,7 @@
       "is_exclusive": false
     },
     {
+        "created_at": "2025-01-01T00:00:00Z",
         "id": "006",
         "name": "Fresh Squeezed Suite",
         "price": 45,

@@ -6,6 +6,7 @@ import { z } from "zod"
 
 // ✅ Product Schema for Beats, Kits, and Merch
 export const ProductSchema = z.object({
+  created_at: z.string().datetime(),
   id: z.string(),
   name: z.string(),
   description: z.string().optional(),
