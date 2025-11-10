@@ -6,14 +6,20 @@ import { z } from "zod"
 
 // ✅ Product Schema for Beats, Kits, and Merch
 export const ProductSchema = z.object({
-  created_at: z.string().datetime(),
-  id: z.string(),
+  created_at: z.iso.date(),
+  id: z.number(),
   name: z.string(),
   description: z.string().optional(),
   price: z.number(),
   category: z.enum(["kit", "pack", "beat", "merch", "bank", "suite", "plugin"]),
-  audio_url: z.string().url().optional(),
-  image_url: z.string().url().optional(),
+  audio_url: z.preprocess(
+    (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
+    z.url().optional()
+  ),
+  image_url: z.preprocess(
+    (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
+    z.url().optional()
+  ),
   tags: z.array(z.string()).optional(),
   is_exclusive: z.boolean().default(false),
 })
@@ -83,12 +89,12 @@ export const SignupFormSchema = z.object({
   }
 })
 
-const mergeSignUpForm = SignupFormSchema._def.schema.pick({ confirmPassword: true })
+const mergeSignUpForm = SignupFormSchema.pick({ confirmPassword: true })
 export const UpdateUserFormSchema = SigninFormSchema.extend({
   username: z.string().optional(),
   email: z.string().optional(),
   avatar_url: z.string().optional()
-}).merge(mergeSignUpForm)
+}).extend(mergeSignUpForm.shape)
   .superRefine(({ confirmPassword, password }, ctx) => {
     if (confirmPassword !== password) {
       ctx.addIssue({

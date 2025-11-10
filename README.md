@@ -84,11 +84,12 @@ Organic The Label is a community-driven platform that connects music producers a
 
 ### Available Scripts
 
-- `pnpm dev` - Start development server with seed data generation
+- `pnpm dev` - Start development server
 - `pnpm build` - Build the application for production
 - `pnpm start` - Start the production server
 - `pnpm serve` - Build and start production server
 - `pnpm lint` - Run ESLint
+- `pnpm generate-dev` - Start development server with seed data generation
 - `pnpm generate-seed` - Generate seed data for development
 
 ### Project Structure

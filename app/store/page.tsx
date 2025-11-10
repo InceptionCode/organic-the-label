@@ -14,6 +14,8 @@ import { StoreFilters } from './components/store-filters';
 import { Suspense, use } from 'react';
 import { getProductsAction } from '@/app/api/store/get-products';
 
+import FallbackFileSVG from '@/public/file.svg';
+
 // Helper function to format category display
 function formatCategory(category: string): string {
   // Remove curly braces if present (e.g., "{kit}" -> "kit")
@@ -171,7 +173,16 @@ function ProductsList({
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-500">
                         <span className="text-4xl font-bold">
-                          {formatCategory(product.category).charAt(0)}
+                          {product.name.charAt(0)}
+                          {
+                            <Image
+                              src={FallbackFileSVG}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                            />
+                          }
                         </span>
                       </div>
                     )}

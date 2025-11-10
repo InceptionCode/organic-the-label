@@ -2,6 +2,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server-base';
 import { ProductSchema, type Product } from '@/lib/schemas';
+import { ProductDB } from '@/lib/supabase/supabase-schema';
 
 export type GetProductsActionState = {
   products: Product[];
@@ -80,10 +81,9 @@ export const getProductsAction = async (): Promise<GetProductsActionState> => {
     }
 
     // Validate and parse products
-    const products = data.map((product) => {
+    const products: Product[] = data.map((product: Product) => {
       try {
-        // Handle category format (might be "{kit}" or just "kit")
-        const category = product.category?.replace(/[{}]/g, '') || 'kit';
+        const category = product.category?.toString() || 'kit';
 
         return ProductSchema.parse({
           ...product,
