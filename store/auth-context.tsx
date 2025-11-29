@@ -7,7 +7,7 @@ import { type AuthStore, createAuthStore } from '@/lib/store';
 import isEmpty from 'lodash/isEmpty';
 import { createSupabaseBrowserClient } from '@/lib/supabase/client-base';
 import { User } from '@supabase/supabase-js';
-import { defaultUserState } from '@/lib/store/authStore';
+import { defaultUserState } from '@/lib/store/auth-store';
 
 export type AuthStoreApi = ReturnType<typeof createAuthStore>;
 

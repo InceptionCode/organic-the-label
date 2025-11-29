@@ -1,7 +1,8 @@
 'use client'
 
-import { SigninFormSchema, SignupFormSchema } from "@/lib/schemas"
-import { parseForm } from "react-zorm"
+import { SigninFormSchema, SignupFormSchema, type SigninForm, type SignupForm } from "@/lib/schemas"
+import { parseWithZod } from '@conform-to/zod/v4';
+import { parseSubmission } from '@conform-to/react/future';
 import { redirect } from "next/navigation"
 import { AuthError } from "@supabase/supabase-js"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
@@ -20,7 +21,19 @@ export const signinAction = async (_: unknown, formData: FormData): Promise<Logi
     console.info('instantiated supabase client')
 
     try {
-        const { email, password } = parseForm(SigninFormSchema, formData)
+        const { status, reply } = parseWithZod(formData, { schema: SigninFormSchema })
+        const { payload } = parseSubmission(formData)
+
+        if (status === 'error') {
+            console.error('Submission failed: replying...')
+
+            return {
+                ok: false,
+                error: { message: 'Form submission error', error: reply() }
+            }
+        }
+
+        const { email, password } = payload as SigninForm
 
         console.info('parsed user form data')
 
@@ -52,9 +65,21 @@ export const signupAction = async (_: unknown, formData: FormData): Promise<Logi
     console.info('instantiated supabase client')
 
     try {
-        const { username, email, password } = parseForm(SignupFormSchema, formData)
+        const { status, reply } = parseWithZod(formData, { schema: SignupFormSchema })
+        const { payload } = parseSubmission(formData)
+
+        if (status === 'error') {
+            console.error('Submission failed: replying...')
+
+            return {
+                ok: false,
+                error: { message: 'Form submission error', error: reply() }
+            }
+        }
 
         console.info('parsed user form data')
+
+        const { email, password, username } = payload as SignupForm
 
         const { error } = await supabase.auth.signUp({
             email,

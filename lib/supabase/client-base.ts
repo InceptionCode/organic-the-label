@@ -1,5 +1,4 @@
 import { createBrowserClient } from '@supabase/ssr'
-
 // Client-side Supabase (for auth, personalization, etc.)
 export const createSupabaseBrowserClient = (fallbackUrl?: string) =>
   createBrowserClient(

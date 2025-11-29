@@ -12,17 +12,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui-components';
-import { useZorm } from 'react-zorm';
+import { useForm } from '@conform-to/react';
+import { parseWithZod } from '@conform-to/zod/v4';
 import Link from 'next/link';
 import Image from 'next/image';
 import { resetPasswordRequest } from '@/app/api/auth/reset-password-request';
+
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Include magic link and Google sign in
 export default function Login() {
-  const zo = useZorm('login', SigninFormSchema);
-  const resetPassZo = useZorm('reset', SigninFormSchema.pick({ email: true }));
+  const [loginForm, loginFields] = useForm({
+    id: 'login',
+    onValidate({ formData }) {
+      return parseWithZod(formData, {
+        schema: SigninFormSchema,
+      });
+    },
+  });
+  const [resetPassForm, resetPassFields] = useForm({
+    id: 'reset',
+    onValidate({ formData }) {
+      return parseWithZod(formData, {
+        schema: SigninFormSchema.pick({ email: true }),
+      });
+    },
+  });
 
-  const disabled = zo.validation?.success === false;
+  const disabled = loginForm.valid === false;
   const [signinState, signinSubmitAction, signinPending] = useActionState(signinAction, undefined);
   const [resetState, resetSubmitAction, resetPending] = useActionState(
     resetPasswordRequest,
@@ -33,15 +49,11 @@ export default function Login() {
 
   return (
     <main>
-      <form ref={zo.ref} action={signinSubmitAction} className="flex flex-col gap-2.5">
-        <TextField name={zo.fields.email()} label="Email" type="email" />
-        {zo.errors.email((e) => (
-          <p>{e.message}</p>
-        ))}
-        <TextField name={zo.fields.password()} label="Password" type="password" />
-        {zo.errors.password((e) => (
-          <p>{e.message}</p>
-        ))}
+      <form id={loginForm.id} action={signinSubmitAction} className="flex flex-col gap-2.5">
+        <TextField name={loginFields.email.name} label="Email" type="email" />
+        <p>{loginFields.email.errors}</p>
+        <TextField name={loginFields.password.name} label="Password" type="password" />
+        <p>{loginFields.password.errors}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
           <Button disabled={disabled || signinPending} type="submit" className="gap-y-4 sm:w-[20%]">
             Sign In
@@ -79,11 +91,9 @@ export default function Login() {
           <DialogHeader>
             <DialogTitle>Enter email</DialogTitle>
           </DialogHeader>
-          <form ref={resetPassZo.ref} className="flex flex-col gap-2" action={resetSubmitAction}>
-            <TextField name={resetPassZo.fields.email()} label="Email" type="email" invert />
-            {resetPassZo.errors.email((e) => (
-              <p className="dark:invert">{e.message}</p>
-            ))}
+          <form id={resetPassForm.id} className="flex flex-col gap-2" action={resetSubmitAction}>
+            <TextField name={resetPassFields.email.name} label="Email" type="email" invert />
+            <p className="dark:invert">{resetPassFields.email.errors}</p>
             <Button
               disabled={resetPending}
               type="submit"

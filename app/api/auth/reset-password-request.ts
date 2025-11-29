@@ -1,9 +1,10 @@
 'use client'
 
-import { SigninFormSchema } from "@/lib/schemas";
+import { SigninFormSchema, type SigninForm } from "@/lib/schemas";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
+import { parseWithZod } from "@conform-to/zod/v4";
+import { parseSubmission } from "@conform-to/react/future";
 import { AuthError } from "@supabase/supabase-js"
-import { parseForm } from "react-zorm";
 
 export type ResetPasswordRequest = {
   error?: AuthError | unknown | null;
@@ -12,7 +13,18 @@ export type ResetPasswordRequest = {
 export const resetPasswordRequest = async (_: unknown, formData: FormData): Promise<ResetPasswordRequest> => {
   const supabase = createSupabaseBrowserClient()
 
-  const { email } = parseForm(SigninFormSchema.pick({ email: true }), formData)
+  const { status, reply } = parseWithZod(formData, { schema: SigninFormSchema.pick({ email: true }) })
+  const { payload } = parseSubmission(formData)
+
+  if (status === 'error') {
+    console.error('Submission failed: replying...')
+
+    return {
+      error: { message: 'Form submission error', error: reply() }
+    }
+  }
+
+  const { email } = payload as SigninForm
 
 
   if (!email) {

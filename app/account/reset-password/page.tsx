@@ -4,7 +4,8 @@
 import { useActionState, useEffect } from 'react';
 import { UpdateUserFormSchema } from '@/lib/schemas';
 import { TextField, Button } from '@/ui-components';
-import { useZorm } from 'react-zorm';
+import { useForm } from '@conform-to/react';
+import { parseWithZod } from '@conform-to/zod/v4';
 
 import { updateUserAction } from '@/app/api/auth/update-user';
 import { useRouter } from 'next/navigation';
@@ -15,9 +16,16 @@ import { ShieldExclamationIcon } from '@heroicons/react/24/outline';
 export default function ResetPassword() {
   const router = useRouter();
 
-  const zo = useZorm('updatePassword', UpdateUserFormSchema);
+  const [resetPassForm, resetPassFields] = useForm({
+    id: 'resetPass',
+    onValidate({ formData }) {
+      return parseWithZod(formData, {
+        schema: UpdateUserFormSchema,
+      });
+    },
+  });
 
-  const disabled = zo.validation?.success === false;
+  const disabled = resetPassForm.valid === false;
   const [state, action, pending] = useActionState(updateUserAction, undefined);
 
   useEffect(() => {
@@ -40,15 +48,16 @@ export default function ResetPassword() {
           </CardDescription>
         </CardHeader>
       </Card>
-      <form ref={zo.ref} action={action} className="flex flex-col gap-2.5">
-        <TextField name={zo.fields.password()} label="Password" type="password" />
-        {zo.errors.password((e) => (
-          <p>{e.message}</p>
-        ))}
-        <TextField name={zo.fields.confirmPassword()} label="Confirm Password" type="password" />
-        {zo.errors.confirmPassword((e) => (
-          <p>{e.message}</p>
-        ))}
+      <form id={resetPassForm.id} action={action} className="flex flex-col gap-2.5">
+        <TextField name={resetPassFields.password.name} label="Password" type="password" />
+
+        <p>{resetPassFields.password.errors}</p>
+        <TextField
+          name={resetPassFields.confirmPassword.name}
+          label="Confirm Password"
+          type="password"
+        />
+        <p>{resetPassFields.confirmPassword.errors}</p>
         <div className="flex justify-end items-center gap-4 pt-2">
           <Button variant="secondary" onClick={() => router.replace('/login')}>
             Cancel

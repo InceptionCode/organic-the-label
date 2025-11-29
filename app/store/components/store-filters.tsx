@@ -28,21 +28,19 @@ const sortOptions: { value: SortOption; label: string }[] = [
   { value: 'name-desc', label: 'Name: Z to A' },
 ];
 
-export function StoreFilters() {
+export default function StoreFilters() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  
+
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [category, setCategory] = useState<CategoryFilter>(
-    (searchParams.get('category') as CategoryFilter) || 'all'
+    (searchParams.get('category') as CategoryFilter) || 'all',
   );
   const [sort, setSort] = useState<SortOption>(
-    (searchParams.get('sort') as SortOption) || 'newest'
+    (searchParams.get('sort') as SortOption) || 'newest',
   );
-  const [exclusiveOnly, setExclusiveOnly] = useState(
-    searchParams.get('exclusive') === 'true'
-  );
+  const [exclusiveOnly, setExclusiveOnly] = useState(searchParams.get('exclusive') === 'true');
 
   // Update URL params when filters change
   const updateFilters = (updates: {
@@ -52,7 +50,7 @@ export function StoreFilters() {
     exclusive?: boolean;
   }) => {
     const params = new URLSearchParams(searchParams.toString());
-    
+
     if (updates.search !== undefined) {
       if (updates.search) {
         params.set('search', updates.search);
@@ -60,7 +58,7 @@ export function StoreFilters() {
         params.delete('search');
       }
     }
-    
+
     if (updates.category !== undefined) {
       if (updates.category === 'all') {
         params.delete('category');
@@ -68,7 +66,7 @@ export function StoreFilters() {
         params.set('category', updates.category);
       }
     }
-    
+
     if (updates.sort !== undefined) {
       if (updates.sort === 'newest') {
         params.delete('sort');
@@ -76,7 +74,7 @@ export function StoreFilters() {
         params.set('sort', updates.sort);
       }
     }
-    
+
     if (updates.exclusive !== undefined) {
       if (updates.exclusive) {
         params.set('exclusive', 'true');
@@ -123,11 +121,7 @@ export function StoreFilters() {
     });
   };
 
-  const hasActiveFilters = 
-    search || 
-    category !== 'all' || 
-    sort !== 'newest' || 
-    exclusiveOnly;
+  const hasActiveFilters = search || category !== 'all' || sort !== 'newest' || exclusiveOnly;
 
   return (
     <div className="mb-8 space-y-6">
@@ -213,12 +207,9 @@ export function StoreFilters() {
           >
             Clear all filters
           </Button>
-          {isPending && (
-            <span className="text-sm text-gray-400">Updating...</span>
-          )}
+          {isPending && <span className="text-sm text-gray-400">Updating...</span>}
         </div>
       )}
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/store/auth-context';
+import { defaultUserState } from '@/lib/store/auth-store';
 import {
   Button,
   Dialog,
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui-components';
+import safeParseUser from '@/utils/helpers/safe-parse-uesr';
 import { useStorage } from '@/utils/hooks/use-storage';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -19,7 +20,7 @@ import { useEffect, useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
+  const user = safeParseUser(defaultUserState);
 
   const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
     initMethod: 'get',

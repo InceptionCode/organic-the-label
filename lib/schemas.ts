@@ -1,17 +1,30 @@
-import { z } from "zod"
+import { z } from "zod/v4"
 
 // --------------------
 // ZOD SCHEMAS (Shared Types)
 // --------------------
 
 // ✅ Product Schema for Beats, Kits, and Merch
+const categoryKit = z.literal("kit")
+const categoryBeat = z.literal("beat")
+const categoryPack = z.literal("pack")
+const categoryMerch = z.literal("merch")
+const categoryBank = z.literal("bank")
+const categoryPlugin = z.literal("plugin")
+const categorySuite = z.literal("suite")
+const categoryFree = z.literal("free")
+
+// Create a union type for category options
+export const unionCategories = z.union([categoryBank, categoryBeat, categoryFree, categoryKit, categoryMerch, categoryPack, categoryPlugin, categorySuite]);
+export type ProductCategories = z.infer<typeof unionCategories>
+
 export const ProductSchema = z.object({
   created_at: z.iso.date(),
   id: z.number(),
   name: z.string(),
   description: z.string().optional(),
   price: z.number(),
-  category: z.enum(["kit", "pack", "beat", "merch", "bank", "suite", "plugin"]),
+  category: z.array(unionCategories),
   audio_url: z.preprocess(
     (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
     z.url().optional()
@@ -59,15 +72,17 @@ export const UserSchema = z.object({
 export type User = z.infer<typeof UserSchema>
 
 export const SigninFormSchema = z.object({
-  email: z.string().email("Please enter a valid email").trim(),
+  email: z.email("Please enter a valid email").trim(),
   password: z.string()
     .min(8, 'Password must be at least 8 characters long.')
     .trim()
     .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
 })
 
+export type SigninForm = z.infer<typeof SigninFormSchema>
+
 export const SignupFormSchema = z.object({
-  email: z.string().email("Please enter a valid email").trim(),
+  email: z.email("Please enter a valid email").trim(),
   username: z.string()
     .trim()
     .refine((uname) => /^[a-zA-Z0-9._-]+$/.test(uname), "Username must NOT contain special characters"),
@@ -88,6 +103,8 @@ export const SignupFormSchema = z.object({
     })
   }
 })
+
+export type SignupForm = z.infer<typeof SignupFormSchema>
 
 const mergeSignUpForm = SignupFormSchema.pick({ confirmPassword: true })
 export const UpdateUserFormSchema = SigninFormSchema.extend({

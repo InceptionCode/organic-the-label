@@ -53,6 +53,7 @@ Organic The Label is a community-driven platform that connects music producers a
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   INTERNAL_SUPABASE_WEBHOOK_SECRET=your_webhook_secretkey
 
    # Stripe
    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key

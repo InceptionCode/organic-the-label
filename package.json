@@ -13,6 +13,8 @@
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql"
   },
   "dependencies": {
+    "@conform-to/react": "^1.13.3",
+    "@conform-to/zod": "^1.13.3",
     "@libsql/client": "^0.15.3",
     "@radix-ui/react-alert-dialog": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -27,6 +29,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.41.0",
+    "future": "link:@conform-to/react/future",
     "lucide-react": "^0.488.0",
     "next": "^16.0.1",
     "next-auth": "^4.24.11",
@@ -35,11 +38,10 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.55.0",
     "react-social-icons": "^6.24.0",
-    "react-zorm": "^0.9.0",
     "stripe": "^18.0.0",
     "tailwind-merge": "^3.2.0",
     "tailwind-variants": "^1.0.0",
-    "zod": "^4.0.0",
+    "zod": "^4.1.13",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
@@ -54,6 +56,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "autoprefixer": "^10.4.21",
+    "baseline-browser-mapping": "^2.8.32",
     "cypress": "^14.3.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",

@@ -1,10 +1,10 @@
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server-base';
-import { ProductSchema, type Product } from '@/lib/schemas';
-import { ProductDB } from '@/lib/supabase/supabase-schema';
+import { ProductSchema, type Product, ProductCategories } from '@/lib/schemas';
+import { ResolvedProductSearchParams } from '@/lib/product/normalize-search-params';
+import { createSupabasePublicClient } from '@/lib/supabase/unsecure-base';
 
-export type GetProductsActionState = {
+export type GetProductsFetchState = {
   products: Product[];
   error: Error | null;
 };
@@ -14,19 +14,44 @@ export type GetProductsActionState = {
  * Uses dev_products table in development, prod_products in production
  * 
  * @returns Promise<GetProductsActionState> - Array of validated products or error
- */
-export const getProductsAction = async (): Promise<GetProductsActionState> => {
+*/
+
+export const getProductsFetch = async (searchParams?: ResolvedProductSearchParams): Promise<GetProductsFetchState> => {
+
   try {
-    const supabase = await createSupabaseServerClient();
     const isDev = process.env.NODE_ENV === 'development';
     const productTable = isDev ? 'dev_products' : 'prod_products';
-
+    const supabase = await createSupabasePublicClient();
     // Fetch products from Supabase
     // Try with ordering first, fallback to simple select if ordering fails
-    const { data, error } = await supabase
+    const sort = searchParams?.sort ?? 'newest'
+
+    let query = supabase
       .from(productTable)
       .select('*')
-      .order('created_at', { ascending: false });
+
+    if (searchParams?.category && searchParams.category !== 'all') {
+      query = query.contains('category', `{${searchParams.category}}`)
+    }
+
+    if (searchParams?.exclusive) query = query.eq('is_exclusive', true);
+
+    switch (sort) {
+      case 'price-low':
+        query = query.order('price', { ascending: true });
+        break;
+      case 'price-high':
+        query = query.order('price', { ascending: false });
+        break;
+      case 'name-asc':
+        query = query.order('name', { ascending: true })
+      case 'name-desc':
+        query = query.order('name', { ascending: false })
+      default:
+        query = query.order('created_at', { ascending: false });
+    }
+
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching products with ordering:', error);
@@ -54,7 +79,8 @@ export const getProductsAction = async (): Promise<GetProductsActionState> => {
       const products = fallbackData.map((product) => {
         try {
           // Handle category format (might be "{kit}" or just "kit")
-          const category = product.category?.replace(/[{}]/g, '') || 'kit';
+
+          const category: Product["category"] = product.category?.map((type: string) => type.replace(/[{}]/g, '') || 'kit');
 
           return ProductSchema.parse({
             ...product,
@@ -83,7 +109,7 @@ export const getProductsAction = async (): Promise<GetProductsActionState> => {
     // Validate and parse products
     const products: Product[] = data.map((product: Product) => {
       try {
-        const category = product.category?.toString() || 'kit';
+        const category: Product["category"] = product.category?.map((type) => (type.replace(/[{}]/g, '') || 'kit') as ProductCategories);
 
         return ProductSchema.parse({
           ...product,
@@ -92,6 +118,8 @@ export const getProductsAction = async (): Promise<GetProductsActionState> => {
         });
       } catch (parseError) {
         console.error('Error parsing product:', product, parseError);
+
+        console.log('>>>>> category', product.category)
         return null;
       }
     }).filter((product): product is Product => product !== null);

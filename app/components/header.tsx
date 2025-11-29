@@ -5,7 +5,8 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import { Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { ProfileDropdown } from './profile-dropdown';
-import { useAuthStore } from '@/store/auth-context';
+import { defaultUserState } from '@/lib/store/auth-store';
+import safeParseUser from '@/utils/helpers/safe-parse-uesr';
 /*
 - Store link
 - Logo home link
@@ -22,7 +23,7 @@ export const Header = () => {
   const pathname = usePathname();
   const isCurrent = (name: string) => pathname === `/${name}`;
 
-  const user = useAuthStore((state) => state.user);
+  const user = safeParseUser(defaultUserState);
 
   const navLinks = [
     { name: 'Explore', href: '/', current: isCurrent('') }, // current value will come from props.

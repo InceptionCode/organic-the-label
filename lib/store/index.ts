@@ -1,2 +1,2 @@
-export type { AuthStoreState, AuthStore } from '@/lib/store/authStore'
-export { createAuthStore } from '@/lib/store/authStore'
+export type { AuthStoreState, AuthStore } from '@/lib/store/auth-store'
+export { createAuthStore } from '@/lib/store/auth-store'

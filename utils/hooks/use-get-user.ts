@@ -1,5 +1,5 @@
 import { getUserAction } from "@/app/api/auth/get-user";
-import { defaultUserState } from "@/lib/store/authStore";
+import { defaultUserState } from "@/lib/store/auth-store";
 import { User } from "@/lib/schemas";
 import { useState, useEffect } from "react";
 

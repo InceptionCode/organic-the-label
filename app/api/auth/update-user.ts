@@ -1,9 +1,10 @@
 'use client'
 
-import { UpdateUserFormSchema } from "@/lib/schemas";
+import { UpdateUserForm, UpdateUserFormSchema } from "@/lib/schemas";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
 import { AuthError } from "@supabase/supabase-js"
-import { parseForm } from "react-zorm";
+import { parseWithZod } from '@conform-to/zod/v4';
+import { parseSubmission } from '@conform-to/react/future';
 
 export type UpdateUserActionState = {
   ok: boolean,
@@ -15,8 +16,22 @@ export type UpdateUserActionState = {
 
 export const updateUserAction = async (_: unknown, formData: FormData): Promise<UpdateUserActionState> => {
   const supabase = createSupabaseBrowserClient()
+
   console.info('instantiated supabase client')
-  const { username, avatar_url, ...form } = parseForm(UpdateUserFormSchema, formData)
+
+  const { status, reply } = parseWithZod(formData, { schema: UpdateUserFormSchema })
+  const { payload } = parseSubmission(formData)
+
+  if (status === 'error') {
+    console.error('Submission failed: replying...')
+
+    return {
+      ok: false,
+      error: { message: 'Form submission error', error: reply() }
+    }
+  }
+
+  const { username, avatar_url, ...form } = payload as UpdateUserForm
 
   console.info('parsed user form data')
 
