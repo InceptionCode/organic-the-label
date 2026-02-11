@@ -2,6 +2,6 @@ import { ResolvedProductSearchParams } from "@/lib/product/normalize-search-para
 
 export const buildFilterKey = (params?: ResolvedProductSearchParams) => {
   return params ? (
-    `sort=${params.sort}|filter=${params.category}|search=${params.search}|is_exclusive=${params.exclusive}`
-  ) : 'all'
+    [`after=${params.after}`, `sort=${params.sort}`, `filter=${params.category}`, `tags=${params.tags?.join(',')}`, `search=${params.search}`, `is_exclusive=${params.exclusive}`]
+  ) : ['all']
 }

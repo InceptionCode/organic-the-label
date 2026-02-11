@@ -5,9 +5,15 @@ import { Button } from '@/ui-components/button';
 import { Input } from '@/ui-components/input';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect, useTransition } from 'react';
+import { Label } from '@/ui-components/label';
+
+import { isEqual } from '@/utils/helpers/checks'
 
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc';
 type CategoryFilter = 'all' | 'kit' | 'pack' | 'beat' | 'merch' | 'bank' | 'suite' | 'plugin';
+type TagOptions = 'all' | 'ambient' | 'melodic' | 'vintage' | 'r&b' | 'hiphop' | 'trap' | 'dark' | 'ost' | 'opium' | 'rage' | 'digital';
+
+const TagOptionsArray = ['all', 'ambient', 'melodic', 'vintage', 'r&b', 'hiphop', 'trap', 'dark', 'ost', 'opium', 'rage', 'digital'];
 
 const categories: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -18,6 +24,21 @@ const categories: { value: CategoryFilter; label: string }[] = [
   { value: 'bank', label: 'Sound Banks' },
   { value: 'suite', label: 'Suites' },
   { value: 'plugin', label: 'Plugins & VSTs' },
+];
+
+const tagOptions: { value: TagOptions; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'ambient', label: 'Ambient' },
+  { value: 'melodic', label: 'Melodic' },
+  { value: 'vintage', label: 'Vintage' },
+  { value: 'r&b', label: 'R&B' },
+  { value: 'hiphop', label: 'Hip-Hop' },
+  { value: 'trap', label: 'Trap' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'ost', label: 'OST' },
+  { value: 'opium', label: 'Opium' },
+  { value: 'rage', label: 'Rage' },
+  { value: 'digital', label: 'Digital' },
 ];
 
 const sortOptions: { value: SortOption; label: string }[] = [
@@ -37,19 +58,32 @@ export default function StoreFilters() {
   const [category, setCategory] = useState<CategoryFilter>(
     (searchParams.get('category') as CategoryFilter) || 'all',
   );
+
+  const [tags, setTags] = useState<TagOptions[]>(
+    () => {
+      const value = searchParams.get('tags') as TagOptions;
+      if (!value) return ['all'];
+      return value.split(',').map(t => t.trim()).filter(t => TagOptionsArray.includes(t)) as TagOptions[];
+    }
+  );
+
   const [sort, setSort] = useState<SortOption>(
     (searchParams.get('sort') as SortOption) || 'newest',
   );
+
   const [exclusiveOnly, setExclusiveOnly] = useState(searchParams.get('exclusive') === 'true');
 
   // Update URL params when filters change
   const updateFilters = (updates: {
     search?: string;
     category?: CategoryFilter;
+    tags?: string[];
     sort?: SortOption;
     exclusive?: boolean;
   }) => {
     const params = new URLSearchParams(searchParams.toString());
+
+    params.delete('after')
 
     if (updates.search !== undefined) {
       if (updates.search) {
@@ -64,6 +98,14 @@ export default function StoreFilters() {
         params.delete('category');
       } else {
         params.set('category', updates.category);
+      }
+    }
+
+    if (updates.tags !== undefined) {
+      if (updates.tags.includes('all') || isEqual(updates.tags, TagOptionsArray)) {
+        params.delete('tags');
+      } else {
+        updates.tags.forEach(tag => params.append("tag", tag))
       }
     }
 
@@ -104,6 +146,11 @@ export default function StoreFilters() {
   const handleSortChange = (value: SortOption) => {
     setSort(value);
     updateFilters({ sort: value });
+  };
+
+  const handleTagsChange = (value: TagOptions[]) => {
+    setTags(value);
+    updateFilters({ tags: value });
   };
 
   const handleExclusiveToggle = (checked: boolean) => {
@@ -168,7 +215,7 @@ export default function StoreFilters() {
           ))}
         </div>
 
-        {/* Sort and Exclusive Filter */}
+        {/* Sort and Tag Filters */}
         <div className="flex flex-wrap gap-3 items-center">
           {/* Exclusive Toggle */}
           <label className="flex items-center gap-2 cursor-pointer">
@@ -180,6 +227,22 @@ export default function StoreFilters() {
             />
             <span className="text-sm text-gray-300">Exclusive Only</span>
           </label>
+
+          {/* Tag Dropdown */}
+          <Label htmlFor="tags">Tags</Label>
+          <select
+            name="tags"
+            value={tags}
+            onChange={(e) => handleTagsChange(e.target.value as unknown as TagOptions[])}
+            className="bg-gray-900 border border-gray-700 text-white text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+            multiple
+          >
+            {tagOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
 
           {/* Sort Dropdown */}
           <select

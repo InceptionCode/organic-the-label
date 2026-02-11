@@ -9,6 +9,7 @@ import InitAuthStore from '@/store/init-auth-store';
 import { Suspense } from 'react';
 
 import '@/app/styles/globals.css';
+import { CartStoreProvider } from '@/store/cart-context';
 /* Global State
 - Because layout runs for every route. The store providers will wrap the main content here.
 - We grab all necessary state from the correct server actions/requests and pass it down to the client providers.
@@ -61,9 +62,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.className} ${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <Suspense fallback={<HtmlDocumentBody>{children}</HtmlDocumentBody>}>
+          <Suspense
+            fallback={
+              <HtmlDocumentBody>
+                {/* Render default static cart icon (store) */}
+                {children}
+              </HtmlDocumentBody>
+            }
+          >
             <InitAuthStore>
-              <HtmlDocumentBody>{children}</HtmlDocumentBody>
+              <CartStoreProvider>
+                <HtmlDocumentBody>
+                  {/* Render dynamic cart widget (store) */}
+                  {children}
+                </HtmlDocumentBody>
+              </CartStoreProvider>
             </InitAuthStore>
           </Suspense>
         </ThemeProvider>

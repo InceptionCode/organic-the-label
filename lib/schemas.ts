@@ -14,26 +14,57 @@ const categoryPlugin = z.literal("plugin")
 const categorySuite = z.literal("suite")
 const categoryFree = z.literal("free")
 
+// Tags
+const tagFree = z.literal('free');
+const tagAmbient = z.literal('ambient');
+const tagMelodic = z.literal('melodic');
+const tagVintage = z.literal('vintage');
+const tagRnB = z.literal('r&b');
+const tagHipHop = z.literal('hiphop');
+const tagTrap = z.literal('trap');
+const tagDark = z.literal('dark');
+const tagOST = z.literal('ost');
+const tagOpium = z.literal('opium');
+const tagRage = z.literal('rage');
+const tagDigital = z.literal('digital');
+
+// Order
+const orderSource = z.literal("order")
+const membershipSource = z.literal("membership")
+const manualSource = z.literal("manual")
+const promoSource = z.literal("promo")
+
 // Create a union type for category options
 export const unionCategories = z.union([categoryBank, categoryBeat, categoryFree, categoryKit, categoryMerch, categoryPack, categoryPlugin, categorySuite]);
 export type ProductCategories = z.infer<typeof unionCategories>
 
+export const unionTags = z.union([tagFree, tagAmbient, tagMelodic, tagVintage, tagRnB, tagHipHop, tagTrap, tagDark, tagOST, tagOpium, tagRage, tagDigital])
+export type ProductTags = z.infer<typeof unionTags>
+
+export const unionOrderSources = z.union([orderSource, membershipSource, manualSource, promoSource])
+export type OrderSources = z.infer<typeof unionOrderSources>
+
 export const ProductSchema = z.object({
-  created_at: z.iso.date(),
-  id: z.number(),
+  created_at: z.iso.datetime(),
+  id: z.string(),
   name: z.string(),
   description: z.string().optional(),
   price: z.number(),
-  category: z.array(unionCategories),
+  category: unionCategories,
   audio_url: z.preprocess(
     (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
     z.url().optional()
   ),
-  image_url: z.preprocess(
-    (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
-    z.url().optional()
-  ),
-  tags: z.array(z.string()).optional(),
+  image: z.object({
+    url: z.preprocess(
+      (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
+      z.url().optional().nullable()
+    ),
+    altText: z.string().optional().nullable(),
+    width: z.number().optional().nullable(),
+    height: z.number().optional().nullable()
+  }).optional().nullable(),
+  tags: z.array(unionTags).optional(),
   is_exclusive: z.boolean().default(false),
 })
 
@@ -41,7 +72,12 @@ export type Product = z.infer<typeof ProductSchema>
 
 // ✅ Cart Item Schema for local + server syncing
 export const CartItemSchema = z.object({
-  productId: z.string(),
+  product_id: z.string(),
+  product_name: z.string(),
+  product_category: z.string(),
+  product_description: z.string(),
+  product_image_url: z.string().optional(),
+  price: z.string(),
   quantity: z.number().min(1),
 })
 
@@ -61,15 +97,45 @@ export const UserSchema = z.object({
   username: z.string(),
   created_at: z.string(),
   confirmed_at: z.string(),
-  isAnon: z.boolean(),
+  is_anon: z.boolean(),
   id: z.string().optional(),
   updated_at: z.string().optional(),
   last_signed_in: z.string().optional(),
   avatar_url: z.string().optional(),
-  preferences: UserPreferencesSchema.optional()
+  preferences: UserPreferencesSchema.optional(),
+  is_member: z.boolean()
 })
 
 export type User = z.infer<typeof UserSchema>
+
+export const EntitlementMetadataSchema = z.object({
+  shopify_order_id: z.string().optional(),
+  shopify_customer_id: z.string().optional(),
+  granted_by: z.number().optional(), // references the user id (uuid) of the user who granted the entitlement
+  granted_until: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export type EntitlementMetadata = z.infer<typeof EntitlementMetadataSchema>
+
+export const EntitlementSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  product_id: z.string(),
+  shopify_order_id: z.string().optional(),
+  shopify_customer_id: z.string().optional(),
+  purchaser_email: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  granted_at: z.string(),
+
+  expires_at: z.string().nullable(),
+  revoked_at: z.string().nullable(),
+  source: unionOrderSources,
+  metadata: EntitlementMetadataSchema.optional(),
+})
+
+export type Entitlement = z.infer<typeof EntitlementSchema>
 
 export const SigninFormSchema = z.object({
   email: z.email("Please enter a valid email").trim(),
@@ -124,6 +190,16 @@ export const UpdateUserFormSchema = SigninFormSchema.extend({
 
 export type UpdateUserForm = z.infer<typeof UpdateUserFormSchema>
 
+// --------------------
+// SHOPIFY
+// --------------------
+
+export const STORE_PAGE_COUNT = 24
+export const STORE_SORTKEY_PRICE = "PRICE"
+export const STORE_SORTKEY_TITLE = "TITLE"
+export const STORE_SORTKEY_CREATED_AT = "CREATED_AT"
+export const STORE_SORTORDER_TRUE = true
+export const STORE_SORTORDER_FALSE = false
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------

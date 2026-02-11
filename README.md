@@ -12,11 +12,27 @@ Organic The Label is a community-driven platform that connects music producers a
 - **Free Subscription Incentives**: Exclusive advice, tips, educational videos, free resources, and reminders for future events and deals
 - **Producer & Artist Discovery**: Tools to find and connect with producers and artists
 - **YouTube Integration**: Dedicated pages for deeper discussions and details behind YouTube posts
-- **Store Pages**:
-  - General store page
-  - Separate pages for "Kits, Packs, & Banks" (digital products)
-  - Physical merchandise store
+- **Storefront powered by Shopify**:
+  - `/store` page backed by Shopify Storefront API
+  - Filters for category, tags, exclusivity, and sort (price, title, created_at)
+  - Pagination using Shopify cursors (`hasNextPage` / `endCursor`)
+  - Products normalized and validated via Zod before rendering
+- **Personalized Store Experience**:
+  - Membership-aware upsell and messaging (`MembershipContent`)
+  - Future recommendations and deals based on user preferences (`Recommendations`)
 - **Future Premium Membership**: Access to premium content and exclusive features
+
+## Shopify Storefront Integration
+
+The store experience is backed by the **Shopify Storefront API**, with a thin integration layer in `lib/Shopify` and the `/store` route.
+
+- **GraphQL Query & Types**
+
+  - `lib/Shopify/queries.ts` defines all GraphQL queries and `PageResponse` types.
+
+- **Normalization & Validation**
+  - `lib/schemas.ts` defines Zod schemas used for normalization and validation between the client and server.
+  - Any parsing errors are surfaced with context to help debug upstream Shopify data.
 
 ## Local Development
 
@@ -26,6 +42,7 @@ Organic The Label is a community-driven platform that connects music producers a
 - pnpm (recommended) or npm/yarn
 - Supabase account and project
 - Stripe account (for payment processing)
+- Shopify Storefront SDK
 
 ### Setup
 
@@ -63,6 +80,12 @@ Organic The Label is a community-driven platform that connects music producers a
    # Database (if using Turso)
    TURSO_DATABASE_URL=your_turso_database_url
    TURSO_AUTH_TOKEN=your_turso_auth_token
+
+   # Shopify Storefront
+   SHOPIFY_DEV_STORE_DOMAIN=your-dev-store.myshopify.com
+   SHOPIFY_PROD_STORE_DOMAIN=your-prod-store.myshopify.com
+   SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_storefront_access_token
+   SHOPIFY_PUBLIC_ACCESS_TOKEN=your_storefront_public_token
    ```
 
 4. **Run the development server**
@@ -98,42 +121,31 @@ Organic The Label is a community-driven platform that connects music producers a
 ```
 / (root)
 ├── app/                              # Next.js App Router
-│   ├── account/                      # User account pages
-│   │   ├── page.tsx                  # Account dashboard
-│   │   └── reset-password/           # Password reset flow
-│   ├── api/                          # API routes
-│   │   └── auth/                     # Authentication endpoints
-│   │       ├── confirm/              # Email confirmation
-│   │       ├── get-user.ts           # Get user data
-│   │       ├── login.ts              # Login handler
-│   │       ├── provider.ts           # Auth provider
-│   │       ├── reset-password-request.ts
-│   │       ├── sign-out.ts
-│   │       └── update-user.ts
-│   ├── components/                   # Shared components
-│   │   ├── footer.tsx
-│   │   ├── header.tsx
-│   │   └── profile-dropdown.tsx
-│   ├── login/                        # Login page
-│   ├── signup/                       # Signup page
-│   ├── search/                       # Search functionality
-│   ├── store/                        # Store pages
+│   ├── account/                      # User account pages (dashboard, reset password)
+│   ├── api/                          # API routes (auth, store, webhooks, etc.)
+│   ├── components/                   # Shared layout + marketing components
+│   ├── store/                        # Storefront pages and components
+│   │   ├── components/               # Store filters, product grid, cart UI
+│   │   └── page.tsx                  # Store landing page backed by Shopify
 │   ├── layout.tsx                    # Root layout
 │   ├── page.tsx                      # Explore/Home page
 │   ├── global-error.tsx              # Global error boundary
 │   └── not-found.tsx                 # 404 page
 ├── lib/                              # Utility libraries
 │   ├── font-tags.ts                  # Font configuration
-│   ├── schemas.ts                    # Zod schemas
+│   ├── schemas.ts                    # Zod schemas (products, users, entitlements, etc.)
 │   ├── stripe.ts                     # Stripe client
-│   ├── store/                        # State management
-│   │   ├── authStore.ts
-│   │   └── index.ts
+│   ├── Shopify/                      # Shopify Storefront API integration (client, queries, cache)
+│   ├── store/                        # Shared state + adapters
+│   │   ├── auth-store.ts             # Auth store (Zustand vanilla)
+│   │   ├── cart-store.ts             # Cart store (Zustand vanilla)
+│   │   └── parse-store-data.ts       # Normalize Shopify responses into Product[]
 │   └── supabase/                     # Supabase clients
 │       ├── client-base.ts
 │       └── server-base.ts
-├── store/                            # Global state
-│   └── auth-context.tsx              # Auth context provider
+├── store/                            # React context providers over stores
+│   ├── auth-context.tsx              # Auth context provider (wraps auth-store)
+│   └── cart-context.tsx              # Cart context provider (wraps cart-store)
 ├── ui-components/                    # Reusable UI components
 │   ├── alert-dialog.tsx
 │   ├── button.tsx
@@ -152,7 +164,7 @@ Organic The Label is a community-driven platform that connects music producers a
 │   │   ├── use-sign-out.ts
 │   │   └── use-storage.ts
 │   └── supabase/
-│       └── middleware.ts
+│       └── middleware.ts             # RSC middleware helpers
 ├── public/                           # Static assets
 │   ├── *.svg                         # SVG icons
 │   └── sample-data.json              # Mock data for development
@@ -176,6 +188,7 @@ Organic The Label is a community-driven platform that connects music producers a
 - **Authentication**: Supabase Auth
 - **Database**: Supabase (PostgreSQL)
 - **Payments**: Stripe
+- **Commerce**: Shopify Storefront API + Storefront API Client (`@shopify/storefront-api-client`)
 - **State Management**: Zustand
 - **Form Handling**: React Hook Form + Zod
 - **UI Components**: Radix UI
@@ -185,6 +198,8 @@ Organic The Label is a community-driven platform that connects music producers a
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Stripe Documentation](https://stripe.com/docs)
+- [Shopify Storefront API (GraphQL)](https://shopify.dev/docs/api/storefront/2026-01)
+- [Shopify Storefront API Client for JavaScript](https://www.npmjs.com/package/@shopify/storefront-api-client)
 
 ## Deploy on Vercel
 

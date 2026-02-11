@@ -1,9 +1,8 @@
 import {
   RawSearchParams,
-  type NormalizedSearchParams,
   getNormalizedSearchParams,
 } from '@/lib/product/normalize-search-params';
-import { getProductsFetch } from '@/app/api/store/get-products';
+
 import {
   Card,
   CardContent,
@@ -17,28 +16,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import FallbackFileSVG from '@/public/file.svg';
 import { formatCategory, formatPrice } from '@/utils/helpers/product-helpers';
-import { buildFilterKey } from '@/lib/product/build-filter-tag';
-import { cacheLife, cacheTag } from 'next/cache';
 
-const StoreLayout = async ({
+import { getCachedProductsPage } from '@/lib/Shopify/products-cache';
+
+export default async function StoreContent({
   searchParams,
-  productTable,
 }: {
-  searchParams: NormalizedSearchParams;
-  productTable: string;
-}) => {
-  'use cache';
+  searchParams: RawSearchParams | Promise<RawSearchParams>;
+}) {
+  const isDev = process.env.NODE_ENV === 'development';
+  const productTable = isDev ? 'dev_products' : 'prod_products';
+  const baseSearchParams = await searchParams
+  const normalizedSearchParams = getNormalizedSearchParams(baseSearchParams);
 
-  cacheLife({
-    stale: 3600, // 1 hour until considered stale
-    revalidate: 900, // 2 hours until revalidated
-    expire: 86400, // 1 day until expired
-  });
-
-  cacheTag(productTable, buildFilterKey());
-
-  const { products, error } = await getProductsFetch(searchParams);
-
+  const { products, hasNext, nextCursor, error } = await getCachedProductsPage(normalizedSearchParams, productTable);
+  console.table(products)
   return (
     <>
       {/* Error State */}
@@ -55,12 +47,12 @@ const StoreLayout = async ({
       {error ? (
         <div className="flex flex-col items-center justify-center py-16">
           <p className="text-muted-foreground text-lg mb-4">
-            {Object.values(searchParams).length === 0
+            {Object.values(normalizedSearchParams).length === 0
               ? 'No products available at the moment.'
               : 'No products match your filters.'}
           </p>
           <p className="text-muted-foreground text-sm">
-            {Object.values(searchParams).length === 0
+            {Object.values(normalizedSearchParams).length === 0
               ? 'Check back soon for new releases!'
               : 'Try adjusting your search or filters.'}
           </p>
@@ -76,10 +68,12 @@ const StoreLayout = async ({
                 <CardHeader className="p-0">
                   {/* Product Image */}
                   <div className="relative w-full h-48 bg-gray-800 rounded-t-xl overflow-hidden">
-                    {product.image_url ? (
+                    {product.image?.url ? (
                       <Image
-                        src={product.image_url}
-                        alt={product.name}
+                        src={product.image.url}
+                        alt={product.image.altText || product.name}
+                        placeholder='blur'
+                        blurDataURL={product.image.url}
                         fill
                         className="object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
@@ -113,9 +107,7 @@ const StoreLayout = async ({
                 <CardContent className="flex-1 p-6 flex flex-col">
                   <div className="mb-2">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                      {formatCategory(product.category).map((item, index) => (
-                        <span key={index}> {item} </span>
-                      ))}
+                      {product.category}
                     </span>
                   </div>
                   <CardTitle className="text-xl mb-2 line-clamp-2 text-white">
@@ -134,7 +126,7 @@ const StoreLayout = async ({
                     </div>
                     {product.tags && product.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {product.tags.slice(0, 3).map((tag, index) => (
+                        {product.tags.slice(0, 4).map((tag, index) => (
                           <span
                             key={index}
                             className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded"
@@ -160,7 +152,16 @@ const StoreLayout = async ({
               </Card>
             ))}
           </div>
-
+          <div style={{ marginTop: 24 }}>
+            {hasNext && nextCursor ? (() => {
+              const nextParams = new URLSearchParams(baseSearchParams.toString());
+              nextParams.set("after", nextCursor);
+              return <Link href={`/store?${nextParams.toString()}`}>Next page →</Link>
+            })()
+              : (
+                <span style={{ opacity: 0.7 }}>No more products</span>
+              )}
+          </div>
           {/* Footer Stats */}
           <div className="mt-12 pt-8 border-t border-gray-800">
             <p className="text-center text-muted-foreground text-sm">
@@ -171,16 +172,4 @@ const StoreLayout = async ({
       ) : null}
     </>
   );
-};
-
-export default async function StoreContent({
-  searchParams,
-}: {
-  searchParams: RawSearchParams | Promise<RawSearchParams>;
-}) {
-  const isDev = process.env.NODE_ENV === 'development';
-  const productTable = isDev ? 'dev_products' : 'prod_products';
-  const normalizedSearchParams = getNormalizedSearchParams(await searchParams);
-
-  return <StoreLayout searchParams={normalizedSearchParams} productTable={productTable} />;
 }

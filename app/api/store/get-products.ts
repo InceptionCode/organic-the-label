@@ -1,11 +1,14 @@
 'use server';
 
-import { ProductSchema, type Product, ProductCategories } from '@/lib/schemas';
+import { type Product, STORE_PAGE_COUNT, STORE_SORTORDER_TRUE, STORE_SORTKEY_CREATED_AT, STORE_SORTORDER_FALSE, STORE_SORTKEY_PRICE, STORE_SORTKEY_TITLE } from '@/lib/schemas';
 import { ResolvedProductSearchParams } from '@/lib/product/normalize-search-params';
-import { createSupabasePublicClient } from '@/lib/supabase/unsecure-base';
-
+import { shopifyServerClient } from '@/lib/Shopify/shopify-server-client';
+import { PRODUCTS_PAGE_QUERY, type ProductsPageResponse } from '@/lib/Shopify/queries';
+import { parseStoreData } from '@/lib/store';
 export type GetProductsFetchState = {
   products: Product[];
+  hasNext: boolean;
+  nextCursor: string | null;
   error: Error | null;
 };
 
@@ -20,120 +23,117 @@ export const getProductsFetch = async (searchParams?: ResolvedProductSearchParam
 
   try {
     const isDev = process.env.NODE_ENV === 'development';
-    const productTable = isDev ? 'dev_products' : 'prod_products';
-    const supabase = await createSupabasePublicClient();
-    // Fetch products from Supabase
+    const productEndpoint = isDev ? process.env.SHOPIFY_DEV_STORE_DOMAIN : process.env.SHOPIFY_PROD_STORE_DOMAIN;
+
+    console.log(`Endpoint used: ${productEndpoint}`)
+
+    const shopifyClient = shopifyServerClient(productEndpoint);
+    // Fetch products from Shopify
     // Try with ordering first, fallback to simple select if ordering fails
     const sort = searchParams?.sort ?? 'newest'
+    const after = searchParams?.after ?? null; // for pagination
+    const tags = (searchParams?.tags ?? []).filter(Boolean);
 
-    let query = supabase
-      .from(productTable)
-      .select('*')
+    let query: string | null = null
+    let sortOrder: boolean = STORE_SORTORDER_TRUE
+    let sortKey: string = STORE_SORTKEY_CREATED_AT
 
     if (searchParams?.category && searchParams.category !== 'all') {
-      query = query.contains('category', `{${searchParams.category}}`)
+      query = `product_type:{${searchParams.category}}`
     }
 
-    if (searchParams?.exclusive) query = query.eq('is_exclusive', true);
+    if (tags.length !== 0) {
+      const tagString = tags.join(' OR ')
+      query = query + ` AND tag:${tagString}`
+    }
+
+    if (searchParams?.exclusive) query = query + ` AND tag:exclusive`;
 
     switch (sort) {
       case 'price-low':
-        query = query.order('price', { ascending: true });
+        sortOrder = STORE_SORTORDER_FALSE;
+        sortKey = STORE_SORTKEY_PRICE
         break;
       case 'price-high':
-        query = query.order('price', { ascending: false });
+        sortOrder = STORE_SORTORDER_TRUE;
+        sortKey = STORE_SORTKEY_PRICE
         break;
       case 'name-asc':
-        query = query.order('name', { ascending: true })
+        sortOrder = STORE_SORTORDER_FALSE;
+        sortKey = STORE_SORTKEY_TITLE
       case 'name-desc':
-        query = query.order('name', { ascending: false })
+        sortOrder = STORE_SORTORDER_TRUE;
+        sortKey = STORE_SORTKEY_TITLE
       default:
-        query = query.order('created_at', { ascending: false });
     }
 
-    const { data, error } = await query
+    const { data, errors } = await shopifyClient.request<ProductsPageResponse>(PRODUCTS_PAGE_QUERY, {
+      variables: {
+        first: STORE_PAGE_COUNT,
+        after,
+        query,
+        sortKey,
+        sortOrder
+      },
+    });
 
-    if (error) {
-      console.error('Error fetching products with ordering:', error);
+    if (errors?.message || errors?.networkStatusCode) {
+      console.error("Error fetching products | Shopify Storefront SDK errors:", errors, `Shopify Storefront products query failed with: ${errors.message} and status code: ${errors.networkStatusCode}`);
       // Fallback: try without ordering
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from(productTable)
-        .select('*');
+      const { data: fallbackData, errors: fallbackError } = await shopifyClient.request<ProductsPageResponse>(PRODUCTS_PAGE_QUERY, {
+        variables: {
+          STORE_PAGE_COUNT,
+          after,
+          sortKey: STORE_SORTKEY_CREATED_AT,
+          order: STORE_SORTORDER_TRUE
+        }
+      })
 
       if (fallbackError) {
-        console.error('Error fetching products:', fallbackError);
-        return {
-          products: [],
-          error: new Error(`Failed to fetch products: ${fallbackError.message}`),
-        };
+        console.error("Error fetching default products | Shopify Storefront SDK errors:", errors, `Shopify Storefront products query failed with: ${errors.message} and status code: ${errors.networkStatusCode}`);
+        throw new Error(`Failed to fetch products ${fallbackError.message}`)
       }
 
-      if (!fallbackData || fallbackData.length === 0) {
+      if (!fallbackData || fallbackData.products.edges.length === 0) {
         return {
           products: [],
+          hasNext: false,
+          nextCursor: null,
           error: null,
         };
       }
 
-      // Parse fallback data
-      const products = fallbackData.map((product) => {
-        try {
-          // Handle category format (might be "{kit}" or just "kit")
-
-          const category: Product["category"] = product.category?.map((type: string) => type.replace(/[{}]/g, '') || 'kit');
-
-          return ProductSchema.parse({
-            ...product,
-            category,
-            price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
-          });
-        } catch (parseError) {
-          console.error('Error parsing product:', product, parseError);
-          return null;
-        }
-      }).filter((product): product is Product => product !== null);
+      const products = parseStoreData(fallbackData.products.edges)
 
       return {
         products,
+        hasNext: fallbackData.products.pageInfo.hasNextPage,
+        nextCursor: fallbackData.products.pageInfo.endCursor,
         error: null,
       };
     }
 
-    if (!data || data.length === 0) {
+    if (!data || data.products.edges.length === 0) {
       return {
         products: [],
+        hasNext: false,
+        nextCursor: null,
         error: null,
       };
     }
 
     // Validate and parse products
-    const products: Product[] = data.map((product: Product) => {
-      try {
-        const category: Product["category"] = product.category?.map((type) => (type.replace(/[{}]/g, '') || 'kit') as ProductCategories);
-
-        return ProductSchema.parse({
-          ...product,
-          category,
-          price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
-        });
-      } catch (parseError) {
-        console.error('Error parsing product:', product, parseError);
-
-        console.log('>>>>> category', product.category)
-        return null;
-      }
-    }).filter((product): product is Product => product !== null);
+    const products: Product[] = parseStoreData(data.products.edges)
 
     return {
       products,
+      hasNext: data.products.pageInfo.hasNextPage,
+      nextCursor: data.products.pageInfo.endCursor,
       error: null,
     };
   } catch (e) {
     console.error('Unexpected error in getProductsAction:', e);
-    return {
-      products: [],
-      error: e instanceof Error ? e : new Error('Unknown error occurred while fetching products'),
-    };
+    throw e instanceof Error ? e : new Error('Unknown error occurred while fetching products')
   }
 };
 

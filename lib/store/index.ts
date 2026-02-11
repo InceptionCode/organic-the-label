@@ -1,2 +1,5 @@
 export type { AuthStoreState, AuthStore } from '@/lib/store/auth-store'
 export { createAuthStore } from '@/lib/store/auth-store'
+export type { CartStoreState, CartStore } from '@/lib/store/cart-store'
+export { createCartStore } from '@/lib/store/cart-store'
+export { parseStoreData } from '@/lib/store/parse-store-data'

@@ -21,12 +21,13 @@ export const AuthStoreProvider = ({ initialUser, children }: AuthProviderProps) 
 
   const setUpdatedUser = (user?: User) => ({
     username: user?.user_metadata.username || user?.email,
-    isAnon: user?.is_anonymous ?? false,
+    is_anon: user?.is_anonymous ?? false,
     created_at: user?.created_at ?? '',
     confirmed_at: user?.confirmed_at ?? '',
     updated_at: user?.updated_at,
     last_signed_in: user?.last_sign_in_at,
     avatar_url: user?.user_metadata.avatar_url,
+    is_member: user?.user_metadata.is_member,
   });
 
   useEffect(() => {
