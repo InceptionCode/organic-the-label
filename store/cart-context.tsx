@@ -10,16 +10,21 @@ export type CartStoreApi = ReturnType<typeof createCartStore>;
 export const CartStoreContext = createContext<CartStoreApi | null>(null);
 
 export type CartStoreProvider = React.PropsWithChildren<{ initialCart?: CartStore['cart'] }>;
-export const CartStoreProvider = ({ initialCart, children }: CartStoreProvider) => {
+export const CartStoreProvider = ({ children }: CartStoreProvider) => {
   const storeRef = useRef<CartStoreApi | null>(null);
-
-  useEffect(() => {
-    // Grab initial data from local storage
-  }, []);
+  const refreshCart = useRef<(() => Promise<void>) | null>(null);
 
   if (isEmpty(storeRef.current)) {
-    storeRef.current = createCartStore({ cart: initialCart });
+    storeRef.current = createCartStore();
+    refreshCart.current = storeRef.current.getState().refreshCart;
   }
+
+  useEffect(() => {
+    const refresh = refreshCart.current;
+    if (isEmpty(refresh)) return;
+
+    refresh().catch(() => { });
+  }, [refreshCart.current]);
 
   return <CartStoreContext.Provider value={storeRef.current}>{children}</CartStoreContext.Provider>;
 };

@@ -10,7 +10,7 @@ import { buildFilterKey } from "../product/build-filter-tag";
  * No cookies/headers inside this function or anything it imports.
  */
 
-export const getCachedProductsPage = (searchParams: NormalizedSearchParams, productTable: string) =>
+export const getCachedProducts = (searchParams: NormalizedSearchParams, productTable: string) =>
   unstable_cache(
     async () => getProductsFetch(searchParams),
     ["shopify:productsPage", productTable, ...buildFilterKey(searchParams)],

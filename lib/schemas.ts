@@ -47,7 +47,9 @@ export type OrderSources = z.infer<typeof unionOrderSources>
 export const ProductSchema = z.object({
   created_at: z.iso.datetime(),
   id: z.string(),
+  variantId: z.string(),
   name: z.string(),
+  handle: z.string(),
   description: z.string().optional(),
   price: z.number(),
   category: unionCategories,
@@ -83,6 +85,27 @@ export const CartItemSchema = z.object({
 
 export type CartItem = z.infer<typeof CartItemSchema>
 
+export type Money = { amount: string; currencyCode: string };
+
+export type CartLine = {
+  id: string;
+  quantity: number;
+  merchandise: {
+    id: string; // variant id
+    title: string; // variant title
+    price: Money;
+    product: { title: string; handle: string };
+    image?: { url: string; altText?: string | null; width?: number; height?: number };
+  };
+};
+
+export type Cart = {
+  id: string;
+  checkoutUrl: string;
+  totalQuantity: number;
+  cost: { totalAmount: Money };
+  lines: { edges: Array<{ node: CartLine }> };
+};
 // ✅ User Personalization Schema (Interests + Email Prefs)
 export const UserPreferencesSchema = z.object({
   userId: z.string(),

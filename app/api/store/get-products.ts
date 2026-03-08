@@ -82,7 +82,7 @@ export const getProductsFetch = async (searchParams?: ResolvedProductSearchParam
       // Fallback: try without ordering
       const { data: fallbackData, errors: fallbackError } = await shopifyClient.request<ProductsPageResponse>(PRODUCTS_PAGE_QUERY, {
         variables: {
-          STORE_PAGE_COUNT,
+          first: STORE_PAGE_COUNT,
           after,
           sortKey: STORE_SORTKEY_CREATED_AT,
           order: STORE_SORTORDER_TRUE

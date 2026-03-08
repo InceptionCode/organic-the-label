@@ -13,3 +13,9 @@ export function formatCategory(categories: string[]) {
 export function formatPrice(price: number): string {
   return `$${price.toFixed(2)}`;
 }
+
+export function formatMoney(amount: string, currencyCode: string) {
+  const n = Number(amount);
+  if (Number.isNaN(n)) return `${amount} ${currencyCode}`;
+  return new Intl.NumberFormat(undefined, { style: "currency", currency: currencyCode }).format(n);
+}

@@ -25,8 +25,8 @@ export default async function StoreContent({
       {/* Error State */}
       {error && (
         <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-red-400 text-lg mb-4">Failed to load products</p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-[color:var(--danger)] text-body-l mb-4">Failed to load products</p>
+          <p className="text-muted text-body-s">
             Please try refreshing the page or contact support if the problem persists.
           </p>
         </div>
@@ -35,12 +35,12 @@ export default async function StoreContent({
       {/* Products Grid */}
       {error ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-muted-foreground text-lg mb-4">
+          <p className="text-secondary text-body-l mb-4">
             {Object.values(normalizedSearchParams).length === 0
               ? 'No products available at the moment.'
               : 'No products match your filters.'}
           </p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted text-body-s">
             {Object.values(normalizedSearchParams).length === 0
               ? 'Check back soon for new releases!'
               : 'Try adjusting your search or filters.'}
@@ -60,8 +60,8 @@ export default async function StoreContent({
             })() : null}
           </div>
           {/* Footer Stats */}
-          <div className="mt-12 pt-8 border-t border-gray-800">
-            <p className="text-center text-muted-foreground text-sm">
+          <div className="mt-12 pt-8 border-t border-subtle">
+            <p className="text-center text-muted text-body-s">
               Showing {products.length} {products.length === 1 ? 'product' : 'products'}
             </p>
           </div>

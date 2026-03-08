@@ -3,7 +3,8 @@ import { ProductSchema, type Product, type ProductCategories, type ProductTags }
 
 export const parseStoreData = (products: ProductsPageResponse["products"]["edges"]): Product[] => {
   const mappedProducts: Product[] = products.map(({ node: product }) => {
-    const price = product.priceRange.minVariantPrice.amount
+    const variantId = product.variants.edges[0].node.id
+    const price = product.variants.edges[0].node.price.amount
 
     try {
       const category: Product["category"] = product.productType.toLowerCase() as ProductCategories;
@@ -14,9 +15,10 @@ export const parseStoreData = (products: ProductsPageResponse["products"]["edges
         created_at: product.createdAt,
         name: product.title,
         image: product.featuredImage,
+        price: typeof price === 'string' ? parseFloat(price) : price,
         category,
         tags,
-        price: typeof price === 'string' ? parseFloat(price) : price,
+        variantId
       });
     } catch (parseError) {
       const error = new Error(`Error parsing product: ${product.title}`, { cause: parseError });

@@ -281,6 +281,14 @@
     border-color: var(--border-strong);
   }
 
+  .shadow-md-premium {
+    box-shadow: var(--shadow-md-premium);
+  }
+
+  .shadow-lg-premium {
+    box-shadow: var(--shadow-lg-premium);
+  }
+
   .ring-focus {
     box-shadow: 0 0 0 1px var(--border-focus), 0 0 0 4px color-mix(in srgb, var(--border-focus) 40%, transparent);
   }

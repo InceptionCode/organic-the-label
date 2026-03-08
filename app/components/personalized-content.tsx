@@ -1,16 +1,17 @@
-'use client';
 
 import { RawSearchParams, getNormalizedSearchParams } from '@/lib/product/normalize-search-params';
-import { useAuthStore } from '@/store/auth-context';
 import MembershipContent from './membership-content';
 import Recommendations from './recommendations';
+import { defaultUserState } from '@/lib/store/auth-store';
+import safeParseUser from '@/utils/helpers/safe-parse-uesr';
 
 export default async function PersonalizedContent({
   searchParams,
 }: {
   searchParams: RawSearchParams | Promise<RawSearchParams>;
 }) {
-  const user = useAuthStore((state) => state.user);
+  const user = safeParseUser(defaultUserState);
+
   const normalizedSearchParams = getNormalizedSearchParams(await searchParams);
 
   return (

@@ -103,8 +103,9 @@ export default function StoreFilters() {
 
     if (updates.tags !== undefined) {
       if (updates.tags.includes('all') || isEqual(updates.tags, TagOptionsArray)) {
-        params.delete('tags');
+        params.delete('tag');
       } else {
+        params.delete('tag');
         updates.tags.forEach(tag => params.append("tag", tag))
       }
     }
@@ -148,9 +149,11 @@ export default function StoreFilters() {
     updateFilters({ sort: value });
   };
 
-  const handleTagsChange = (value: TagOptions[]) => {
-    setTags(value);
-    updateFilters({ tags: value });
+  const handleTagsChange = (values: TagOptions[]) => {
+    const newTags = [...new Set([...tags, ...values])]
+
+    setTags(newTags);
+    updateFilters({ tags: newTags });
   };
 
   const handleExclusiveToggle = (checked: boolean) => {
@@ -175,19 +178,19 @@ export default function StoreFilters() {
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+          <MagnifyingGlassIcon className="h-5 w-5 text-muted" aria-hidden="true" />
         </div>
         <Input
           type="text"
           placeholder="Search products..."
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-10 pr-10 w-full bg-gray-900 border-gray-700 text-white placeholder-gray-400 focus:border-red-600 focus:ring-red-600"
+          className="pl-10 pr-10 w-full"
         />
         {search && (
           <button
             onClick={() => handleSearchChange('')}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-primary"
           >
             <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -204,11 +207,6 @@ export default function StoreFilters() {
               variant={category === cat.value ? 'default' : 'outline'}
               size="sm"
               onClick={() => handleCategoryChange(cat.value)}
-              className={
-                category === cat.value
-                  ? 'bg-red-600 hover:bg-red-700'
-                  : 'border-gray-700 text-gray-300 hover:bg-gray-800'
-              }
             >
               {cat.label}
             </Button>
@@ -223,9 +221,9 @@ export default function StoreFilters() {
               type="checkbox"
               checked={exclusiveOnly}
               onChange={(e) => handleExclusiveToggle(e.target.checked)}
-              className="w-4 h-4 text-red-600 bg-gray-900 border-gray-700 rounded focus:ring-red-600 focus:ring-2"
+              className="w-4 h-4 rounded border-default bg-surface-1 text-primary focus:ring-2 focus:ring-[color:var(--accent-primary)]"
             />
-            <span className="text-sm text-gray-300">Exclusive Only</span>
+            <span className="text-body-s text-secondary">Exclusive Only</span>
           </label>
 
           {/* Tag Dropdown */}
@@ -234,7 +232,7 @@ export default function StoreFilters() {
             name="tags"
             value={tags}
             onChange={(e) => handleTagsChange(e.target.value as unknown as TagOptions[])}
-            className="bg-gray-900 border border-gray-700 text-white text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+            className="bg-surface-1 border border-default text-primary text-body-s rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-primary)]"
             multiple
           >
             {tagOptions.map((option) => (
@@ -248,7 +246,7 @@ export default function StoreFilters() {
           <select
             value={sort}
             onChange={(e) => handleSortChange(e.target.value as SortOption)}
-            className="bg-gray-900 border border-gray-700 text-white text-sm rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-red-600"
+            className="bg-surface-1 border border-default text-primary text-body-s rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-primary)]"
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -262,15 +260,10 @@ export default function StoreFilters() {
       {/* Clear Filters */}
       {hasActiveFilters && (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearFilters}
-            className="text-gray-400 hover:text-white"
-          >
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
             Clear all filters
           </Button>
-          {isPending && <span className="text-sm text-gray-400">Updating...</span>}
+          {isPending && <span className="text-body-s text-muted">Updating...</span>}
         </div>
       )}
     </div>
