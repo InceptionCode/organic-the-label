@@ -1,4 +1,4 @@
-import StoreHeader from '@/app/store/components/store-header';
+import { CollectionHeader } from '@/app/store/components/collection-header';
 
 /**
  * Store page layout component that displays products with filtering and sorting
@@ -7,8 +7,7 @@ import StoreHeader from '@/app/store/components/store-header';
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* Header Component "including navigation" */}
-      <StoreHeader />
+      <CollectionHeader />
       <main className="w-full">{children}</main>
     </>
   );
