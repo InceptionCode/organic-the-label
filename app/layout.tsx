@@ -59,15 +59,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} ${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Suspense
             fallback={
-              <HtmlDocumentBody>
+              <>
                 {/* Render default static cart icon (store) */}
                 {children}
-              </HtmlDocumentBody>
+                <Footer />
+              </>
             }
           >
             <InitAuthStore>
