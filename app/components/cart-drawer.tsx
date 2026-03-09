@@ -7,14 +7,12 @@ import { CartItemRow } from './cart-item-row';
 import { CheckoutButton } from './checkout-button';
 
 export default function CartDrawer() {
-  const [cart, isOpen, close, setQty, removeLine, isLoading] = useCartStore((s) => [
-    s.cart,
-    s.isOpen,
-    s.close,
-    s.setQty,
-    s.removeLine,
-    s.isLoading,
-  ]);
+  const cart = useCartStore((s) => s.cart);
+  const isOpen = useCartStore((s) => s.isOpen);
+  const close = useCartStore((s) => s.close);
+  const setQty = useCartStore((s) => s.setQty);
+  const removeLine = useCartStore((s) => s.removeLine);
+  const isLoading = useCartStore((s) => s.isLoading);
 
   const lines = cart?.lines.edges.map((e) => e.node) ?? [];
   const totalItems = cart?.totalQuantity ?? 0;

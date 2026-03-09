@@ -12,7 +12,8 @@ export default function AddToCartButton({
   quantity?: number;
   openDrawer?: boolean;
 }) {
-  const [isLoading, addToCart] = useCartStore((s) => [s.isLoading, s.addToCart]);
+  const isLoading = useCartStore((s) => s.isLoading);
+  const addToCart = useCartStore((s) => s.addToCart);
 
   return (
     <Button className="flex-1" onClick={() => addToCart(variantId, quantity, { openDrawer })} disabled={isLoading}>

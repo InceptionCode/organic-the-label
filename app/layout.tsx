@@ -68,8 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             fallback={
               <>
                 {/* Render default static cart icon (store) */}
-                {children}
-                <Footer />
+                <main className="flex-1 px-4 md:px-12 py-8 max-w-7xl mx-auto w-full">{children}</main>
               </>
             }
           >

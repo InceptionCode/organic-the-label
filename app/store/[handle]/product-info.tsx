@@ -17,12 +17,14 @@ export function ProductInfo({ name, description, descriptionHtml, price, currenc
       <div className="price-text text-primary">
         <PriceDisplay amount={amount} currencyCode={currencyCode} />
       </div>
-      {(description || descriptionHtml) && (
+      {descriptionHtml ? (
         <div
           className="text-body-m text-secondary [&_p]:mb-3"
           dangerouslySetInnerHTML={descriptionHtml ? { __html: descriptionHtml } : undefined}
-        >
-          {!descriptionHtml && description}
+        />
+      ) : (
+        <div className="text-body-m text-secondary [&_p]:mb-3">
+          {description && description}
         </div>
       )}
     </div>

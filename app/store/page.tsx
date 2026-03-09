@@ -4,6 +4,7 @@ import StoreLayout from '@/app/store/store-layout';
 import PersonalizedContent from '@/app/components/personalized-content';
 
 import { Suspense } from 'react';
+import { LoadingState } from '@/ui-components';
 
 // HTML is per-request (because membership can change)
 
@@ -33,10 +34,10 @@ export default function StorePage({
 }) {
   return (
     <StoreLayout>
-      <Suspense fallback={<div className="mb-8 h-32 bg-gray-900 rounded animate-pulse" />}>
+      <Suspense fallback={<LoadingState />}>
         <StoreFilters />
       </Suspense>
-      <Suspense fallback="Loading recommendations and personalized data...">
+      <Suspense fallback={<LoadingState variant='skeleton' />}>
         <PersonalizedContent searchParams={searchParams} />
       </Suspense>
       <Suspense fallback={<StoreSkeleton />}>

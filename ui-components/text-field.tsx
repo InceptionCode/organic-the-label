@@ -1,3 +1,5 @@
+'use client'
+
 import { Slot } from '@radix-ui/react-slot';
 import { PropsWithChildren, useState, type ReactNode } from 'react';
 import { Input, type InputProps } from './input';

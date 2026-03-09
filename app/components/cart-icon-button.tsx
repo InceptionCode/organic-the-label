@@ -4,7 +4,8 @@ import Image from 'next/image';
 import { useCartStore } from '@/store/cart-context';
 
 export default function CartIconButton() {
-  const [toggle, count] = useCartStore((s) => [s.toggle, s.cart?.totalQuantity ?? 0]);
+  const toggle = useCartStore((s) => s.toggle);
+  const count = useCartStore((s) => s.cart?.totalQuantity ?? 0);
 
   return (
     <button
