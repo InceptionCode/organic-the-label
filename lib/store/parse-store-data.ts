@@ -1,5 +1,6 @@
 import type { ProductsPageResponse } from "@/lib/Shopify/queries";
 import { ProductSchema, type Product, type ProductCategories, type ProductTags } from "@/lib/schemas";
+import { parseAudioPreviewUrls } from "@/utils/helpers/parse-preview-urls";
 
 export const parseStoreData = (products: ProductsPageResponse["products"]["edges"]): Product[] => {
   const mappedProducts: Product[] = products.map(({ node: product }) => {
@@ -16,6 +17,7 @@ export const parseStoreData = (products: ProductsPageResponse["products"]["edges
         name: product.title,
         image: product.featuredImage,
         price: typeof price === 'string' ? parseFloat(price) : price,
+        audio_preview: parseAudioPreviewUrls(product.metafield?.value)[0] || undefined,
         category,
         tags,
         variantId

@@ -49,10 +49,10 @@ function normalizeParam(
 
 // Main function: normalize search params into the shape you want
 export function getNormalizedSearchParams(
-  searchParams: RawSearchParams | URLSearchParams
+  searchParams: RawSearchParams | URLSearchParams,
 ): NormalizedSearchParams {
   const getRaw = (key: string): string | string[] | undefined => {
-    const params = searchParams
+    const params = searchParams;
     if (params instanceof URLSearchParams) {
       const all = params.getAll(key);
       if (all.length === 0) return undefined;
@@ -62,13 +62,32 @@ export function getNormalizedSearchParams(
     return params[key];
   };
 
+  // Prefer the new comma-separated `tags` param, but gracefully fall back to legacy `tag` keys.
+  const rawTagsParam = getRaw('tags');
+  const rawLegacyTags = asStringArray(getRaw('tag'));
+
+  const parsedTagsFromTagsParam: string[] = [];
+
+  if (typeof rawTagsParam === 'string') {
+    parsedTagsFromTagsParam.push(
+      ...rawTagsParam
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean),
+    );
+  } else if (Array.isArray(rawTagsParam)) {
+    parsedTagsFromTagsParam.push(...rawTagsParam);
+  }
+
+  const combinedTags = [...parsedTagsFromTagsParam, ...rawLegacyTags];
+
   const normalized = {
-    search: normalizeParam(getRaw("search")),
-    category: normalizeParam(getRaw("category")),
-    sort: normalizeParam(getRaw("sort")),
-    tags: normalizeTags(asStringArray(getRaw("tag"))),
-    exclusive: normalizeParam(getRaw("exclusive")),
-    after: normalizeParam(getRaw("after"))
+    search: normalizeParam(getRaw('search')),
+    category: normalizeParam(getRaw('category')),
+    sort: normalizeParam(getRaw('sort')),
+    tags: normalizeTags(combinedTags),
+    exclusive: normalizeParam(getRaw('exclusive')),
+    after: normalizeParam(getRaw('after')),
   };
 
   return normalized;

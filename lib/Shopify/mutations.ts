@@ -20,6 +20,16 @@ export type CartLinesAddResponse = {
   }
 }
 
+export type CartLinesUpdateResponse = {
+  cartLinesUpdate: {
+    cart: CartQueryResponse,
+    userErrors?: {
+      field: string;
+      message: string;
+    }
+  }
+}
+
 export type CartLinesRemove = {
   cartLinesRemove: {
     cart: CartQueryResponse,
@@ -60,10 +70,20 @@ export const CART_LINES_ADD_MUTATION = `
   }
 `;
 
+export const CART_LINES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart { ...CartFragment }
+      userErrors { field message }
+    }
+  }
+`;
+
 export const CART_LINES_REMOVE_MUTATION = `
   ${CART_FRAGMENT}
   mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-    cartLinesRemove(cartId: $cartId, lineIds: $lines) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
       cart { ...CartFragment }
       userErrors { field message }
     }

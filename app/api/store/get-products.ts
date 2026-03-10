@@ -43,11 +43,21 @@ export const getProductsFetch = async (searchParams?: ResolvedProductSearchParam
     }
 
     if (tags.length !== 0) {
-      const tagString = tags.join(' OR ')
-      query = query + ` AND tag:${tagString}`
+      const tagString = tags.join(' OR ');
+      if (query) {
+        query = query + ` AND tag:${tagString}`;
+      } else {
+        query = `tag:${tagString}`;
+      }
     }
 
-    if (searchParams?.exclusive) query = query + ` AND tag:exclusive`;
+    if (searchParams?.exclusive) {
+      if (query) {
+        query = query + ` AND tag:exclusive`;
+      } else {
+        query = `tag:exclusive`;
+      }
+    }
 
     switch (sort) {
       case 'price-low':

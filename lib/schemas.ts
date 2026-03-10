@@ -44,6 +44,15 @@ export type ProductTags = z.infer<typeof unionTags>
 export const unionOrderSources = z.union([orderSource, membershipSource, manualSource, promoSource])
 export type OrderSources = z.infer<typeof unionOrderSources>
 
+export const ProductMetafieldSchema = z.object({
+  value: z.string().optional().nullable(),
+})
+
+export type ProductMetafield = z.infer<typeof ProductMetafieldSchema>
+
+export const ProductPreviewUrlsSchema = z.array(z.object({ preview_title: z.string(), preview_url: z.string() }))
+export type ProductPreviewUrls = z.infer<typeof ProductPreviewUrlsSchema>
+
 export const ProductSchema = z.object({
   created_at: z.iso.datetime(),
   id: z.string(),
@@ -53,10 +62,7 @@ export const ProductSchema = z.object({
   description: z.string().optional(),
   price: z.number(),
   category: unionCategories,
-  audio_url: z.preprocess(
-    (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),
-    z.url().optional()
-  ),
+  audio_preview: ProductPreviewUrlsSchema.element.optional().nullable(),
   image: z.object({
     url: z.preprocess(
       (arg) => (typeof arg === 'string' && arg === '' ? undefined : arg),

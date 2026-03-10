@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { CART_COOKIE } from "@/lib/store/cart-cookie";
 import { shopifyServerClient } from "@/lib/Shopify/shopify-server-client";
-import { CART_LINES_ADD_MUTATION, type CartLinesAddResponse, type CartState } from "@/lib/Shopify/mutations";
+import { CART_LINES_UPDATE_MUTATION, CartLinesUpdateResponse, type CartState } from "@/lib/Shopify/mutations";
 
-type AddBody = { variantId: string; quantity?: number };
+type UpdateBody = { lineId: string; quantity?: number };
 
 export async function POST(req: Request): Promise<NextResponse<CartState>> {
   const isDev = process.env.NODE_ENV === 'development';
@@ -12,12 +12,12 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
 
   const shopifyClient = shopifyServerClient(productEndpoint)
 
-  const { variantId, quantity = 1 } = (await req.json()) as AddBody;
+  const { lineId, quantity = 1 } = (await req.json()) as UpdateBody;
 
   const jar = await cookies();
   const cartId = jar.get(CART_COOKIE)?.value ?? null;
 
-  const line = { merchandiseId: variantId, quantity };
+  const line = { id: lineId, quantity };
 
   if (!cartId) {
     console.error("Cart does not exist!")
@@ -25,13 +25,16 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
     throw new Error("Cart could not be updated")
   }
 
-  const { data, errors } = await shopifyClient.request<CartLinesAddResponse>(CART_LINES_ADD_MUTATION, {
+  const { data, errors } = await shopifyClient.request<CartLinesUpdateResponse>(CART_LINES_UPDATE_MUTATION, {
     variables: { cartId, lines: [line] },
   });
 
-  if (errors?.networkStatusCode) return NextResponse.json({ ok: false, errors }, { status: 500 });
+  if (errors?.networkStatusCode) {
+    console.error('errors', errors);
+    return NextResponse.json({ ok: false, errors }, { status: 500 });
+  }
 
-  const added = data?.cartLinesAdd;
+  const added = data?.cartLinesUpdate;
   if (added?.userErrors?.message) return NextResponse.json({ ok: false, errors: added.userErrors }, { status: 400 });
 
   return NextResponse.json({ ok: true, cart: added?.cart });

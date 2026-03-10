@@ -9,7 +9,7 @@ import { QuantityControl } from './quantity-control';
 type CartItemRowProps = {
   line: CartLine;
   onSetQty: (lineId: string, quantity: number) => void;
-  onRemove: (lineId: string) => void;
+  onRemove: (lineIds: string[]) => void;
   disabled?: boolean;
 };
 
@@ -53,7 +53,7 @@ export function CartItemRow({ line, onSetQty, onRemove, disabled }: CartItemRowP
             quantity={line.quantity}
             onDecrement={() => onSetQty(line.id, line.quantity - 1)}
             onIncrement={() => onSetQty(line.id, line.quantity + 1)}
-            onRemove={() => onRemove(line.id)}
+            onRemove={() => onRemove([line.id])}
             min={1}
             disabled={disabled}
           />

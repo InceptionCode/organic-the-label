@@ -37,3 +37,5 @@ export { Tag } from './tag';
 export { Divider } from './divider';
 export { EmptyState } from './empty-state';
 export { LoadingState, SkeletonCard } from './loading-state';
+export { MultiSelectFilter } from './multi-select-filter';
+export { SortSelect } from './sort-select';

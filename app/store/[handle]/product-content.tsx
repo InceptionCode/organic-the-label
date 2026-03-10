@@ -6,12 +6,16 @@ import { ProductInfo } from './product-info';
 import { type LicenseOption } from './license-options';
 import { ProductPurchaseClient } from './product-purchase-client';
 import { RelatedProducts } from './related-products';
+import { parseAudioPreviewUrls } from '@/utils/helpers/parse-preview-urls';
+import AudioPreviewList from '@/ui-components/audio-preview-list';
 
 export type ProductHandleParam = { handle: string };
 
 export default async function ProductContent({ params }: { params: Promise<ProductHandleParam> }) {
   const { handle } = await params;
   const { product, error } = await getCachedProductDetails(handle);
+  const previews = parseAudioPreviewUrls(product.metafield?.value);
+
   if (!product) return notFound();
 
   const variants = (product as any).variants?.edges ?? [];
@@ -50,7 +54,13 @@ export default async function ProductContent({ params }: { params: Promise<Produ
           />
         </div>
       </div>
-
+      <div className="p-8">
+        {
+          previews.length > 0 ? (
+            <AudioPreviewList previews={previews} title={product.name} />
+          ) : null
+        }
+      </div>
       <RelatedProducts products={relatedProducts} currentHandle={handle} />
     </main>
   );

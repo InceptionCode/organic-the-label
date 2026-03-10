@@ -17,7 +17,10 @@ export async function GET() {
 
   const { data, errors } = await shopifyClient.request<CartQueryResponse>(CART_QUERY, { variables: { id: cartId } });
 
-  if (errors?.networkStatusCode) return NextResponse.json({ ok: false, errors }, { status: 500 });
+  if (errors?.networkStatusCode) {
+    console.error('errors', errors);
+    return NextResponse.json({ ok: false, errors }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true, cart: data });
 }

@@ -45,6 +45,9 @@ export type ProductsPageResponse = {
             }
           }>
         }
+        metafield: null | {
+          value: string | null;
+        };
       };
     }>;
   };
@@ -94,6 +97,9 @@ export type ProductsDetailResponse = {
         }
       }>
     }
+    metafield: null | {
+      value: string | null;
+    };
   }
 }
 
@@ -173,6 +179,9 @@ export const PRODUCTS_PAGE_QUERY = `
               }
             }
           }
+          metafield(namespace: "custom", key: "audio_preview_urls") {
+            value
+          }
         }
       }
     }
@@ -223,6 +232,9 @@ export const PRODUCT_BY_HANDLE_QUERY = `
             }
           }
         }
+      }
+      metafield(namespace: "custom", key: "audio_preview_urls") {
+        value
       }
     }
   }

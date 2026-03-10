@@ -1,19 +1,20 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/ui-components/button';
-import { Input } from '@/ui-components/input';
+import { Button, Input } from '@/ui-components';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useState, useEffect, useTransition } from 'react';
-import { Label } from '@/ui-components/label';
+import { useState, useTransition } from 'react';
 
-import { isEqual } from '@/utils/helpers/checks'
+import { parseMultiValueParam, serializeMultiValueParam } from '@/utils/helpers/filter-query';
+import { FilterBar } from './filter-bar';
+import { ProductCategories, ProductTags as TagOptions } from '@/lib/schemas';
+
+import { isEqual } from '@/utils/helpers/checks';
 
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc';
-type CategoryFilter = 'all' | 'kit' | 'pack' | 'beat' | 'merch' | 'bank' | 'suite' | 'plugin';
-type TagOptions = 'all' | 'ambient' | 'melodic' | 'vintage' | 'r&b' | 'hiphop' | 'trap' | 'dark' | 'ost' | 'opium' | 'rage' | 'digital';
+type CategoryFilter = ProductCategories | 'all';
 
-const TagOptionsArray = ['all', 'ambient', 'melodic', 'vintage', 'r&b', 'hiphop', 'trap', 'dark', 'ost', 'opium', 'rage', 'digital'];
+const TagOptionsArray: TagOptions[] = ['ambient', 'melodic', 'vintage', 'r&b', 'hiphop', 'trap', 'dark', 'ost', 'opium', 'rage', 'digital'];
 
 const categories: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -27,7 +28,6 @@ const categories: { value: CategoryFilter; label: string }[] = [
 ];
 
 const tagOptions: { value: TagOptions; label: string }[] = [
-  { value: 'all', label: 'All' },
   { value: 'ambient', label: 'Ambient' },
   { value: 'melodic', label: 'Melodic' },
   { value: 'vintage', label: 'Vintage' },
@@ -59,13 +59,11 @@ export default function StoreFilters() {
     (searchParams.get('category') as CategoryFilter) || 'all',
   );
 
-  const [tags, setTags] = useState<TagOptions[]>(
-    () => {
-      const value = searchParams.get('tags') as TagOptions;
-      if (!value) return ['all'];
-      return value.split(',').map(t => t.trim()).filter(t => TagOptionsArray.includes(t)) as TagOptions[];
-    }
-  );
+  const [tags, setTags] = useState<TagOptions[]>(() => {
+    const value = searchParams.get('tags');
+    const parsed = parseMultiValueParam(value);
+    return parsed.filter((t): t is TagOptions => TagOptionsArray.includes(t as TagOptions));
+  });
 
   const [sort, setSort] = useState<SortOption>(
     (searchParams.get('sort') as SortOption) || 'newest',
@@ -102,11 +100,15 @@ export default function StoreFilters() {
     }
 
     if (updates.tags !== undefined) {
-      if (updates.tags.includes('all') || isEqual(updates.tags, TagOptionsArray)) {
-        params.delete('tag');
+      const normalizedTags = updates.tags
+        .filter((tag): tag is TagOptions => TagOptionsArray.includes(tag as TagOptions));
+
+      const serialized = serializeMultiValueParam(normalizedTags);
+
+      if (!serialized) {
+        params.delete('tags');
       } else {
-        params.delete('tag');
-        updates.tags.forEach(tag => params.append("tag", tag))
+        params.set('tags', serialized);
       }
     }
 
@@ -150,10 +152,12 @@ export default function StoreFilters() {
   };
 
   const handleTagsChange = (values: TagOptions[]) => {
-    const newTags = [...new Set([...tags, ...values])]
+    const nextTags = values.filter((tag) =>
+      TagOptionsArray.includes(tag),
+    );
 
-    setTags(newTags);
-    updateFilters({ tags: newTags });
+    setTags(nextTags);
+    updateFilters({ tags: nextTags });
   };
 
   const handleExclusiveToggle = (checked: boolean) => {
@@ -185,7 +189,7 @@ export default function StoreFilters() {
           placeholder="Search products..."
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-10 pr-10 w-full"
+          className="pl-10 pr-10 w-full text-white placeholder:text-white"
         />
         {search && (
           <button
@@ -198,64 +202,19 @@ export default function StoreFilters() {
       </div>
 
       {/* Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <Button
-              key={cat.value}
-              variant={category === cat.value ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => handleCategoryChange(cat.value)}
-            >
-              {cat.label}
-            </Button>
-          ))}
-        </div>
-
-        {/* Sort and Tag Filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Exclusive Toggle */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={exclusiveOnly}
-              onChange={(e) => handleExclusiveToggle(e.target.checked)}
-              className="w-4 h-4 rounded border-default bg-surface-1 text-primary focus:ring-2 focus:ring-[color:var(--accent-primary)]"
-            />
-            <span className="text-body-s text-secondary">Exclusive Only</span>
-          </label>
-
-          {/* Tag Dropdown */}
-          <Label htmlFor="tags">Tags</Label>
-          <select
-            name="tags"
-            value={tags}
-            onChange={(e) => handleTagsChange(e.target.value as unknown as TagOptions[])}
-            className="bg-surface-1 border border-default text-primary text-body-s rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-primary)]"
-            multiple
-          >
-            {tagOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          {/* Sort Dropdown */}
-          <select
-            value={sort}
-            onChange={(e) => handleSortChange(e.target.value as SortOption)}
-            className="bg-surface-1 border border-default text-primary text-body-s rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-primary)]"
-          >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <FilterBar
+        categories={categories}
+        selectedCategory={category}
+        onCategoryChange={handleCategoryChange}
+        exclusiveOnly={exclusiveOnly}
+        onExclusiveToggle={handleExclusiveToggle}
+        tagOptions={tagOptions}
+        selectedTags={tags}
+        onTagsChange={handleTagsChange}
+        sortOptions={sortOptions}
+        sortValue={sort}
+        onSortChange={handleSortChange}
+      />
 
       {/* Clear Filters */}
       {hasActiveFilters && (

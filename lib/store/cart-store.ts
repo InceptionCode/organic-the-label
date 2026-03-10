@@ -14,7 +14,7 @@ type CartStoreState = {
   refreshCart: () => Promise<void>;
   addToCart: (variantId: string, quantity?: number, opts?: { openDrawer?: boolean }) => Promise<void>;
   setQty: (lineId: string, quantity: number) => Promise<void>;
-  removeLine: (lineId: string) => Promise<void>;
+  removeLine: (lineIds: string[]) => Promise<void>;
   clearError: () => void;
 };
 
@@ -88,7 +88,7 @@ export const createCartStore = () => {
 
     setQty: async (lineId, quantity) => {
       const q = Math.max(0, Math.floor(quantity));
-      if (q === 0) return get().removeLine(lineId);
+      if (q === 0) return get().removeLine([lineId]);
 
       set({ isLoading: true, error: null });
       try {
@@ -104,13 +104,13 @@ export const createCartStore = () => {
       }
     },
 
-    removeLine: async (lineId) => {
+    removeLine: async (lineIds) => {
       set({ isLoading: true, error: null });
       try {
         const data = await jsonFetch<CartApiOk<{ cart: Cart }>>("/api/store/cart/remove", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lineId }),
+          body: JSON.stringify({ lineIds }),
         });
 
         set({ cart: data.cart, isLoading: false });

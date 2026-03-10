@@ -10,6 +10,7 @@ export type GetProductDetailFetchState = {
     descriptionHtml: string;
     availableForSale: Boolean;
     images: Array<Product["image"]>
+    metafield: ProductsDetailResponse["product"]["metafield"];
   };
   error: Error | null;
 };

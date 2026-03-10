@@ -24,7 +24,10 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
       variables: { lines: [line] },
     });
 
-    if (errors?.networkStatusCode || !data?.cartCreate) return NextResponse.json({ ok: false, errors }, { status: 500 });
+    if (errors?.networkStatusCode || !data?.cartCreate) {
+      console.error('errors', errors);
+      return NextResponse.json({ ok: false, errors }, { status: 500 });
+    }
 
     const created = data.cartCreate;
     if (created.userErrors?.message) return NextResponse.json({ ok: false, errors: created.userErrors }, { status: 400 });
@@ -42,6 +45,19 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
     return res;
   }
 
-  console.error('Cart already exist or there was an issue creating the cart.')
+  if (cartId) {
+    const { data, errors } = await shopifyClient.request<CartLinesAddResponse>(CART_LINES_ADD_MUTATION, {
+      variables: { cartId, lines: [line] },
+    });
+
+    if (errors?.networkStatusCode || !data?.cartLinesAdd) {
+      console.error('errors', errors);
+      return NextResponse.json({ ok: false, errors }, { status: 500 });
+    }
+
+    const cart = data.cartLinesAdd.cart;
+    return NextResponse.json({ ok: true, cart });
+  }
+
   throw new Error('Could not create cart!')
 }
