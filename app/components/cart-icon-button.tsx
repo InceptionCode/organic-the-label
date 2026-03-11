@@ -1,6 +1,4 @@
 'use client';
-
-import Image from 'next/image';
 import { useCartStore } from '@/store/cart-context';
 import CartIcon from '@/ui-components/icons/cart-icon';
 

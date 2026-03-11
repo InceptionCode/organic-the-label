@@ -11,17 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui-components';
-import safeParseUser from '@/utils/helpers/safe-parse-uesr';
+import useSafeParseUser from '@/utils/helpers/safe-parse-uesr';
 import { useStorage } from '@/utils/hooks/use-storage';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const user = safeParseUser(defaultUserState);
+  const user = useSafeParseUser(defaultUserState);
 
   const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
     initMethod: 'get',
@@ -85,7 +84,7 @@ export default function Home() {
 
         <p className="text-4xl font-bold text-center">This is Organic Sonics!</p>
         <p className="text-xl">
-          A platform for music producers to level up their craft and sound. We're here to help you get the most out of your music production journey. Discover new tools, resources, and community to help you level up your sound.
+          A platform for music producers to level up their craft and sound. We&apos;re here to help you get the most out of your music production journey. Discover new tools, resources, and community to help you level up your sound.
         </p>
         <p className="text-2xl text-center">
           Join our community to get exclusive content, discounts and more...

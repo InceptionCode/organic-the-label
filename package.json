@@ -9,7 +9,8 @@
     "generate-seed": "ts-node seed.ts",
     "start": "next start",
     "serve": "pnpm build && pnpm start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "type-check": "tsc --noEmit",
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql"
   },
   "dependencies": {
