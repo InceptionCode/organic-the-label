@@ -1,6 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { formatPrice } from '@/utils/helpers/product-helpers';
 
 export type LicenseOption = {
   id: string;
@@ -24,7 +25,7 @@ export function LicenseOptions({ options, selectedId, onSelect, disabled }: Lice
       <div className="rounded-lg border border-subtle bg-surface-1 p-4">
         <p className="text-body-s text-secondary">{options[0].title}</p>
         <p className="price-text text-primary mt-1">
-          {options[0].currencyCode} {options[0].price}
+          {options[0].currencyCode} {formatPrice(Number(options[0].price))}
         </p>
       </div>
     );

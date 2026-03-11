@@ -13,6 +13,7 @@ import {
 import AddToCartButton from '@/app/components/add-to-cart';
 import FallbackFileSVG from '@/public/file.svg';
 import { formatPrice } from '@/utils/helpers/product-helpers';
+import { truncateWords } from '@/utils/helpers/truncate';
 import type { Product } from '@/lib/schemas';
 import { Button } from '@/ui-components/button';
 import AudioPreviewList from '@/ui-components/audio-preview-list';
@@ -66,8 +67,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </CardTitle>
         </div>
         {product.description && (
-          <CardDescription className="text-body-s line-clamp-2 text-muted">
-            {product.description}
+          <CardDescription className="text-body-s text-muted px-0.5 py-1.5">
+            {truncateWords(product.description, 10)}
           </CardDescription>
         )}
         {product.audio_preview && product.audio_preview.preview_url && (

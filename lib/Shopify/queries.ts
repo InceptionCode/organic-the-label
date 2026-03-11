@@ -161,6 +161,7 @@ export const PRODUCTS_PAGE_QUERY = `
           handle
           title
           createdAt
+          description
           availableForSale
           productType
           tags
