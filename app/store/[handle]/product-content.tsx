@@ -30,10 +30,10 @@ type ProductVariants = {
 export default async function ProductContent({ params }: { params: Promise<ProductHandleParam> }) {
   const { handle } = await params;
   const { product } = await getCachedProductDetails(handle);
-  const previews = parseAudioPreviewUrls(product.metafield?.value);
 
   if (!product) return notFound();
 
+  const previews = parseAudioPreviewUrls(product.metafield?.value);
   const variants = (product as ProductVariants).variants?.edges ?? [];
   const licenseOptions: LicenseOption[] = variants.map((edge) => ({
     id: edge.node.id,
