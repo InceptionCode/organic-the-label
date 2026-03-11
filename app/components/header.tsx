@@ -4,10 +4,11 @@ import { usePathname } from 'next/navigation';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ProfileDropdown } from './profile-dropdown';
 import CartIconButton from './cart-icon-button';
 import { defaultUserState } from '@/lib/store/auth-store';
-import safeParseUser from '@/utils/helpers/safe-parse-uesr';
+import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
 /*
 - Store link
 - Logo home link
@@ -24,7 +25,7 @@ export const Header = () => {
   const pathname = usePathname();
   const isCurrent = (name: string) => pathname === `/${name}`;
 
-  const user = safeParseUser(defaultUserState);
+  const user = useSafeParseUser(defaultUserState);
 
   const navLinks = [
     { name: 'Explore', href: '/', current: isCurrent('') }, // current value will come from props.
@@ -49,9 +50,11 @@ export const Header = () => {
             <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
               <div className="flex shrink-0 items-center">
                 <Link href="/">
-                  <img
+                  <Image
                     alt="Organic Label Company logo"
                     src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
+                    width={56}
+                    height={56}
                     className="h-14 w-auto"
                   />
                 </Link>
@@ -87,7 +90,7 @@ export const Header = () => {
                 <span className="sr-only">Search</span>
                 <MagnifyingGlassIcon aria-hidden="true" className="size-6" />
               </Link>
-              {user && !user.isAnon ? (
+              {user && !user.is_anon ? (
                 <ProfileDropdown />
               ) : (
                 <Link

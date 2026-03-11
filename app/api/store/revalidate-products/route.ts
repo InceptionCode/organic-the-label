@@ -11,8 +11,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
-  const body = await req.json();
-  const { affectedFilters } = body; // optional; for v1, ignore
+  await req.json();
 
   // v1: just nuke the generic "products" cache layer
   revalidateTag(productTable, 'max');

@@ -8,7 +8,7 @@ export type GetProductDetailFetchState = {
   product: Product & {
     handle: string;
     descriptionHtml: string;
-    availableForSale: Boolean;
+    availableForSale: boolean;
     images: Array<Product["image"]>
     metafield: ProductsDetailResponse["product"]["metafield"];
   };
@@ -38,7 +38,7 @@ export const getProductDetailsFetch = async (handle: string): Promise<GetProduct
     });
 
     if (errors?.message || errors?.networkStatusCode || !data) {
-      console.error("Error fetching product details | Shopify Storefront SDK errors:", errors, `Shopify Storefront product query failed with: ${errors.message} and status code: ${errors.networkStatusCode}`);
+      console.error("Error fetching product details | Shopify Storefront SDK errors:", errors, `Shopify Storefront product query failed with: ${errors?.message} and status code: ${errors?.networkStatusCode}`);
       throw new Error(`Failed to fetch products ${errors?.message}`)
     }
 

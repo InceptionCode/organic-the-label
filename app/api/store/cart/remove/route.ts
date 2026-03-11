@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { CART_COOKIE } from "@/lib/store/cart-cookie";
 import { shopifyServerClient } from "@/lib/Shopify/shopify-server-client";
-import { CART_LINES_REMOVE_MUTATION, CartLinesRemove, type CartLinesAddResponse, type CartState } from "@/lib/Shopify/mutations";
+import { CART_LINES_REMOVE_MUTATION, CartLinesRemove, type CartState } from "@/lib/Shopify/mutations";
 
 type RemoveBody = { lineIds: string[] };
 

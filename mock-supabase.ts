@@ -13,14 +13,16 @@ export const mockSupabase = {
   },
   getProducts: async (): Promise<Product[]> => [
     {
-      id: 1,
+      id: "1",
       name: 'Moonlight Beat',
       price: 30,
-      category: ['beat'],
-      audio_url: 'https://cdn.example.com/audio/moonlight.mp3',
-      image_url: 'https://cdn.example.com/img/beat.jpg',
+      category: 'beat',
+      audio_preview: { preview_title: "Moonlight", preview_url: 'https://cdn.example.com/audio/moonlight.mp3' },
+      image: { url: 'https://cdn.example.com/img/beat.jpg' },
       is_exclusive: true,
-      created_at: '2025-01-01'
+      created_at: '2025-01-01',
+      variantId: '1',
+      handle: 'moonlight-beat',
     },
   ],
 }

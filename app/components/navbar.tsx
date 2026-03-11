@@ -7,7 +7,7 @@ import CartIconButton from './cart-icon-button';
 import { MobileNav } from './mobile-nav';
 import { ProfileDropdown } from './profile-dropdown';
 import { defaultUserState } from '@/lib/store/auth-store';
-import safeParseUser from '@/utils/helpers/safe-parse-uesr';
+import safeParseUser from '@/utils/hooks/use-safe-parse-user';
 import { cn } from '@/lib/utils';
 import { navLinks } from '@/lib/constants';
 

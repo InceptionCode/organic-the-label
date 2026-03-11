@@ -21,16 +21,21 @@ type CartStoreState = {
 export type CartStore = CartStoreState;
 
 type CartApiOk<T> = { ok: true } & T;
-type CartApiErr = { ok: false; error?: string; errors?: any };
+
+type CartApiErrorShape = {
+  ok?: boolean;
+  error?: string;
+  errors?: { message?: string }[];
+};
 
 async function jsonFetch<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const res = await fetch(input, init);
-  const data = (await res.json()) as any;
+  const data = (await res.json()) as T & CartApiErrorShape;
 
   if (!res.ok || data?.ok === false) {
     const msg =
       data?.error ||
-      (Array.isArray(data?.errors) ? data.errors.map((e: any) => e?.message).join(", ") : null) ||
+      (Array.isArray(data?.errors) ? data.errors.map((e) => e?.message).join(", ") : null) ||
       "Request failed";
     throw new Error(msg);
   }
@@ -61,8 +66,9 @@ export const createCartStore = () => {
         });
 
         set({ cart: data.cart, isLoading: false });
-      } catch (e: any) {
-        set({ isLoading: false, error: e?.message ?? "Failed to load cart" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Failed to load cart";
+        set({ isLoading: false, error: message });
       }
     },
 
@@ -81,8 +87,9 @@ export const createCartStore = () => {
           isLoading: false,
           isOpen: opts?.openDrawer ?? false
         });
-      } catch (e: any) {
-        set({ isLoading: false, error: e?.message ?? "Add to cart failed" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Add to cart failed";
+        set({ isLoading: false, error: message });
       }
     },
 
@@ -99,8 +106,9 @@ export const createCartStore = () => {
         });
 
         set({ cart: data.cart, isLoading: false });
-      } catch (e: any) {
-        set({ isLoading: false, error: e?.message ?? "Update quantity failed" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Update quantity failed";
+        set({ isLoading: false, error: message });
       }
     },
 
@@ -114,8 +122,9 @@ export const createCartStore = () => {
         });
 
         set({ cart: data.cart, isLoading: false });
-      } catch (e: any) {
-        set({ isLoading: false, error: e?.message ?? "Remove item failed" });
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Remove item failed";
+        set({ isLoading: false, error: message });
       }
     }
   }))

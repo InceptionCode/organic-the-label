@@ -38,7 +38,7 @@ export default function StorePage({
         <StoreFilters />
       </Suspense>
       <Suspense fallback={<LoadingState variant='skeleton' />}>
-        <PersonalizedContent searchParams={searchParams} />
+        <PersonalizedContent />
       </Suspense>
       <Suspense fallback={<StoreSkeleton />}>
         <StoreContent searchParams={searchParams} />
