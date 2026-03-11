@@ -13,3 +13,4 @@ on conflict (user_id, product_gid)
 do update set
   -- keep history stable; only ensure not revoked
   revoked_at = null;
+*/

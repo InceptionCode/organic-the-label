@@ -9,8 +9,6 @@ import { parseMultiValueParam, serializeMultiValueParam } from '@/utils/helpers/
 import { FilterBar } from './filter-bar';
 import { ProductCategories, ProductTags as TagOptions } from '@/lib/schemas';
 
-import { isEqual } from '@/utils/helpers/checks';
-
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc';
 type CategoryFilter = ProductCategories | 'all';
 

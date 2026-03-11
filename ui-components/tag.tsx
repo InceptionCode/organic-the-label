@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {}
+export type TagProps = React.HTMLAttributes<HTMLSpanElement>;
 
 function Tag({ className, ...props }: TagProps) {
   return (

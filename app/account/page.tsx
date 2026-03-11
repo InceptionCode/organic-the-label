@@ -1,16 +1,18 @@
 'use client';
 
-import { useAuthStore } from '../../store/auth-context';
 import { Button } from '@/ui-components';
 import { signOutAction } from '../api/auth/sign-out';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/ui-components/card';
 
 import { ShieldExclamationIcon } from '@heroicons/react/24/outline';
 import isEmpty from 'lodash/isEmpty';
+import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
+import { defaultUserState } from '@/lib/store/auth-store';
+
 // TODO: Finish designing account page
 // NOTE: Provide a way to edit user info (password, email, username, avatar_link) - make sure updates happen on a supabase browser client.
 export default function Account() {
-  const user = useAuthStore((state) => state.user);
+  const user = useSafeParseUser(defaultUserState)
 
   return (
     <div>
