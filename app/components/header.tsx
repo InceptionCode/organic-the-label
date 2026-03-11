@@ -8,7 +8,7 @@ import Image from 'next/image';
 import { ProfileDropdown } from './profile-dropdown';
 import CartIconButton from './cart-icon-button';
 import { defaultUserState } from '@/lib/store/auth-store';
-import useSafeParseUser from '@/utils/helpers/safe-parse-uesr';
+import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
 /*
 - Store link
 - Logo home link

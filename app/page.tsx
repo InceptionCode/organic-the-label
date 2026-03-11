@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui-components';
-import useSafeParseUser from '@/utils/helpers/safe-parse-uesr';
+import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
 import { useStorage } from '@/utils/hooks/use-storage';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
