@@ -11,6 +11,7 @@
     "serve": "pnpm build && pnpm start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "type-check": "tsc --noEmit",
+    "test": "echo \"No tests yet\"",
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql"
   },
   "dependencies": {
