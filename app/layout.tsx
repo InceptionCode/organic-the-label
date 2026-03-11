@@ -68,12 +68,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Suspense
             fallback={
               <>
-                {/* Auth store not ready yet; render a simple shell without route children */}
-                <Navbar />
+                {/* Auth store not ready yet; render a simple shell without any auth-dependent components */}
                 <main className="flex-1 px-4 md:px-12 py-8 max-w-7xl mx-auto w-full">
                   <LoadingState />
                 </main>
-                <Footer />
               </>
             }
           >
