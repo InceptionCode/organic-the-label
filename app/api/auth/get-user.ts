@@ -23,7 +23,8 @@ export const getUserAction = async (): Promise<GetUserActionState> => {
     return {
       user: {
         username: user.user_metadata.username || user.email!,
-        isAnon: user.is_anonymous!,
+        is_anon: user.is_anonymous!,
+        is_member: user.user_metadata.is_member!,
         created_at: user.created_at,
         confirmed_at: user.confirmed_at ?? '',
         updated_at: user.updated_at,
