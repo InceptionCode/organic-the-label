@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers';
-import { RawSearchParams, getNormalizedSearchParams } from '@/lib/product/normalize-search-params';
 import { getUserAction } from '@/app/api/auth/get-user';
 import { checkMembershipCtaVisibility } from '@/lib/membership-cta/visibility';
 import MembershipContent from './membership-content';
@@ -13,11 +12,7 @@ function shouldShowMembershipCta(user: { is_anon: boolean; is_member?: boolean }
   return isAnon || !isMember;
 }
 
-export default async function PersonalizedContent({
-  searchParams,
-}: {
-  searchParams: RawSearchParams | Promise<RawSearchParams>;
-}) {
+export default async function PersonalizedContent() {
   const [userResult, cookieStore] = await Promise.all([
     getUserAction(),
     cookies(),
@@ -26,8 +21,6 @@ export default async function PersonalizedContent({
   const user = userResult.user as User;
   const ctaVisible = checkMembershipCtaVisibility(cookieStore);
   const shouldShowCta = shouldShowMembershipCta(user) && ctaVisible;
-
-  const normalizedSearchParams = getNormalizedSearchParams(await searchParams);
 
   return (
     <>
