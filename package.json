@@ -1,6 +1,6 @@
 {
   "name": "organic-the-label",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development next dev --turbopack",
@@ -11,6 +11,7 @@
     "serve": "pnpm build && pnpm start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "type-check": "tsc --noEmit",
+    "test": "echo \"No tests yet\"",
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql"
   },
   "dependencies": {
