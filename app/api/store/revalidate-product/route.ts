@@ -18,8 +18,20 @@ function verifyShopifyHmac(rawBody: string, hmacHeader: string | null, secret: s
   }
 }
 
+export async function GET() {
+  return NextResponse.json({ ok: true, method: "GET" });
+}
+
+export async function HEAD() {
+  return new Response(null, { status: 200 });
+}
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200 });
+}
+
+
 export async function POST(req: Request) {
-  // Extra gate (optional but recommended)
   const url = new URL(req.url);
   const gate = url.searchParams.get("secret");
 
@@ -42,7 +54,6 @@ export async function POST(req: Request) {
 
   const payload = JSON.parse(rawBody) as { handle?: string; id?: number };
 
-  // Invalidate by handle (best)
   if (payload.handle) {
     revalidateTag(`product:handle:${payload.handle}`, "max");
   }
