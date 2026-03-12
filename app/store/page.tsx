@@ -34,7 +34,6 @@ export default function StorePage({
 }) {
   return (
     <StoreLayout>
-      <div className="bold text-danger text-center text-8xl">store-build-marker-2026-03-12-1</div>
       <Suspense fallback={<LoadingState />}>
         <StoreFilters />
       </Suspense>
