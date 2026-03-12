@@ -26,7 +26,6 @@ export const parseStoreData = (products: ProductsPageResponse["products"]["edges
       const error = new Error(`Error parsing product: ${product.title}`, { cause: parseError });
 
       console.error('Error parsing product:', product, parseError);
-      console.log('>>>>> category', product.tags)
 
       throw error;
     }
