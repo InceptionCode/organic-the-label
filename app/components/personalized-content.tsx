@@ -24,8 +24,6 @@ export default async function PersonalizedContent() {
 
   return (
     <>
-      <div className="bold text-danger text-center text-8xl">store-build-marker-2026-03-12-1</div>
-
       <MembershipContent shouldShowCta={shouldShowCta} />
       <Recommendations
         user={user ?? undefined}
