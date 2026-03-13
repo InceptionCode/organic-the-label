@@ -29,6 +29,15 @@ export const AuthStoreProvider = ({ initialUser, children }: AuthProviderProps) 
   });
 
   useEffect(() => {
+    fetch("/api/auth/init", {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => {
+      // Silent fail for MVP
+    });
+  }, []);
+
+  useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {

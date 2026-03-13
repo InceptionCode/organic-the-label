@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { signinAction } from '@/app/api/auth/login';
 import { SigninFormSchema } from '@/lib/schemas';
 import {
@@ -17,6 +17,7 @@ import { parseWithZod } from '@conform-to/zod/v4';
 import Link from 'next/link';
 import Image from 'next/image';
 import { resetPasswordRequest } from '@/app/api/auth/reset-password-request';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
 
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Include magic link and Google sign in
@@ -46,6 +47,19 @@ export default function Login() {
   );
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (signinState?.ok) {
+      trackActivity({
+        eventType: "user_signed_in",
+        eventProperties: {
+          email: loginFields.email.value,
+          date: new Date().toISOString(),
+          source: "login_page" // for analytics purposes later - track the trigger of the login event
+        },
+      });
+    }
+  }, [loginFields.email.value, signinState]);
 
   return (
     <main>

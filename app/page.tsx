@@ -17,6 +17,7 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
 
 export default function Home() {
   const router = useRouter();
@@ -38,6 +39,12 @@ export default function Home() {
   };
 
   const [open, setOpen] = useState<boolean>();
+
+  useEffect(() => {
+    trackActivity({
+      eventType: "homepage_viewed",
+    });
+  }, []);
 
   useEffect(() => {
     const showSignUpCTA = initCTAFlag === 'true';

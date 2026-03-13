@@ -2,6 +2,7 @@
 
 import type { ProductPreviewUrls } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
+import { trackActivity } from "@/utils/helpers/activity/tracking";
 
 export default function AudioPreviewList({
   previews,
@@ -12,6 +13,16 @@ export default function AudioPreviewList({
 }) {
   if (!previews.length) return null;
   const gridCols = previews.length > 1 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1';
+
+  const handlePlay = (e: React.SyntheticEvent<HTMLAudioElement>) => {
+    trackActivity({
+      eventType: "audio_preview_played",
+      eventProperties: {
+        audio_preview_name: e.currentTarget.title,
+        source: "audio_preview_list" // for analytics purposes later - track the trigger of the audio preview played event
+      },
+    });
+  };
 
   return (
     <div className="space-y-4 w-full">
@@ -28,7 +39,7 @@ export default function AudioPreviewList({
             <div className="font-bold opacity-75 text-lg">
               Preview {preview.preview_title}
             </div>
-            <audio controls preload="none" className="w-full">
+            <audio controls preload="none" title={`${preview.preview_title} preview`} className="w-full" onPlay={handlePlay}>
               <source src={preview.preview_url} type="audio/mpeg" />
               Your browser does not support the audio element.
             </audio>
