@@ -8,6 +8,7 @@ import { ProductPurchaseClient } from './product-purchase-client';
 import { RelatedProducts } from './related-products';
 import { parseAudioPreviewUrls } from '@/utils/helpers/parse-preview-urls';
 import AudioPreviewList from '@/ui-components/audio-preview-list';
+import ProductViewTracker from './product-view-tracker';
 
 export type ProductHandleParam = { handle: string };
 
@@ -50,6 +51,7 @@ export default async function ProductContent({ params }: { params: Promise<Produ
 
   return (
     <main className="content-container py-8 md:py-12">
+      <ProductViewTracker handle={handle} tags={product.tags ?? []} category={product.category} />
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
         <ProductGallery
           title={product.name}

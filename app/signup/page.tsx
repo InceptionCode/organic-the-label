@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { signupAction } from '@/app/api/auth/login';
 import { SignupFormSchema } from '@/lib/schemas';
 import { TextField, Button } from '@/ui-components';
@@ -9,6 +9,7 @@ import { parseWithZod } from '@conform-to/zod/v4';
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Provide magic link and google sign up
 export default function SignUp() {
@@ -21,8 +22,21 @@ export default function SignUp() {
     },
   });
   const disabled = signupForm.valid === false;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, action, pending] = useActionState(signupAction, undefined);
+
+  const [signupState, action, pending] = useActionState(signupAction, undefined);
+
+  useEffect(() => {
+    if (signupState?.ok) {
+      trackActivity({
+        eventType: "user_signed_up",
+        eventProperties: {
+          email: signupFields.email.value,
+          date: new Date().toISOString(),
+          source: "signup_page" // for analytics purposes later - track the trigger of the signup event
+        },
+      });
+    }
+  }, [signupFields.email.value, signupState]);
 
   return (
     <main>
