@@ -1,10 +1,10 @@
-import { createSupabasePrivateClient } from "./base";
+import { createSupabaseAdminClient } from "../../utils/supabase/base";
 
 export async function ensureAnonymousVisitor(anon_token: string): Promise<{
   id: string;
   anon_token: string;
 }> {
-  const supabase = await createSupabasePrivateClient();
+  const supabase = await createSupabaseAdminClient();
 
   console.log("created client for ensuring anonToken", anon_token);
 

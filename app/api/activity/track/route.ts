@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { ANON_COOKIE_NAME } from "@/lib/constants";
 import { ensureAnonymousVisitor } from "@/lib/supabase/ensure-anon-visitor";
 import { activityEventSchema } from "@/lib/supabase/anon-event.schema";
-import { createSupabasePrivateClient } from "@/lib/supabase/base";
+import { createSupabaseServerClient } from "@/utils/supabase/server-base";
+import { insertActivityEvent } from "@/lib/supabase/insert-activity-event";
 
 export async function POST(req: Request) {
   try {
@@ -19,6 +20,28 @@ export async function POST(req: Request) {
       );
     }
 
+    const supabaseServerClient = await createSupabaseServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseServerClient.auth.getUser();
+
+    if (authError) {
+      console.error("activity auth lookup failed", authError);
+    }
+
+    if (user) {
+      await insertActivityEvent({
+        eventType: parsed.data.eventType,
+        eventProperties: parsed.data.eventProperties ?? {},
+        userId: user.id,
+      });
+
+      console.info("activity event inserted for authenticated user", user.id);
+
+      return NextResponse.json({ ok: true, actor: "user" });
+    }
+
     const cookieStore = await cookies();
     const anonToken = cookieStore.get(ANON_COOKIE_NAME)?.value;
 
@@ -31,22 +54,18 @@ export async function POST(req: Request) {
     }
 
     const visitor = await ensureAnonymousVisitor(anonToken);
-    const supabase = await createSupabasePrivateClient();
-
-    const { error } = await supabase.from("activity_events").insert({
-      anonymous_visitor_id: visitor.id,
-      event_type: parsed.data.eventType,
-      event_properties: parsed.data.eventProperties,
+    await insertActivityEvent({
+      eventType: parsed.data.eventType,
+      eventProperties: parsed.data.eventProperties ?? {},
+      anonymousVisitorId: visitor.id,
     });
 
-    if (error) {
-      console.error("failed to insert activity event", error);
-      throw new Error(error.message);
-    }
+    console.info("activity event inserted for anonymous visitor", visitor.id);
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, actor: "anonymous visitor" });
   } catch (error) {
     console.error("activity track failed", error);
+
     return NextResponse.json(
       { ok: false, error: "Failed to track activity" },
       { status: 500 }

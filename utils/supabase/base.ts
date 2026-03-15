@@ -18,7 +18,7 @@ export const createSupabasePublicClient = (fallbackUrl?: string) =>
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-export const createSupabasePrivateClient = (fallbackUrl?: string) =>
+export const createSupabaseAdminClient = (fallbackUrl?: string) =>
   createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL! || fallbackUrl!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!

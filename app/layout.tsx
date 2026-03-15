@@ -6,12 +6,14 @@ import CartDrawer from '@/app/components/cart-drawer';
 import { ThemeProvider } from '@/ui-components/theme-provider';
 
 import { inter, geistSans, geistMono } from '@/lib/font-tags';
-import InitAuthStore from '@/store/init-auth-store';
+
 import { Suspense } from 'react';
 
 import '@/app/styles/globals.css';
 import { CartStoreProvider } from '@/store/cart-context';
 import { LoadingState } from '@/ui-components';
+import { AuthStoreProvider } from '@/store/auth-context';
+
 /* Global State
 - Because layout runs for every route. The store providers will wrap the main content here.
 - We grab all necessary state from the correct server actions/requests and pass it down to the client providers.
@@ -75,14 +77,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </>
             }
           >
-            <InitAuthStore>
+            <AuthStoreProvider>
               <CartStoreProvider>
                 <HtmlDocumentBody>
                   {/* Render dynamic cart widget (store) */}
                   {children}
                 </HtmlDocumentBody>
               </CartStoreProvider>
-            </InitAuthStore>
+            </AuthStoreProvider>
           </Suspense>
         </ThemeProvider>
       </body>

@@ -124,6 +124,7 @@ export type UserPreferences = z.infer<typeof UserPreferencesSchema>
 
 export const UserSchema = z.object({
   username: z.string(),
+  email: z.string(),
   created_at: z.string(),
   confirmed_at: z.string(),
   is_anon: z.boolean(),

@@ -1,93 +1,64 @@
 'use client';
 
-import dayjs from 'dayjs';
-import { useContext, createContext, useEffect, useState } from 'react';
-import { useStore } from 'zustand';
-import { type AuthStore, createAuthStore } from '@/lib/store';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client-base';
-import { User } from '@supabase/supabase-js';
-import { defaultUserState } from '@/lib/store/auth-store';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { createSupabaseBrowserClient } from '@/utils/supabase/client-base';
 
-export type AuthStoreApi = ReturnType<typeof createAuthStore>;
+import type { User } from '@/lib/schemas';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export const AuthStoreContext = createContext<AuthStoreApi | null>(null);
+type AuthContextValue = { user: User | null };
 
-export type AuthProviderProps = React.PropsWithChildren<{ initialUser?: AuthStore['user'] }>;
-export const AuthStoreProvider = ({ initialUser, children }: AuthProviderProps) => {
-  const supabase = createSupabaseBrowserClient();
-  const [store] = useState(() => createAuthStore({ user: initialUser }));
+const AuthContext = createContext<AuthContextValue | null>(null);
 
-  const setUpdatedUser = (user?: User) => ({
-    username: user?.user_metadata.username || user?.email,
-    is_anon: user?.is_anonymous ?? false,
-    created_at: user?.created_at ?? '',
-    confirmed_at: user?.confirmed_at ?? '',
-    updated_at: user?.updated_at,
-    last_signed_in: user?.last_sign_in_at,
-    avatar_url: user?.user_metadata.avatar_url,
-    is_member: user?.user_metadata.is_member,
-  });
+let authInitRequested = false;
+
+const mapSupabaseUser = (u?: SupabaseUser | null): User | null => {
+  if (!u) return null;
+
+  return {
+    username: u.user_metadata?.username ?? u.email ?? '',
+    is_anon: u.is_anonymous ?? false,
+    email: u.email ?? '',
+    created_at: u.created_at ?? '',
+    confirmed_at: u.confirmed_at ?? '',
+    updated_at: u.updated_at,
+    last_signed_in: u.last_sign_in_at,
+    avatar_url: u.user_metadata?.avatar_url,
+    is_member: u.user_metadata?.is_member ?? false,
+  };
+};
+
+export function AuthStoreProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [supabase] = useState(() => createSupabaseBrowserClient());
 
   useEffect(() => {
-    fetch("/api/auth/init", {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {
-      // Silent fail for MVP
-    });
+    if (!authInitRequested) {
+      authInitRequested = true;
+      fetch('/api/auth/init', { method: 'POST', credentials: 'include' }).catch(() => { });
+    }
   }, []);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      switch (event) {
-        case 'SIGNED_IN':
-          const currentSignInAt = store.getState().user?.last_signed_in;
-          const isNewSignin = !dayjs(currentSignInAt).isSame(dayjs(session?.user.last_sign_in_at));
-
-          if (isNewSignin) {
-            // update user
-            store.setState((state) => ({
-              ...state,
-              user: setUpdatedUser(session?.user),
-            }));
-          }
-          break;
-        case 'SIGNED_OUT':
-          store.setState((state) => ({
-            ...state,
-            user: defaultUserState,
-          }));
-
-          break;
-        case 'TOKEN_REFRESHED':
-        case 'USER_UPDATED':
-          store.setState((state) => ({
-            ...state,
-            user: setUpdatedUser(session?.user),
-          }));
-
-          break;
-        default:
-          break;
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(mapSupabaseUser(session?.user ?? null));
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase, store]);
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
-  return <AuthStoreContext.Provider value={store}>{children}</AuthStoreContext.Provider>;
-};
+  return (
+    <AuthContext.Provider value={{ user }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-export const useAuthStore = <T,>(selector: (store: AuthStore) => T): T => {
-  const authStoreContext = useContext(AuthStoreContext);
-
-  if (!authStoreContext) {
-    throw new Error(`useAuthStore must be used within AuthStoreContext`);
+export function useUser() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error('useUser must be used within AuthStoreProvider');
   }
 
-  return useStore(authStoreContext, selector);
-};
+  return ctx.user;
+}

@@ -1,6 +1,6 @@
 'use server'
 
-import { createSupabaseServerClient } from "@/lib/supabase/server-base"
+import { createSupabaseServerClient } from "@/utils/supabase/server-base"
 import type { AuthStoreState } from "@/lib/store"
 import { AuthError } from "@supabase/supabase-js"
 
@@ -23,6 +23,7 @@ export const getUserAction = async (): Promise<GetUserActionState> => {
     return {
       user: {
         username: user.user_metadata.username || user.email!,
+        email: user.email!,
         is_anon: user.is_anonymous!,
         is_member: user.user_metadata.is_member!,
         created_at: user.created_at,

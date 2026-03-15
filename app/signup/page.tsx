@@ -13,20 +13,23 @@ import { trackActivity } from '@/utils/helpers/activity/tracking';
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Provide magic link and google sign up
 export default function SignUp() {
+  const [signupState, action, pending] = useActionState(signupAction, undefined);
+
   const [signupForm, signupFields] = useForm({
     id: 'signup',
+    lastResult: signupState,
     onValidate({ formData }) {
       return parseWithZod(formData, {
         schema: SignupFormSchema,
       });
     },
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
   });
   const disabled = signupForm.valid === false;
 
-  const [signupState, action, pending] = useActionState(signupAction, undefined);
-
   useEffect(() => {
-    if (signupState?.ok) {
+    if (signupState && typeof signupState === 'object' && pending === false) {
       trackActivity({
         eventType: "user_signed_up",
         eventProperties: {
@@ -36,35 +39,41 @@ export default function SignUp() {
         },
       });
     }
-  }, [signupFields.email.value, signupState]);
+  }, [signupFields.email.value, pending, signupState]);
 
   return (
     <main>
-      <form id={signupForm.id} action={action} className="flex flex-col gap-2.5">
-        <TextField name={signupFields.username.name} label="Username" type="text" />
+      <form id={signupForm.id} action={action} onSubmit={signupForm.onSubmit} noValidate className="flex flex-col gap-2.5">
+        {signupForm.errors ? (
+          <div className="text-destructive text-sm" role="alert">
+            {Array.isArray(signupForm.errors) ? signupForm.errors.join(', ') : String(signupForm.errors)}
+          </div>
+        ) : null}
+        <TextField name={signupFields.username.name} label="Username" type="text" defaultValue={signupFields.username.initialValue} />
         <div>
-          <p>{signupFields.username.errors}</p>
+          <p>{signupFields.username.errors ? (Array.isArray(signupFields.username.errors) ? signupFields.username.errors.join(', ') : String(signupFields.username.errors)) : null}</p>
           <br />
           <em>Periods, underscores, and hyphens are allowed</em>
         </div>
-        <TextField name={signupFields.email.name} label="Email" type="email" />
-        <p>{signupFields.email.errors}</p>
-        <TextField name={signupFields.password.name} label="Password" type="password" />
+        <TextField name={signupFields.email.name} label="Email" type="email" defaultValue={signupFields.email.initialValue} />
+        <p>{signupFields.email.errors ? (Array.isArray(signupFields.email.errors) ? signupFields.email.errors.join(', ') : String(signupFields.email.errors)) : null}</p>
+        <TextField name={signupFields.password.name} label="Password" type="password" defaultValue={signupFields.password.initialValue} />
 
-        <p>{signupFields.password.errors}</p>
+        <p>{signupFields.password.errors ? (Array.isArray(signupFields.password.errors) ? signupFields.password.errors.join(', ') : String(signupFields.password.errors)) : null}</p>
         <TextField
           name={signupFields.confirmPassword.name}
           label="Confirm Password"
           type="password"
+          defaultValue={signupFields.confirmPassword.initialValue}
         />
-        <p>{signupFields.confirmPassword.errors}</p>
+        <p>{signupFields.confirmPassword.errors ? (Array.isArray(signupFields.confirmPassword.errors) ? signupFields.confirmPassword.errors.join(', ') : String(signupFields.confirmPassword.errors)) : null}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
           <Button disabled={disabled || pending} type="submit" className="gap-y-4 sm:w-[20%]">
-            Sign In
+            Sign Up
           </Button>
           <Button disabled={pending} type="submit" variant="outline" className="gap-y-4 sm:w-[25%]">
             <Image src="/google.svg" alt="Google logo" width={20} height={20} priority />
-            Sign in with Google
+            Sign up with Google
           </Button>
           <p className="text-sm">
             Or sign in with <a className=""> magic link</a>
