@@ -20,6 +20,8 @@ import { resetPasswordRequest } from '@/app/api/auth/reset-password-request';
 
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Include magic link and Google sign in
+
+/* Auth flow is incomplete. Due to a major bug in production, the auth flow is not working as expected and must be completely rewritten. */
 export default function Login() {
   const [loginForm, loginFields] = useForm({
     id: 'login',
@@ -55,11 +57,11 @@ export default function Login() {
         <TextField name={loginFields.password.name} label="Password" type="password" />
         <p>{loginFields.password.errors}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
-          <Button disabled={disabled || signinPending} type="submit" className="gap-y-4 sm:w-[20%]">
+          <Button disabled type="submit" className="gap-y-4 sm:w-[20%]">
             Sign In
           </Button>
           <Button
-            disabled={signinPending}
+            disabled
             type="submit"
             variant="outline"
             className="gap-y-4 sm:w-[25%]"
@@ -95,7 +97,7 @@ export default function Login() {
             <TextField name={resetPassFields.email.name} label="Email" type="email" invert />
             <p className="dark:invert">{resetPassFields.email.errors}</p>
             <Button
-              disabled={resetPending}
+              disabled
               type="submit"
               className="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs sm:ml-3 sm:w-auto hover:cursor-pointer"
               onClick={() => setOpenDialog(false)}
