@@ -11,6 +11,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Provide magic link and google sign up
+
+/* Auth flow is incomplete. Due to a major bug in production, the auth flow is not working as expected and must be completely rewritten. */
+
 export default function SignUp() {
   const [signupForm, signupFields] = useForm({
     id: 'signup',
@@ -45,10 +48,10 @@ export default function SignUp() {
         />
         <p>{signupFields.confirmPassword.errors}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
-          <Button disabled={disabled || pending} type="submit" className="gap-y-4 sm:w-[20%]">
+          <Button disabled type="submit" className="gap-y-4 sm:w-[20%]">
             Sign In
           </Button>
-          <Button disabled={pending} type="submit" variant="outline" className="gap-y-4 sm:w-[25%]">
+          <Button disabled type="submit" variant="outline" className="gap-y-4 sm:w-[25%]">
             <Image src="/google.svg" alt="Google logo" width={20} height={20} priority />
             Sign in with Google
           </Button>

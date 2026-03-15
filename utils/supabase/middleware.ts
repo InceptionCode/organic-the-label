@@ -42,28 +42,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
-    try {
-      const { error } = await supabase.auth.signInAnonymously()
-
-      if (error) {
-        console.error(error)
-        return NextResponse.json({
-          ok: false,
-          message: 'Failed to authenticate user',
-          error
-        }, { status: 401 })
-      }
-
-    } catch (e) {
-      console.error(e)
-      return NextResponse.json({
-        ok: false,
-        message: 'Failed to authenticate user',
-        error: e
-      }, { status: 401 })
-    }
-  }
   // NOTE: Revisit redirect and authorization logic when membership becomes a thing.
   if (privateRoutes.includes(request.nextUrl.pathname) && user?.is_anonymous) {
     // no user, potentially respond by redirecting the user to the login page
