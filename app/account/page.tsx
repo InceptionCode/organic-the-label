@@ -1,18 +1,21 @@
 'use client';
 
 import { Button } from '@/ui-components';
-import { signOutAction } from '../api/auth/sign-out';
+
 import { Card, CardDescription, CardHeader, CardTitle } from '@/ui-components/card';
 
 import { ShieldExclamationIcon } from '@heroicons/react/24/outline';
 import isEmpty from 'lodash/isEmpty';
 import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
 import { defaultUserState } from '@/lib/store/auth-store';
+import useSignOut from '@/utils/hooks/use-sign-out';
+
 
 // TODO: Finish designing account page
 // NOTE: Provide a way to edit user info (password, email, username, avatar_link) - make sure updates happen on a supabase browser client.
 export default function Account() {
   const user = useSafeParseUser(defaultUserState)
+  const { signOutHandler } = useSignOut();
 
   return (
     <div>
@@ -29,7 +32,7 @@ export default function Account() {
       )}
       Account page for {user?.username}: - change username - change email - change password - view
       subscription - view and track purchases
-      <Button onClick={signOutAction}>Sign Out</Button>
+      <Button onClick={signOutHandler}>Sign Out</Button>
     </div>
   );
 }

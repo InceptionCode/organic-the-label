@@ -1,6 +1,5 @@
 'use client';
 
-import { defaultUserState } from '@/lib/store/auth-store';
 import {
   Button,
   Dialog,
@@ -18,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { defaultUserState } from '@/lib/store/auth-store';
 
 export default function Home() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function Home() {
   });
 
   const onConfirm = () => {
-    router.push('/login');
+    router.push('/signup');
     setStorage('session', 'showSignUpCTA', 'false');
   };
 

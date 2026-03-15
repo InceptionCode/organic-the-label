@@ -1,43 +1,34 @@
 'use client'
 
 import { SigninFormSchema, type SigninForm } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
+import { createSupabaseBrowserClient } from "@/utils/supabase/client-base"
 import { parseWithZod } from "@conform-to/zod/v4";
 import { parseSubmission } from "@conform-to/react/future";
-import { AuthError } from "@supabase/supabase-js"
 
-export type ResetPasswordRequest = {
-  error?: AuthError | unknown | null;
-} | void
-
-export const resetPasswordRequest = async (_: unknown, formData: FormData): Promise<ResetPasswordRequest> => {
+export const resetPasswordRequest = async (
+  _: unknown,
+  formData: FormData
+): Promise<object | undefined> => {
   const supabase = createSupabaseBrowserClient()
-
-  const { status, reply } = parseWithZod(formData, { schema: SigninFormSchema.pick({ email: true }) })
+  const submission = parseWithZod(formData, { schema: SigninFormSchema.pick({ email: true }) })
   const { payload } = parseSubmission(formData)
 
-  if (status === 'error') {
+  if (submission.status === 'error') {
     console.error('Submission failed: replying...')
-
-    return {
-      error: { message: 'Form submission error', error: reply() }
-    }
+    return submission.reply()
   }
 
   const { email } = payload as SigninForm
 
-
   if (!email) {
-    const error = Error('Must provide a valid email')
-
-    console.log(error)
-    return { error }
+    console.error('Error:Must provide a valid email')
+    return submission.reply({ formErrors: ['Must provide a valid email'] })
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email)
 
   if (error) {
     console.error(error)
-    return { error }
+    return submission.reply({ formErrors: [error.message] })
   }
 }

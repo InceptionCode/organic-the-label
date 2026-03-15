@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
@@ -18,38 +17,46 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { resetPasswordRequest } from '@/app/api/auth/reset-password-request';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { redirect } from 'next/navigation';
 
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
 // NOTE: Include magic link and Google sign in
 export default function Login() {
-  const [loginForm, loginFields] = useForm({
-    id: 'login',
-    onValidate({ formData }) {
-      return parseWithZod(formData, {
-        schema: SigninFormSchema,
-      });
-    },
-  });
-  const [resetPassForm, resetPassFields] = useForm({
-    id: 'reset',
-    onValidate({ formData }) {
-      return parseWithZod(formData, {
-        schema: SigninFormSchema.pick({ email: true }),
-      });
-    },
-  });
-
-  const disabled = loginForm.valid === false;
   const [signinState, signinSubmitAction, signinPending] = useActionState(signinAction, undefined);
   const [resetState, resetSubmitAction, resetPending] = useActionState(
     resetPasswordRequest,
     undefined,
   );
 
+  const [loginForm, loginFields] = useForm({
+    id: 'login',
+    lastResult: signinState,
+    onValidate({ formData }) {
+      return parseWithZod(formData, {
+        schema: SigninFormSchema,
+      });
+    },
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
+  });
+  const [resetPassForm, resetPassFields] = useForm({
+    id: 'reset',
+    lastResult: resetState,
+    onValidate({ formData }) {
+      return parseWithZod(formData, {
+        schema: SigninFormSchema.pick({ email: true }),
+      });
+    },
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
+  });
+
+  const disabled = loginForm.valid === false;
+
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   useEffect(() => {
-    if (signinState?.ok) {
+    if (signinState && typeof signinState === 'object' && 'ok' in signinState && signinState.ok) {
       trackActivity({
         eventType: "user_signed_in",
         eventProperties: {
@@ -58,16 +65,28 @@ export default function Login() {
           source: "login_page" // for analytics purposes later - track the trigger of the login event
         },
       });
+
+      fetch('/api/auth/bootstrap', {
+        method: 'POST',
+        credentials: 'include',
+      }).then(res => res.json()).then(data => {
+        if (data.ok) redirect('/explore');
+      });
     }
   }, [loginFields.email.value, signinState]);
 
   return (
     <main>
-      <form id={loginForm.id} action={signinSubmitAction} className="flex flex-col gap-2.5">
-        <TextField name={loginFields.email.name} label="Email" type="email" />
-        <p>{loginFields.email.errors}</p>
-        <TextField name={loginFields.password.name} label="Password" type="password" />
-        <p>{loginFields.password.errors}</p>
+      <form id={loginForm.id} action={signinSubmitAction} onSubmit={loginForm.onSubmit} noValidate className="flex flex-col gap-2.5">
+        {loginForm.errors ? (
+          <div className="text-destructive text-sm" role="alert">
+            {Array.isArray(loginForm.errors) ? loginForm.errors.join(', ') : String(loginForm.errors)}
+          </div>
+        ) : null}
+        <TextField name={loginFields.email.name} label="Email" type="email" defaultValue={typeof loginFields.email.initialValue === 'string' ? loginFields.email.initialValue : undefined} />
+        <p>{loginFields.email.errors ? (Array.isArray(loginFields.email.errors) ? loginFields.email.errors.join(', ') : String(loginFields.email.errors)) : null}</p>
+        <TextField name={loginFields.password.name} label="Password" type="password" defaultValue={typeof loginFields.password.initialValue === 'string' ? loginFields.password.initialValue : undefined} />
+        <p>{loginFields.password.errors ? (Array.isArray(loginFields.password.errors) ? loginFields.password.errors.join(', ') : String(loginFields.password.errors)) : null}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
           <Button disabled={disabled || signinPending} type="submit" className="gap-y-4 sm:w-[20%]">
             Sign In
@@ -105,9 +124,14 @@ export default function Login() {
           <DialogHeader>
             <DialogTitle>Enter email</DialogTitle>
           </DialogHeader>
-          <form id={resetPassForm.id} className="flex flex-col gap-2" action={resetSubmitAction}>
-            <TextField name={resetPassFields.email.name} label="Email" type="email" invert />
-            <p className="dark:invert">{resetPassFields.email.errors}</p>
+          <form id={resetPassForm.id} action={resetSubmitAction} onSubmit={resetPassForm.onSubmit} noValidate className="flex flex-col gap-2">
+            {resetPassForm.errors ? (
+              <div className="text-destructive text-sm dark:invert" role="alert">
+                {Array.isArray(resetPassForm.errors) ? resetPassForm.errors.join(', ') : String(resetPassForm.errors)}
+              </div>
+            ) : null}
+            <TextField name={resetPassFields.email.name} label="Email" type="email" invert defaultValue={typeof resetPassFields.email.initialValue === 'string' ? resetPassFields.email.initialValue : undefined} />
+            <p className="dark:invert">{resetPassFields.email.errors ? (Array.isArray(resetPassFields.email.errors) ? resetPassFields.email.errors.join(', ') : String(resetPassFields.email.errors)) : null}</p>
             <Button
               disabled={resetPending}
               type="submit"

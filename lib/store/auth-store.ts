@@ -13,7 +13,8 @@ export const defaultUserState: User = {
     created_at: '',
     confirmed_at: '',
     is_anon: true,
-    is_member: false
+    is_member: false,
+    email: ''
 }
 
 export const createAuthStore = (

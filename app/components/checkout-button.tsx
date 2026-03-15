@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { Button } from '@/ui-components/button';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { useEffect } from 'react';
 
 type CheckoutButtonProps = {
   checkoutUrl: string | null;
@@ -11,6 +13,14 @@ type CheckoutButtonProps = {
 
 export function CheckoutButton({ checkoutUrl, disabled, className = '' }: CheckoutButtonProps) {
   const canCheckout = Boolean(checkoutUrl) && !disabled;
+
+  useEffect(() => {
+    if (canCheckout && checkoutUrl) {
+      trackActivity({
+        eventType: "checkout_clicked",
+      });
+    }
+  }, [canCheckout, checkoutUrl]);
 
   if (canCheckout && checkoutUrl) {
     return (
