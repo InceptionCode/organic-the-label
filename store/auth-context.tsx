@@ -1,16 +1,16 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useStore } from 'zustand';
 import { createSupabaseBrowserClient } from '@/utils/supabase/client-base';
-
 import type { User } from '@/lib/schemas';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { AuthStore } from '@/lib/store';
+import { createAuthStore } from '@/lib/store';
 
-type AuthContextValue = { user: User | null };
+type AuthStoreApi = ReturnType<typeof createAuthStore>;
 
-const AuthContext = createContext<AuthContextValue | null>(null);
-
-let authInitRequested = false;
+const AuthStoreContext = createContext<AuthStoreApi | null>(null);
 
 const mapSupabaseUser = (u?: SupabaseUser | null): User | null => {
   if (!u) return null;
@@ -29,36 +29,41 @@ const mapSupabaseUser = (u?: SupabaseUser | null): User | null => {
 };
 
 export function AuthStoreProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
   const [supabase] = useState(() => createSupabaseBrowserClient());
+  const [store] = useState(() => createAuthStore({ user: null }));
 
   useEffect(() => {
-    if (!authInitRequested) {
-      authInitRequested = true;
-      fetch('/api/auth/init', { method: 'POST', credentials: 'include' }).catch(() => { });
-    }
-  }, []);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(mapSupabaseUser(session?.user ?? null));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextUser = mapSupabaseUser(session?.user ?? null);
+      store.setState((state) => ({
+        ...state,
+        user: nextUser,
+      }));
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, [supabase, store]);
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthStoreContext.Provider value={store}>
       {children}
-    </AuthContext.Provider>
+    </AuthStoreContext.Provider>
   );
 }
 
-export function useUser() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error('useUser must be used within AuthStoreProvider');
+export const useAuthStore = <T,>(selector: (store: AuthStore) => T): T => {
+  const authStoreContext = useContext(AuthStoreContext);
+
+  if (!authStoreContext) {
+    throw new Error('useAuthStore must be used within AuthStoreProvider');
   }
 
-  return ctx.user;
+  return useStore(authStoreContext, selector);
+};
+
+export function useUser() {
+  return useAuthStore((state) => state.user ?? null);
 }
+

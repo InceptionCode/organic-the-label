@@ -2,22 +2,26 @@
 import { useCartStore } from '@/store/cart-context';
 import CartIcon from '@/ui-components/icons/cart-icon';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { useTrackingReady } from '@/store/activity-hydrator';
 
 export default function CartIconButton() {
   const toggle = useCartStore((s) => s.toggle);
   const count = useCartStore((s) => s.cart?.totalQuantity ?? 0);
   const cartItems = useCartStore((s) => s.cart?.lines?.edges?.map((line) => line.node.merchandise.product.handle) ?? null);
+  const isTrackingReady = useTrackingReady();
 
   const handleClick = () => {
     toggle();
-    trackActivity({
-      eventType: "cart_opened",
-      eventProperties: {
-        cart_count: count,
-        cart_items: cartItems,
-        source: "cart_icon_button" // for analytics purposes later - track the trigger of the cart opened event
-      },
-    });
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "cart_opened",
+        eventProperties: {
+          cart_count: count,
+          cart_items: cartItems,
+          source: "cart_icon_button" // for analytics purposes later - track the trigger of the cart opened event
+        },
+      });
+    }
   };
   return (
     <button

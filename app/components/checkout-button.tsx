@@ -5,6 +5,8 @@ import { Button } from '@/ui-components/button';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
 import { useEffect } from 'react';
 
+import { useTrackingReady } from '@/store/activity-hydrator';
+
 type CheckoutButtonProps = {
   checkoutUrl: string | null;
   disabled?: boolean;
@@ -12,15 +14,16 @@ type CheckoutButtonProps = {
 };
 
 export function CheckoutButton({ checkoutUrl, disabled, className = '' }: CheckoutButtonProps) {
+  const isTrackingReady = useTrackingReady();
   const canCheckout = Boolean(checkoutUrl) && !disabled;
 
   useEffect(() => {
-    if (canCheckout && checkoutUrl) {
+    if (canCheckout && isTrackingReady) {
       trackActivity({
         eventType: "checkout_clicked",
       });
     }
-  }, [canCheckout, checkoutUrl]);
+  }, [canCheckout, isTrackingReady]);
 
   if (canCheckout && checkoutUrl) {
     return (

@@ -5,7 +5,7 @@ export const activityEventSchema = z.object({
   eventType: z.enum([
     "product_viewed",
     "audio_preview_played",
-    "collection_viewed",
+    "store_viewed",
     "cart_opened",
     "homepage_viewed",
     "user_signed_up",

@@ -3,7 +3,7 @@
 import { SigninFormSchema, SignupFormSchema, type SigninForm, type SignupForm } from "@/lib/schemas"
 import { parseWithZod } from '@conform-to/zod/v4';
 import { parseSubmission } from '@conform-to/react/future';
-import { redirect } from "next/navigation"
+
 import { AuthError, EmailOtpType } from "@supabase/supabase-js"
 
 import { createSupabaseBrowserClient } from "@/utils/supabase/client-base"
@@ -78,13 +78,14 @@ export const signupAction = async (
 
         console.info('parsed user form data')
 
-        const { email, password, username } = payload as SignupForm
+        const { email, password, username, captchaToken } = payload as SignupForm
 
         const { error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                data: { username, type: 'email' as EmailOtpType }
+                data: { username, type: 'email' as EmailOtpType },
+                captchaToken
             }
         })
 
@@ -102,5 +103,9 @@ export const signupAction = async (
         }
     }
 
-    redirect('/account')
+    return {
+        ok: true,
+        error: null
+    } as unknown as LoginActionState
+
 }

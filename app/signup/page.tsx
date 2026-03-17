@@ -1,12 +1,13 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
-import { signupAction } from '@/app/api/auth/login';
+import { useActionState, useEffect, useState } from 'react';
+import { signupAction } from '@/app/api/auth/auth-actions';
 import { SignupFormSchema } from '@/lib/schemas';
 import { TextField, Button } from '@/ui-components';
+import HCaptchaField from '@/app/components/auth/hcaptcha-field';
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod/v4';
-
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
@@ -14,6 +15,7 @@ import { trackActivity } from '@/utils/helpers/activity/tracking';
 // NOTE: Provide magic link and google sign up
 export default function SignUp() {
   const [signupState, action, pending] = useActionState(signupAction, undefined);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [signupForm, signupFields] = useForm({
     id: 'signup',
@@ -26,18 +28,26 @@ export default function SignUp() {
     shouldValidate: 'onBlur',
     shouldRevalidate: 'onInput',
   });
-  const disabled = signupForm.valid === false;
+
+  const disabled = signupForm.valid === false || !captchaToken || pending;
 
   useEffect(() => {
-    if (signupState && typeof signupState === 'object' && pending === false) {
+    const didSucceed =
+      signupState &&
+      typeof signupState === 'object'
+      && 'ok' in signupState && signupState.ok === true
+
+    if (didSucceed) {
       trackActivity({
-        eventType: "user_signed_up",
+        eventType: 'user_signed_up',
         eventProperties: {
           email: signupFields.email.value,
           date: new Date().toISOString(),
-          source: "signup_page" // for analytics purposes later - track the trigger of the signup event
+          source: 'signup_page', // for analytics purposes later - track the trigger of the signup event
         },
       });
+
+      redirect('/account')
     }
   }, [signupFields.email.value, pending, signupState]);
 
@@ -67,6 +77,10 @@ export default function SignUp() {
           defaultValue={signupFields.confirmPassword.initialValue}
         />
         <p>{signupFields.confirmPassword.errors ? (Array.isArray(signupFields.confirmPassword.errors) ? signupFields.confirmPassword.errors.join(', ') : String(signupFields.confirmPassword.errors)) : null}</p>
+        <input type="hidden" name="captchaToken" value={captchaToken ?? ''} />
+        <div className="pt-2">
+          <HCaptchaField onTokenChange={setCaptchaToken} />
+        </div>
         <div className="flex flex-col items-center gap-4 pt-2">
           <Button disabled={disabled || pending} type="submit" className="gap-y-4 sm:w-[20%]">
             Sign Up

@@ -13,6 +13,7 @@ import '@/app/styles/globals.css';
 import { CartStoreProvider } from '@/store/cart-context';
 import { LoadingState } from '@/ui-components';
 import { AuthStoreProvider } from '@/store/auth-context';
+import ActivityHydrator from '@/store/activity-hydrator';
 
 /* Global State
 - Because layout runs for every route. The store providers will wrap the main content here.
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <CartStoreProvider>
                 <HtmlDocumentBody>
                   {/* Render dynamic cart widget (store) */}
+                  <ActivityHydrator />
                   {children}
                 </HtmlDocumentBody>
               </CartStoreProvider>

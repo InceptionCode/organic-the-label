@@ -3,11 +3,13 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button, Input } from '@/ui-components';
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { parseMultiValueParam, serializeMultiValueParam } from '@/utils/helpers/filter-query';
 import { FilterBar } from './filter-bar';
 import { ProductCategories, ProductTags as TagOptions } from '@/lib/schemas';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { useTrackingReady } from '@/store/activity-hydrator';
 
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc';
 type CategoryFilter = ProductCategories | 'all';
@@ -69,6 +71,15 @@ export default function StoreFilters() {
 
   const [exclusiveOnly, setExclusiveOnly] = useState(searchParams.get('exclusive') === 'true');
 
+  const isTrackingReady = useTrackingReady();
+
+  useEffect(() => {
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "store_viewed",
+      });
+    }
+  }, [isTrackingReady]);
   // Update URL params when filters change
   const updateFilters = (updates: {
     search?: string;

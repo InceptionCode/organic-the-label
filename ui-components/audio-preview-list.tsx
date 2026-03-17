@@ -2,6 +2,7 @@
 
 import type { ProductPreviewUrls } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
+import { useTrackingReady } from "@/store/activity-hydrator";
 import { trackActivity } from "@/utils/helpers/activity/tracking";
 
 export default function AudioPreviewList({
@@ -11,17 +12,22 @@ export default function AudioPreviewList({
   previews: ProductPreviewUrls;
   title?: string;
 }) {
+  const isTrackingReady = useTrackingReady();
+
   if (!previews.length) return null;
+
   const gridCols = previews.length > 1 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1';
 
   const handlePlay = (e: React.SyntheticEvent<HTMLAudioElement>) => {
-    trackActivity({
-      eventType: "audio_preview_played",
-      eventProperties: {
-        audio_preview_name: e.currentTarget.title,
-        source: "audio_preview_list" // for analytics purposes later - track the trigger of the audio preview played event
-      },
-    });
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "audio_preview_played",
+        eventProperties: {
+          audio_preview_name: e.currentTarget.title,
+          source: "audio_preview_list" // for analytics purposes later - track the trigger of the audio preview played event
+        },
+      });
+    }
   };
 
   return (
