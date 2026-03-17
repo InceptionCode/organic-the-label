@@ -31,7 +31,7 @@ export const createSupabaseServerClient = async (fallbackUrl?: string, options?:
   // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL! || fallbackUrl!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       global: {
         fetch: fetchSupabase(options?.cacheOptions || {}),

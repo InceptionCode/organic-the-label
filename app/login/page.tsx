@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { signinAction } from '@/app/api/auth/login';
+import { signinAction } from '@/app/api/auth/auth-actions';
 import { SigninFormSchema } from '@/lib/schemas';
 import {
   TextField,

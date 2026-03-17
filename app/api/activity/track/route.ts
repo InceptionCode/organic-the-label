@@ -1,11 +1,12 @@
 // app/api/activity/track/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ANON_COOKIE_NAME } from "@/lib/constants";
+import { ANON_COOKIE_MAX_AGE, ANON_COOKIE_NAME } from "@/lib/constants";
 import { ensureAnonymousVisitor } from "@/lib/supabase/ensure-anon-visitor";
-import { activityEventSchema } from "@/lib/supabase/anon-event.schema";
+import { activityEventSchema } from "@/lib/supabase/event.schema";
 import { createSupabaseServerClient } from "@/utils/supabase/server-base";
 import { insertActivityEvent } from "@/lib/supabase/insert-activity-event";
+import { generateAnonToken } from "@/lib/supabase/anon-token";
 
 export async function POST(req: Request) {
   try {
@@ -43,14 +44,12 @@ export async function POST(req: Request) {
     }
 
     const cookieStore = await cookies();
-    const anonToken = cookieStore.get(ANON_COOKIE_NAME)?.value;
+    let anonToken = cookieStore.get(ANON_COOKIE_NAME)?.value;
+    let shouldSetCookie = false;
 
     if (!anonToken) {
-      console.error("missing anonymous token");
-      return NextResponse.json(
-        { ok: false, error: "Missing anonymous token" },
-        { status: 400 }
-      );
+      anonToken = generateAnonToken();
+      shouldSetCookie = true;
     }
 
     const visitor = await ensureAnonymousVisitor(anonToken);
@@ -62,7 +61,22 @@ export async function POST(req: Request) {
 
     console.info("activity event inserted for anonymous visitor", visitor.id);
 
-    return NextResponse.json({ ok: true, actor: "anonymous visitor" });
+    const response = NextResponse.json({ ok: true, actor: "anonymous visitor" });
+
+    if (shouldSetCookie) {
+      response.cookies.set({
+        name: ANON_COOKIE_NAME,
+        value: anonToken,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: ANON_COOKIE_MAX_AGE,
+      });
+    }
+
+    return response;
+
   } catch (error) {
     console.error("activity track failed", error);
 

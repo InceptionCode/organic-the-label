@@ -1,6 +1,6 @@
-import { ActivityEventType } from "@/lib/supabase/anon-event.schema";
+import { ActivityEventType } from "@/lib/supabase/event.schema";
 
-type TrackActivityInput = {
+export type TrackActivityInput = {
   eventType: ActivityEventType;
   eventProperties?: Record<string, unknown>;
 };

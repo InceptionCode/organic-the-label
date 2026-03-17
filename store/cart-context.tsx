@@ -8,8 +8,8 @@ export type CartStoreApi = ReturnType<typeof createCartStore>;
 
 export const CartStoreContext = createContext<CartStoreApi | null>(null);
 
-export type CartStoreProvider = React.PropsWithChildren<{ initialCart?: CartStore['cart'] }>;
-export const CartStoreProvider = ({ children }: CartStoreProvider) => {
+export type CartStoreProviderProps = React.PropsWithChildren<{ initialCart?: CartStore['cart'] }>;
+export const CartStoreProvider = ({ children }: CartStoreProviderProps) => {
   const [store] = useState(() => createCartStore());
 
   useEffect(() => {
