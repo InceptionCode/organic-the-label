@@ -1,34 +1,39 @@
-'use client'
-
-import { SigninFormSchema, type SigninForm } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/utils/supabase/client-base"
+import { ResetPasswordSchema, type ResetPassword } from "@/lib/schemas";
+import { createSupabaseServerClient } from "@/utils/supabase/server-base"
 import { parseWithZod } from "@conform-to/zod/v4";
 import { parseSubmission } from "@conform-to/react/future";
+
+export type ResetPasswordActionState = { ok: true; error: null };
 
 export const resetPasswordRequest = async (
   _: unknown,
   formData: FormData
-): Promise<object | undefined> => {
-  const supabase = createSupabaseBrowserClient()
-  const submission = parseWithZod(formData, { schema: SigninFormSchema.pick({ email: true }) })
-  const { payload } = parseSubmission(formData)
+) => {
+  const submission = parseWithZod(formData, { schema: ResetPasswordSchema });
+  const { payload } = parseSubmission(formData);
 
   if (submission.status === 'error') {
-    console.error('Submission failed: replying...')
-    return submission.reply()
+    console.error('Invalid reset password form submission', submission.error?.issues);
+    return submission.reply();
   }
 
-  const { email } = payload as SigninForm
+  const supabase = await createSupabaseServerClient();
+  const { email, captchaToken } = payload as ResetPassword;
 
-  if (!email) {
-    console.error('Error:Must provide a valid email')
-    return submission.reply({ formErrors: ['Must provide a valid email'] })
-  }
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      captchaToken,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+    });
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email)
+    if (error) {
+      console.error('Supabase resetPasswordForEmail failed', error);
+      return submission.reply({ formErrors: [error.message] });
+    }
 
-  if (error) {
-    console.error(error)
-    return submission.reply({ formErrors: [error.message] })
+    return { ok: true, error: null };
+  } catch (e) {
+    console.error('Unexpected reset password error', e);
+    return submission.reply({ formErrors: ['Something went wrong. Please try again.'] });
   }
 }
