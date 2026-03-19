@@ -9,17 +9,18 @@ import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod/v4';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
-// TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
-// NOTE: Provide magic link and google sign up
+// TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state.
+// Later version will include the option to sign up via the Google provider.
+
 export default function SignUp() {
   const [signupState, action, pending] = useActionState(signupAction, undefined);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const lastResult = signupState && typeof signupState === 'object' && !('ok' in signupState) ? signupState : null;
 
   const [signupForm, signupFields] = useForm({
     id: 'signup',
-    lastResult: signupState,
+    lastResult,
     onValidate({ formData }) {
       return parseWithZod(formData, {
         schema: SignupFormSchema,
@@ -85,13 +86,6 @@ export default function SignUp() {
           <Button disabled={disabled || pending} type="submit" className="gap-y-4 sm:w-[20%]">
             Sign Up
           </Button>
-          <Button disabled={pending} type="submit" variant="outline" className="gap-y-4 sm:w-[25%]">
-            <Image src="/google.svg" alt="Google logo" width={20} height={20} priority />
-            Sign up with Google
-          </Button>
-          <p className="text-sm">
-            Or sign in with <a className=""> magic link</a>
-          </p>
           <div>
             <p>
               Have an account? <Link href="/login">Sign in here...</Link>

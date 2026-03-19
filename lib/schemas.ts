@@ -206,7 +206,7 @@ export type SignupForm = z.infer<typeof SignupFormSchema>
 const mergeSignUpForm = SignupFormSchema.pick({ confirmPassword: true })
 export const UpdateUserFormSchema = SigninFormSchema.extend({
   username: z.string().optional(),
-  email: z.string().optional(),
+  email: z.email().optional(),
   avatar_url: z.string().optional()
 }).extend(mergeSignUpForm.shape)
   .superRefine(({ confirmPassword, password }, ctx) => {
@@ -221,6 +221,19 @@ export const UpdateUserFormSchema = SigninFormSchema.extend({
 
 export type UpdateUserForm = z.infer<typeof UpdateUserFormSchema>
 
+export const MagicLinkSchema = z.object({
+  email: z.email('Please enter a valid email').trim(),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+});
+
+export type MagicLink = z.infer<typeof MagicLinkSchema>
+
+export const ResetPasswordSchema = z.object({
+  email: z.email('Please enter a valid email').trim(),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+});
+
+export type ResetPassword = z.infer<typeof ResetPasswordSchema>
 // --------------------
 // SHOPIFY
 // --------------------
@@ -231,6 +244,22 @@ export const STORE_SORTKEY_TITLE = "TITLE"
 export const STORE_SORTKEY_CREATED_AT = "CREATED_AT"
 export const STORE_SORTORDER_TRUE = true
 export const STORE_SORTORDER_FALSE = false
+
+export type ShopifyOrderPaidPayload = {
+  id: number;
+  email?: string | null;
+  customer?: {
+    id?: number | null;
+    email?: string | null;
+  } | null;
+  line_items?: Array<{
+    product_id?: number | null;
+    variant_id?: number | null;
+    title?: string;
+    quantity?: number;
+  }>;
+};
+
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------
