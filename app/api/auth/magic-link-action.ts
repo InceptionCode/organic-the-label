@@ -1,7 +1,7 @@
 'use server';
 
 import { MagicLinkSchema, type MagicLink } from '@/lib/schemas';
-import { createSupabaseServerClient } from '@/utils/supabase/server-base';
+import { createSupabaseAdminClient } from '@/utils/supabase/base';
 import { parseWithZod } from '@conform-to/zod/v4';
 import { parseSubmission } from '@conform-to/react/future';
 
@@ -16,7 +16,7 @@ export async function magicLinkAction(_prevState: unknown, formData: FormData) {
     return submission.reply();
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseAdminClient();
   const { email, captchaToken } = payload as MagicLink;
 
   try {
