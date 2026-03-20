@@ -68,7 +68,6 @@ export default function StoreFilters() {
   );
 
   const [exclusiveOnly, setExclusiveOnly] = useState(searchParams.get('exclusive') === 'true');
-
   // Update URL params when filters change
   const updateFilters = (updates: {
     search?: string;

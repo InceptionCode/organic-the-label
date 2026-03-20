@@ -1,6 +1,5 @@
 'use client';
 
-import { defaultUserState } from '@/lib/store/auth-store';
 import {
   Button,
   Dialog,
@@ -17,10 +16,14 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { defaultUserState } from '@/lib/store/auth-store';
+import { useTrackingReady } from '@/store/activity-hydrator';
 
 export default function Home() {
   const router = useRouter();
   const user = useSafeParseUser(defaultUserState);
+  const isTrackingReady = useTrackingReady();
 
   const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
     initMethod: 'get',
@@ -28,7 +31,7 @@ export default function Home() {
   });
 
   const onConfirm = () => {
-    router.push('/login');
+    router.push('/signup');
     setStorage('session', 'showSignUpCTA', 'false');
   };
 
@@ -38,6 +41,14 @@ export default function Home() {
   };
 
   const [open, setOpen] = useState<boolean>();
+
+  useEffect(() => {
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "homepage_viewed",
+      });
+    }
+  }, [isTrackingReady]);
 
   useEffect(() => {
     const showSignUpCTA = initCTAFlag === 'true';

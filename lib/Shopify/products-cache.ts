@@ -1,4 +1,3 @@
-// lib/shopify/products.cached.ts
 import { unstable_cache } from "next/cache";
 import { getProductsFetch } from '@/app/api/store/get-products';
 

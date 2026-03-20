@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // NOTE: Set Roles and Policies for tables and general access on supabase.
 // NOTE: Add recaptcha confirm for NEW anon users. Confirmed anon users should almost never see recaptcha again.
 
-export const privateRoutes: string[] = ['/account', '/account/reset-password']
+export const privateRoutes: string[] = ['/account/reset-password']
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -13,7 +13,7 @@ export async function updateSession(request: NextRequest) {
   // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         getAll() {

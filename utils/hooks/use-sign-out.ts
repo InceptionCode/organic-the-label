@@ -1,7 +1,16 @@
-import { signOutAction } from "@/app/api/auth/sign-out";
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { signOutAction } from '@/app/api/auth/auth-actions';
 
 export default function useSignOut() {
+  const router = useRouter();
+
   // NOTE: In the future once CSS is hooked up add error handling logic to present toast message or whatever
-  const signOutHandler = async () => signOutAction()
-  return { signOutHandler }
+  const signOutHandler = async () => {
+    const { ok } = await signOutAction();
+    if (ok) router.push('/');
+  };
+
+  return { signOutHandler };
 }
