@@ -124,6 +124,7 @@ export type UserPreferences = z.infer<typeof UserPreferencesSchema>
 
 export const UserSchema = z.object({
   username: z.string(),
+  email: z.string(),
   created_at: z.string(),
   confirmed_at: z.string(),
   is_anon: z.boolean(),
@@ -188,7 +189,8 @@ export const SignupFormSchema = z.object({
   confirmPassword: z.string()
     .min(8, 'Password must be at least 8 characters long.')
     .trim()
-    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number.")
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number."),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA')
 }).superRefine(({ confirmPassword, password }, ctx) => {
   if (confirmPassword !== password) {
     ctx.addIssue({
@@ -204,7 +206,7 @@ export type SignupForm = z.infer<typeof SignupFormSchema>
 const mergeSignUpForm = SignupFormSchema.pick({ confirmPassword: true })
 export const UpdateUserFormSchema = SigninFormSchema.extend({
   username: z.string().optional(),
-  email: z.string().optional(),
+  email: z.email().optional(),
   avatar_url: z.string().optional()
 }).extend(mergeSignUpForm.shape)
   .superRefine(({ confirmPassword, password }, ctx) => {
@@ -219,6 +221,19 @@ export const UpdateUserFormSchema = SigninFormSchema.extend({
 
 export type UpdateUserForm = z.infer<typeof UpdateUserFormSchema>
 
+export const MagicLinkSchema = z.object({
+  email: z.email('Please enter a valid email').trim(),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+});
+
+export type MagicLink = z.infer<typeof MagicLinkSchema>
+
+export const ResetPasswordSchema = z.object({
+  email: z.email('Please enter a valid email').trim(),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+});
+
+export type ResetPassword = z.infer<typeof ResetPasswordSchema>
 // --------------------
 // SHOPIFY
 // --------------------
@@ -229,6 +244,22 @@ export const STORE_SORTKEY_TITLE = "TITLE"
 export const STORE_SORTKEY_CREATED_AT = "CREATED_AT"
 export const STORE_SORTORDER_TRUE = true
 export const STORE_SORTORDER_FALSE = false
+
+export type ShopifyOrderPaidPayload = {
+  id: number;
+  email?: string | null;
+  customer?: {
+    id?: number | null;
+    email?: string | null;
+  } | null;
+  line_items?: Array<{
+    product_id?: number | null;
+    variant_id?: number | null;
+    title?: string;
+    quantity?: number;
+  }>;
+};
+
 // --------------------
 // SUPABASE TABLES (SQL)
 // --------------------

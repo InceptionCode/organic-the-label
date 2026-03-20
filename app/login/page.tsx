@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { useActionState, useState } from 'react';
-import { signinAction } from '@/app/api/auth/login';
+import { useActionState, useEffect, useState } from 'react';
+import { signinAction } from '@/app/api/auth/auth-actions';
 import { SigninFormSchema } from '@/lib/schemas';
 import {
   TextField,
@@ -15,63 +14,79 @@ import {
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod/v4';
 import Link from 'next/link';
-import Image from 'next/image';
-import { resetPasswordRequest } from '@/app/api/auth/reset-password-request';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { redirect } from 'next/navigation';
+import MagicLink from '@/app/components/auth/magic-link';
+import ResetPassword from '@/app/components/auth/reset-password';
 
-// TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state
-// NOTE: Include magic link and Google sign in
-
-/* Auth flow is incomplete. Due to a major bug in production, the auth flow is not working as expected and must be completely rewritten. */
+// TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state.
+// Later version will include the option to sign in via the Google provider.
 export default function Login() {
+  const [signinState, signinSubmitAction, signinPending] = useActionState(signinAction, undefined);
+  const lastResult = signinState && typeof signinState === 'object' && !('ok' in signinState) ? signinState : null;
+
   const [loginForm, loginFields] = useForm({
     id: 'login',
+    lastResult,
     onValidate({ formData }) {
       return parseWithZod(formData, {
         schema: SigninFormSchema,
       });
     },
-  });
-  const [resetPassForm, resetPassFields] = useForm({
-    id: 'reset',
-    onValidate({ formData }) {
-      return parseWithZod(formData, {
-        schema: SigninFormSchema.pick({ email: true }),
-      });
-    },
+    shouldValidate: 'onBlur',
+    shouldRevalidate: 'onInput',
   });
 
   const disabled = loginForm.valid === false;
-  const [signinState, signinSubmitAction, signinPending] = useActionState(signinAction, undefined);
-  const [resetState, resetSubmitAction, resetPending] = useActionState(
-    resetPasswordRequest,
-    undefined,
-  );
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+  const [openMagicLinkDialog, setOpenMagicLinkDialog] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (signinState && typeof signinState === 'object' && 'ok' in signinState && signinState.ok) {
+      trackActivity({
+        eventType: "user_signed_in",
+        eventProperties: {
+          email: loginFields.email.value,
+          date: new Date().toISOString(),
+          source: "login_page" // for analytics purposes later - track the trigger of the login event
+        },
+      });
+
+      fetch('/api/auth/bootstrap', {
+        method: 'POST',
+        credentials: 'include',
+      }).then(res => res.json()).then(data => {
+        if (data.ok) redirect('/explore');
+      });
+    }
+  }, [loginFields.email.value, signinState]);
 
   return (
     <main>
-      <form id={loginForm.id} action={signinSubmitAction} className="flex flex-col gap-2.5">
-        <TextField name={loginFields.email.name} label="Email" type="email" />
-        <p>{loginFields.email.errors}</p>
-        <TextField name={loginFields.password.name} label="Password" type="password" />
-        <p>{loginFields.password.errors}</p>
+      <form id={loginForm.id} action={signinSubmitAction} onSubmit={loginForm.onSubmit} noValidate className="flex flex-col gap-2.5">
+        {loginForm.errors ? (
+          <div className="text-destructive text-sm" role="alert">
+            {Array.isArray(loginForm.errors) ? loginForm.errors.join(', ') : String(loginForm.errors)}
+          </div>
+        ) : null}
+        <TextField name={loginFields.email.name} label="Email" type="email" defaultValue={typeof loginFields.email.initialValue === 'string' ? loginFields.email.initialValue : undefined} />
+        <p>{loginFields.email.errors ? (Array.isArray(loginFields.email.errors) ? loginFields.email.errors.join(', ') : String(loginFields.email.errors)) : null}</p>
+        <TextField name={loginFields.password.name} label="Password" type="password" defaultValue={typeof loginFields.password.initialValue === 'string' ? loginFields.password.initialValue : undefined} />
+        <p>{loginFields.password.errors ? (Array.isArray(loginFields.password.errors) ? loginFields.password.errors.join(', ') : String(loginFields.password.errors)) : null}</p>
         <div className="flex flex-col items-center gap-4 pt-2">
-          <Button disabled type="submit" className="gap-y-4 sm:w-[20%]">
+          <Button disabled={disabled || signinPending} type="submit" className="gap-y-4 sm:w-[20%]">
             Sign In
           </Button>
           <Button
-            disabled
-            type="submit"
-            variant="outline"
-            className="gap-y-4 sm:w-[25%]"
+            type="button"
+            variant="link"
+            size="sm"
+            className="text-sm"
+            onClick={() => setOpenMagicLinkDialog(true)}
           >
-            <Image src="/google.svg" alt="Google logo" width={20} height={20} priority />
-            Sign in with Google
+            Or sign in with magic link
           </Button>
-          <p className="text-sm">
-            Or sign in with <a className=""> magic link</a>
-          </p>
           <div>
             <p>
               Don&apos;t have an account? <Link href="/signup">Sign up here...</Link>
@@ -91,20 +106,18 @@ export default function Login() {
       <Dialog open={openDialog}>
         <DialogContent className="sm:max-w-lg" hasClose>
           <DialogHeader>
-            <DialogTitle>Enter email</DialogTitle>
+            <DialogTitle>Reset Password</DialogTitle>
           </DialogHeader>
-          <form id={resetPassForm.id} className="flex flex-col gap-2" action={resetSubmitAction}>
-            <TextField name={resetPassFields.email.name} label="Email" type="email" invert />
-            <p className="dark:invert">{resetPassFields.email.errors}</p>
-            <Button
-              disabled
-              type="submit"
-              className="inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-xs sm:ml-3 sm:w-auto hover:cursor-pointer"
-              onClick={() => setOpenDialog(false)}
-            >
-              Reset Password
-            </Button>
-          </form>
+          <ResetPassword />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openMagicLinkDialog} onOpenChange={setOpenMagicLinkDialog}>
+        <DialogContent className="sm:max-w-lg" hasClose>
+          <DialogHeader>
+            <DialogTitle>Sign in with magic link</DialogTitle>
+          </DialogHeader>
+          <MagicLink />
         </DialogContent>
       </Dialog>
     </main>

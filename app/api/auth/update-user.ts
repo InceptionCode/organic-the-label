@@ -1,7 +1,7 @@
 'use client'
 
 import { UpdateUserForm, UpdateUserFormSchema } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
+import { createSupabaseBrowserClient } from "@/utils/supabase/client-base"
 import { AuthError } from "@supabase/supabase-js"
 import { parseWithZod } from '@conform-to/zod/v4';
 import { parseSubmission } from '@conform-to/react/future';

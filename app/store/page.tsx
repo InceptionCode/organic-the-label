@@ -2,6 +2,7 @@ import StoreContent from '@/app/store/components/store-content';
 import StoreFilters from '@/app/store/components/store-filters';
 import StoreLayout from '@/app/store/store-layout';
 import PersonalizedContent from '@/app/components/personalized-content';
+import StoreTracker from '@/app/store/components/store-tracker';
 
 import { Suspense } from 'react';
 import { LoadingState } from '@/ui-components';
@@ -34,6 +35,7 @@ export default function StorePage({
 }) {
   return (
     <StoreLayout>
+      <StoreTracker />
       <Suspense fallback={<LoadingState />}>
         <StoreFilters />
       </Suspense>
