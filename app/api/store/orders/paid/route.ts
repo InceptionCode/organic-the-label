@@ -5,6 +5,19 @@ import { createSupabaseAdminClient } from "@/utils/supabase/base";
 import type { ShopifyOrderPaidPayload } from "@/lib/schemas";
 import { toOrderGid, toCustomerGid, toProductGid } from "@/utils/helpers/shopify/to-shopify-gid";
 
+export async function GET() {
+  return NextResponse.json({ ok: true, method: "GET" });
+}
+
+export async function HEAD() {
+  return new Response(null, { status: 200 });
+}
+
+export async function OPTIONS() {
+  return new Response(null, { status: 200 });
+}
+
+
 export async function POST(req: Request) {
   try {
     const url = new URL(req.url);
