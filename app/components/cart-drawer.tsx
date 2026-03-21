@@ -5,6 +5,9 @@ import { Drawer } from '@/ui-components';
 import { PriceDisplay } from './price-display';
 import { CartItemRow } from './cart-item-row';
 import { CheckoutButton } from './checkout-button';
+import { useTrackingReady } from '@/store/activity-hydrator';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { useEffect } from 'react';
 
 export default function CartDrawer() {
   const cart = useCartStore((s) => s.cart);
@@ -14,10 +17,26 @@ export default function CartDrawer() {
   const removeLine = useCartStore((s) => s.removeLine);
   const isLoading = useCartStore((s) => s.isLoading);
 
-  const lines = cart?.lines.edges.map((e) => e.node) ?? [];
+  const lines = cart?.lines?.edges?.map((line) => line.node) ?? [];
   const totalItems = cart?.totalQuantity ?? 0;
-  const totalAmount = cart?.cost.totalAmount;
+  const totalAmount = cart?.cost?.totalAmount;
   const isEmpty = lines.length === 0;
+
+  const cartItems = lines.map((line) => line.merchandise.product.handle) ?? null;
+  const isTrackingReady = useTrackingReady();
+
+  useEffect(() => {
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "cart_opened",
+        eventProperties: {
+          cart_count: totalItems,
+          cart_items: cartItems,
+          source: "cart_icon_button" // for analytics purposes later - track the trigger of the cart opened event
+        },
+      });
+    }
+  }, [isTrackingReady, totalItems, cartItems]);
 
   return (
     <Drawer isOpen={isOpen} onClose={close} placement="right">
