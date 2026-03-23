@@ -56,7 +56,7 @@ export default function SignUp() {
     <main>
       <form id={signupForm.id} action={action} onSubmit={signupForm.onSubmit} noValidate className="flex flex-col gap-2.5">
         {signupForm.errors ? (
-          <div className="text-destructive text-sm" role="alert">
+          <div className="text-danger text-sm" role="alert">
             {Array.isArray(signupForm.errors) ? signupForm.errors.join(', ') : String(signupForm.errors)}
           </div>
         ) : null}

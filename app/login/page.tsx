@@ -66,7 +66,7 @@ export default function Login() {
     <main>
       <form id={loginForm.id} action={signinSubmitAction} onSubmit={loginForm.onSubmit} noValidate className="flex flex-col gap-2.5">
         {loginForm.errors ? (
-          <div className="text-destructive text-sm" role="alert">
+          <div className="text-danger text-sm" role="alert">
             {Array.isArray(loginForm.errors) ? loginForm.errors.join(', ') : String(loginForm.errors)}
           </div>
         ) : null}
