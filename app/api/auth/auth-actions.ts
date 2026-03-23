@@ -85,6 +85,7 @@ export const signupAction = async (
             password,
             options: {
                 data: { username, type: 'email' as EmailOtpType },
+                emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL,
                 captchaToken
             }
         })
