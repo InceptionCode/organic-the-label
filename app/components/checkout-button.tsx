@@ -33,7 +33,7 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
         size="lg"
         className={`w-full justify-center ${className}`}
       >
-        <Link href={checkoutUrl}>Checkout</Link>
+        <Link href={checkoutUrl} target='_blank' rel='noopener noreferrer'>Checkout</Link>
       </Button>
     );
   }
