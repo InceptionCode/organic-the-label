@@ -7,8 +7,6 @@ import {
 import { createSupabaseServerClient } from '@/utils/supabase/server-base'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { parseSubmission } from '@conform-to/react/future'
-import { RECOVERY_COOKIE_NAME } from '@/lib/constants'
-import { cookies } from 'next/headers'
 
 export type ResetUserPasswordActionState = {
   ok: true
@@ -20,7 +18,6 @@ export async function resetUserPasswordAction(
   formData: FormData
 ): Promise<ResetUserPasswordActionState | object> {
   const supabase = await createSupabaseServerClient()
-  const cookieStore = await cookies()
 
   try {
     const submission = parseWithZod(formData, { schema: ResetPasswordConfirmSchema })
@@ -44,9 +41,6 @@ export async function resetUserPasswordAction(
       console.error('resetUserPasswordAction: Supabase updateUser failed', error)
       return submission.reply({ formErrors: [error.message] })
     }
-
-    cookieStore.delete(RECOVERY_COOKIE_NAME)
-    console.info('resetUserPasswordAction: recovery token cookie deleted')
 
     return {
       ok: true,

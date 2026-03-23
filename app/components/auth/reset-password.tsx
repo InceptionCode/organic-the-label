@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         </p>
 
         {state && typeof state === 'object' && 'ok' in state && state.ok === true ? (
-          <p>Check your email for reset instructions.</p>
+          <p className="text-black">Check your email for reset instructions.</p>
         ) : null}
 
         <Button type="submit" disabled={disabled || pending || !captchaToken}>

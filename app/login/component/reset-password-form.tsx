@@ -9,13 +9,7 @@ import { resetUserPasswordAction } from '@/app/api/auth/reset-user-password'
 import HCaptchaField from '@/app/components/auth/hcaptcha-field'
 import { TextField, Button } from '@/ui-components'
 
-type ResetPasswordFormProps = {
-  recoveryAllowed: boolean
-}
-
-export default function ResetPasswordForm({
-  recoveryAllowed,
-}: ResetPasswordFormProps) {
+export default function ResetPasswordForm() {
   const router = useRouter()
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
@@ -36,12 +30,6 @@ export default function ResetPasswordForm({
   const disabled = form.valid === false || !captchaToken || pending
 
   useEffect(() => {
-    if (!recoveryAllowed) {
-      router.replace('/login')
-    }
-  }, [recoveryAllowed, router])
-
-  useEffect(() => {
     if (
       state &&
       typeof state === 'object' &&
@@ -51,10 +39,6 @@ export default function ResetPasswordForm({
       router.replace('/login')
     }
   }, [router, state])
-
-  if (!recoveryAllowed) {
-    return null
-  }
 
   return (
     <main>
