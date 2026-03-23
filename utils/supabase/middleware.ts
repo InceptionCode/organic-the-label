@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 // NOTE: Set Roles and Policies for tables and general access on supabase.
 // NOTE: Add recaptcha confirm for NEW anon users. Confirmed anon users should almost never see recaptcha again.
 
-export const privateRoutes: string[] = ['/account/reset-password']
+export const privateRoutes: string[] = []
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ANON_COOKIE_NAME, ANON_COOKIE_MAX_AGE } from "@/lib/constants";
-import { generateAnonToken } from "@/lib/supabase/anon-token";
+import { generateToken } from "@/utils/helpers/token";
 import { ensureAnonymousVisitor } from "@/lib/supabase/ensure-anon-visitor";
 
 export async function POST() {
@@ -9,7 +9,7 @@ export async function POST() {
   let anonToken = cookieStore.get(ANON_COOKIE_NAME)?.value;
 
   if (!anonToken) {
-    anonToken = generateAnonToken();
+    anonToken = generateToken();
   }
 
   const visitor = await ensureAnonymousVisitor(anonToken);
