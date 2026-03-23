@@ -36,7 +36,7 @@ export default function MagicLinkPage({ linkText }: { linkText?: string }) {
         className="flex flex-col gap-4"
       >
         {magicForm.errors ? (
-          <div className="text-destructive text-sm" role="alert">
+          <div className="text-danger text-sm" role="alert">
             {Array.isArray(magicForm.errors) ? magicForm.errors.join(', ') : String(magicForm.errors)}
           </div>
         ) : null}

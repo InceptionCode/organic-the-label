@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
         className="flex flex-col gap-4"
       >
         {resetForm.errors ? (
-          <div className="text-destructive text-sm" role="alert">
+          <div className="text-danger text-sm" role="alert">
             {Array.isArray(resetForm.errors) ? resetForm.errors.join(', ') : String(resetForm.errors)}
           </div>
         ) : null}
@@ -47,8 +47,9 @@ export default function ResetPasswordPage() {
           defaultValue={
             typeof resetFields.email.initialValue === 'string' ? resetFields.email.initialValue : undefined
           }
+          invert
         />
-        <p>
+        <p className="text-danger text-sm">
           {resetFields.email.errors
             ? Array.isArray(resetFields.email.errors)
               ? resetFields.email.errors.join(', ')
