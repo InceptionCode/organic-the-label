@@ -234,6 +234,28 @@ export const ResetPasswordSchema = z.object({
 });
 
 export type ResetPassword = z.infer<typeof ResetPasswordSchema>
+
+export const ResetPasswordConfirmSchema = z.object({
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters long.')
+    .trim()
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), 'Password must contain capital letter and a number.'),
+  confirmPassword: z.string()
+    .min(8, 'Password must be at least 8 characters long.')
+    .trim()
+    .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), 'Password must contain capital letter and a number.'),
+  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+}).superRefine(({ confirmPassword, password }, ctx) => {
+  if (confirmPassword !== password) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Password and confirm password must match',
+      path: ['confirmPassword'],
+    })
+  }
+})
+
+export type ResetPasswordConfirm = z.infer<typeof ResetPasswordConfirmSchema>
 // --------------------
 // SHOPIFY
 // --------------------

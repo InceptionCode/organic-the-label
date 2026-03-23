@@ -6,7 +6,7 @@ import { ensureAnonymousVisitor } from "@/lib/supabase/ensure-anon-visitor";
 import { activityEventSchema } from "@/lib/supabase/event.schema";
 import { createSupabaseServerClient } from "@/utils/supabase/server-base";
 import { insertActivityEvent } from "@/lib/supabase/insert-activity-event";
-import { generateAnonToken } from "@/lib/supabase/anon-token";
+import { generateToken } from "@/utils/helpers/token";
 
 export async function POST(req: Request) {
   try {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     let shouldSetCookie = false;
 
     if (!anonToken) {
-      anonToken = generateAnonToken();
+      anonToken = generateToken();
       shouldSetCookie = true;
     }
 
