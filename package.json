@@ -1,6 +1,6 @@
 {
   "name": "organic-the-label",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -19,6 +19,7 @@
     "@conform-to/zod": "^1.13.3",
     "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@libsql/client": "^0.15.3",
+    "@paper-design/shaders-react": "^0.0.72",
     "@radix-ui/react-alert-dialog": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-label": "^2.1.4",
