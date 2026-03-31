@@ -50,36 +50,83 @@ export default async function ProductContent({ params }: { params: Promise<Produ
   );
 
   return (
-    <main className="content-container py-8 md:py-12">
+    <div>
       <ProductViewTracker handle={handle} tags={product.tags ?? []} category={product.category} />
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-        <ProductGallery
-          title={product.name}
-          featuredImage={product.image}
-          images={product.images}
-        />
-        <div className="space-y-8">
-          <ProductInfo
-            name={product.name}
-            description={product.description}
-            descriptionHtml={(product as ProductVariants & { descriptionHtml?: string }).descriptionHtml}
-            price={product.price}
+      <div className="content-container py-8 md:py-14">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_420px] lg:gap-14 xl:gap-20">
+
+          {/* Left: Gallery */}
+          <ProductGallery
+            title={product.name}
+            featuredImage={product.image}
+            images={product.images}
           />
-          <ProductPurchaseClient
-            variantId={product.variantId}
-            availableForSale={(product as ProductVariants & { availableForSale?: boolean }).availableForSale !== false}
-            licenseOptions={licenseOptions}
-          />
+
+          {/* Right: Info + Purchase (sticky on large screens) */}
+          <div className="flex flex-col gap-8 lg:sticky lg:top-24 lg:self-start">
+            <ProductInfo
+              name={product.name}
+              description={product.description}
+              descriptionHtml={(product as ProductVariants & { descriptionHtml?: string }).descriptionHtml}
+              price={product.price}
+              category={product.category}
+              tags={product.tags}
+            />
+            <ProductPurchaseClient
+              variantId={product.variantId}
+              availableForSale={(product as ProductVariants & { availableForSale?: boolean }).availableForSale !== false}
+              licenseOptions={licenseOptions}
+            />
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap gap-3">
+              {[
+                { icon: '⚡', label: 'Instant Download' },
+                { icon: '🔒', label: 'Secure Checkout' },
+                { icon: '📧', label: 'Email Delivery' },
+              ].map((badge) => (
+                <div
+                  key={badge.label}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                  style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}
+                >
+                  <span aria-hidden>{badge.icon}</span>
+                  <span className="text-caption text-muted">{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+        {previews.length > 0 && (
+          <div
+            className="mt-14 pt-10"
+            style={{ borderTop: '1px solid var(--border-subtle)' }}
+          >
+            <div className="mb-6">
+              <p className="eyebrow mb-2" style={{ color: 'var(--accent-secondary)' }}>
+                Listen before you buy
+              </p>
+              <h2
+                className="text-primary"
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+                  letterSpacing: '0.02em',
+                  lineHeight: 1,
+                }}
+              >
+                AUDIO PREVIEWS
+              </h2>
+            </div>
+            <div className="max-w-2xl">
+              <AudioPreviewList previews={previews} />
+            </div>
+          </div>
+        )}
       </div>
-      <div className="p-8">
-        {
-          previews.length > 0 ? (
-            <AudioPreviewList previews={previews} title={product.name} />
-          ) : null
-        }
+      <div style={{ borderTop: '1px solid var(--border-subtle)' }}>
+        <RelatedProducts products={relatedProducts} currentHandle={handle} />
       </div>
-      <RelatedProducts products={relatedProducts} currentHandle={handle} />
-    </main>
+    </div>
   );
 }

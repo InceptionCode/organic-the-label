@@ -5,7 +5,7 @@ import { Footer } from '@/app/components/footer';
 import CartDrawer from '@/app/components/cart-drawer';
 import { ThemeProvider } from '@/ui-components/theme-provider';
 
-import { inter, geistSans, geistMono } from '@/lib/font-tags';
+import { inter, bebasNeue, geistMono } from '@/lib/font-tags';
 
 import { Suspense } from 'react';
 
@@ -46,8 +46,21 @@ import ActivityHydrator from '@/store/activity-hydrator';
 */
 
 export const metadata: Metadata = {
-  title: 'Organic Sonics',
-  description: 'Pure Organic Sonics for ya head top! Premium producer store!',
+  title: {
+    default: 'Organic Sonics',
+    template: '%s | Organic Sonics',
+  },
+  description: 'Premium beats, drum kits, sample packs, and sound design for modern producers.',
+  icons: {
+    icon: '/brand-assets/organic-sonics-logo.png',
+    apple: '/brand-assets/organic-sonics-logo.png',
+  },
+  openGraph: {
+    title: 'Organic Sonics',
+    description: 'Premium beats, drum kits, sample packs, and sound design for modern producers.',
+    images: [{ url: '/brand-assets/organic-sonics-logo.png' }],
+    type: 'website',
+  },
 };
 
 const HtmlDocumentBody = ({ children }: { children: React.ReactNode }) => {
@@ -55,7 +68,7 @@ const HtmlDocumentBody = ({ children }: { children: React.ReactNode }) => {
     <>
       <Navbar />
       <CartDrawer />
-      <main className="flex-1 px-4 md:px-12 py-8 max-w-7xl mx-auto w-full">{children}</main>
+      <main className="flex-1 w-full">{children}</main>
       <Footer />
     </>
   );
@@ -65,7 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
+        className={`${inter.variable} ${bebasNeue.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Suspense

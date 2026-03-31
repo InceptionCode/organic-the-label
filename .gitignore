@@ -46,3 +46,9 @@ next-env.d.ts
 
 # Internal Documentation
 /.cursor
+/.claude
+/CLAUDE.md
+/temporary screenshots
+/temporary-references
+/screenshot.mjs
+/public/brand-assets/organic-sonics-brand-guidelines.png
