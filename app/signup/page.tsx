@@ -1,13 +1,12 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { signupAction } from '@/app/api/auth/auth-actions';
 import { SignupFormSchema } from '@/lib/schemas';
-import { TextField, Button } from '@/ui-components';
+import { TextField, Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/ui-components';
 import HCaptchaField from '@/app/components/auth/hcaptcha-field';
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod/v4';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state.
@@ -16,7 +15,14 @@ import { trackActivity } from '@/utils/helpers/activity/tracking';
 export default function SignUp() {
   const [signupState, action, pending] = useActionState(signupAction, undefined);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const prevSignupStateRef = useRef<typeof signupState>(undefined);
   const lastResult = signupState && typeof signupState === 'object' && !('ok' in signupState) ? signupState : null;
+
+  const signupSucceeded =
+    signupState != null &&
+    typeof signupState === 'object' &&
+    'ok' in signupState &&
+    signupState.ok === true;
 
   const [signupForm, signupFields] = useForm({
     id: 'signup',
@@ -31,13 +37,16 @@ export default function SignUp() {
   const disabled = signupForm.valid === false || !captchaToken || pending;
 
   useEffect(() => {
-    const didSucceed =
-      signupState &&
-      typeof signupState === 'object' &&
-      'ok' in signupState &&
-      signupState.ok === true;
+    const prev = prevSignupStateRef.current;
+    prevSignupStateRef.current = signupState;
 
-    if (didSucceed) {
+    const prevSucceeded =
+      prev != null &&
+      typeof prev === 'object' &&
+      'ok' in prev &&
+      prev.ok === true;
+
+    if (signupSucceeded && !prevSucceeded) {
       trackActivity({
         eventType: 'user_signed_up',
         eventProperties: {
@@ -46,9 +55,8 @@ export default function SignUp() {
           source: 'signup_page', // for analytics purposes later - track the trigger of the signup event
         },
       });
-      redirect('/account');
     }
-  }, [signupFields.email.value, pending, signupState]);
+  }, [signupFields.email.value, signupSucceeded, signupState]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">
@@ -136,6 +144,57 @@ export default function SignUp() {
           </Link>
         </p>
       </div>
+
+      <Dialog open={signupSucceeded}>
+        <DialogContent className="sm:max-w-md" style={{ textAlign: 'center' }}>
+          <DialogHeader>
+            <div
+              className="mx-auto mb-3 flex items-center justify-center rounded-full"
+              style={{
+                width: '3rem',
+                height: '3rem',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-subtle)',
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ color: 'var(--accent-secondary)' }}
+                aria-hidden="true"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </div>
+            <DialogTitle style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', letterSpacing: '0.02em' }}>
+              CHECK YOUR EMAIL
+            </DialogTitle>
+            <DialogDescription className="text-body-s text-secondary" style={{ marginTop: '0.5rem' }}>
+              We sent a confirmation link to{' '}
+              <span className="text-primary" style={{ fontWeight: 500 }}>
+                {signupFields.email.value}
+              </span>
+              . Click the link in that email to activate your account and continue to your profile.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4">
+            <Link href="/login">
+              <Button variant="ghost" className="w-full">
+                Back to sign in
+              </Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

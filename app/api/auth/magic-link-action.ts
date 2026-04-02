@@ -1,7 +1,7 @@
 'use server';
 
 import { MagicLinkSchema, type MagicLink } from '@/lib/schemas';
-import { createSupabaseAdminClient } from '@/utils/supabase/base';
+import { createSupabasePublicClient } from '@/utils/supabase/base';
 import { parseWithZod } from '@conform-to/zod/v4';
 import { parseSubmission } from '@conform-to/react/future';
 
@@ -16,7 +16,7 @@ export async function magicLinkAction(_prevState: unknown, formData: FormData) {
     return submission.reply();
   }
 
-  const supabase = await createSupabaseAdminClient();
+  const supabase = createSupabasePublicClient();
   const { email, captchaToken } = payload as MagicLink;
 
   try {
@@ -24,7 +24,7 @@ export async function magicLinkAction(_prevState: unknown, formData: FormData) {
       email,
       options: {
         captchaToken,
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/explore`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/confirm?next=/explore`,
       },
     });
 
