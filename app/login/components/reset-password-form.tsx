@@ -1,17 +1,15 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from '@conform-to/react'
 import { parseWithZod } from '@conform-to/zod/v4'
 import { ResetPasswordConfirmSchema } from '@/lib/schemas'
 import { resetUserPasswordAction } from '@/app/api/auth/reset-user-password'
-import HCaptchaField from '@/app/components/auth/hcaptcha-field'
 import { TextField, Button } from '@/ui-components'
 
 export default function ResetPasswordForm() {
   const router = useRouter()
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const [state, action, pending] = useActionState(resetUserPasswordAction, undefined)
   const lastResult =
@@ -27,7 +25,7 @@ export default function ResetPasswordForm() {
     shouldRevalidate: 'onInput',
   })
 
-  const disabled = form.valid === false || !captchaToken || pending
+  const disabled = form.valid === false || pending
 
   useEffect(() => {
     if (
@@ -88,20 +86,6 @@ export default function ResetPasswordForm() {
             ? Array.isArray(fields.confirmPassword.errors)
               ? fields.confirmPassword.errors.join(', ')
               : String(fields.confirmPassword.errors)
-            : null}
-        </p>
-
-        <input
-          type="hidden"
-          name={fields.captchaToken.name}
-          value={captchaToken ?? ''}
-        />
-        <HCaptchaField onTokenChange={setCaptchaToken} />
-        <p className="text-danger text-sm">
-          {fields.captchaToken.errors
-            ? Array.isArray(fields.captchaToken.errors)
-              ? fields.captchaToken.errors.join(', ')
-              : String(fields.captchaToken.errors)
             : null}
         </p>
 
