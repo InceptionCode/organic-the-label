@@ -515,6 +515,43 @@
     color: var(--text-primary);
   }
 
+  /* ── Liquid Glass Card ── */
+  .card-glass {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    box-shadow:
+      0 4px 32px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease;
+  }
+  .card-glass:hover {
+    border-color: rgba(224, 61, 42, 0.24);
+    box-shadow:
+      0 0 0 1px rgba(224, 61, 42, 0.18),
+      0 0 28px rgba(224, 61, 42, 0.13),
+      0 4px 32px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Sonic visual animations (email section) ── */
+  @keyframes sonic-ring-expand {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) scale(3.8); opacity: 0; }
+  }
+  @keyframes sonic-center-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px 2px rgba(224, 61, 42, 0.65), 0 0 22px rgba(224, 61, 42, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 18px 5px rgba(224, 61, 42, 0.95), 0 0 44px rgba(224, 61, 42, 0.55);
+    }
+  }
+
   /* ── Animated grain ── */
   @keyframes grain-shift {
     0%, 100% { transform: translate(0, 0); }

@@ -1,4 +1,23 @@
 import type { ProductCategories } from '@/lib/schemas';
+
+/** Normalized RGB tuples (0–1) for WebGL shaders and 3D visuals (e.g. EmailVisual). */
+export type BrandRgbNormalized = [number, number, number];
+
+export const BRAND_RED_NORM: BrandRgbNormalized = [0.784, 0.208, 0.122]; // #C8351F
+export const BRAND_RED_HOT_NORM: BrandRgbNormalized = [1.0, 0.32, 0.16];
+export const BRAND_RED_DEEP_NORM: BrandRgbNormalized = [0.51, 0.098, 0.098]; // #831919
+export const BRAND_CREAM_NORM: BrandRgbNormalized = [0.851, 0.78, 0.655]; // #D9C7A7
+export const BRAND_BEIGE_NORM: BrandRgbNormalized = [0.969, 0.953, 0.922]; // #F7F3EB
+
+/** Canvas-style RGB stops (0–255) for waveform bars and smooth gradient interpolation. */
+export const BRAND_WAVEFORM_PALETTE_RGB: [number, number, number][] = [
+  [180, 130, 58], // warm amber
+  [190, 100, 68], // terracotta
+  [65, 120, 110], // dusty teal
+  [110, 130, 82], // muted sage
+  [158, 62, 68], // warm burgundy
+];
+
 export const navLinks = [
   { name: 'Explore', href: '/explore' },
   { name: 'Store', href: '/store' },

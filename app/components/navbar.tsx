@@ -57,22 +57,41 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden sm:flex items-center gap-8" aria-label="Main">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={pathname === link.href ? 'page' : undefined}
-                className={cn(
-                  'font-medium transition-soft',
-                  pathname === link.href
-                    ? 'text-primary'
-                    : 'text-muted hover:text-primary',
-                )}
-                style={{ letterSpacing: '0.08em', fontSize: '0.7rem', textTransform: 'uppercase' }}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <div key={link.href} className="relative flex flex-col items-center">
+                  <Link
+                    href={link.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'font-medium transition-soft',
+                      isActive ? 'text-primary' : 'text-muted hover:text-primary',
+                    )}
+                    style={{ letterSpacing: '0.08em', fontSize: '0.7rem', textTransform: 'uppercase' }}
+                  >
+                    {link.name}
+                  </Link>
+                  {isActive && (
+                    <span
+                      aria-hidden
+                      style={{
+                        position: 'absolute',
+                        bottom: '-10px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        background: 'var(--accent-primary)',
+                        boxShadow: '0 0 6px 2px rgba(224,61,42,0.75)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-1">

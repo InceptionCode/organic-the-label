@@ -97,7 +97,10 @@ export type ProductsDetailResponse = {
         }
       }>
     }
-    metafield: null | {
+    audioPreviewMetafield: null | {
+      value: string | null;
+    };
+    whatsIncludedMetafield: null | {
       value: string | null;
     };
   }
@@ -234,7 +237,10 @@ export const PRODUCT_BY_HANDLE_QUERY = `
           }
         }
       }
-      metafield(namespace: "custom", key: "audio_preview_urls") {
+      audioPreviewMetafield: metafield(namespace: "custom", key: "audio_preview_urls") {
+        value
+      }
+      whatsIncludedMetafield: metafield(namespace: "custom", key: "whats_included") {
         value
       }
     }
