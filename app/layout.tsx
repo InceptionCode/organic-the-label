@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/app/components/navbar';
 import { Footer } from '@/app/components/footer';
 import CartDrawer from '@/app/components/cart-drawer';
+import { StickyProductBarServer } from '@/app/components/sticky-product-bar-server';
 import { ThemeProvider } from '@/ui-components/theme-provider';
 
 import { inter, bebasNeue, geistMono } from '@/lib/font-tags';
@@ -70,6 +71,9 @@ const HtmlDocumentBody = ({ children }: { children: React.ReactNode }) => {
       <CartDrawer />
       <main className="flex-1 w-full">{children}</main>
       <Footer />
+      <Suspense fallback={<LoadingState />}>
+        <StickyProductBarServer />
+      </Suspense>
     </>
   );
 };

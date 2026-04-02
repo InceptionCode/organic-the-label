@@ -53,6 +53,9 @@ export type ProductMetafield = z.infer<typeof ProductMetafieldSchema>
 export const ProductPreviewUrlsSchema = z.array(z.object({ preview_title: z.string(), preview_url: z.string() }))
 export type ProductPreviewUrls = z.infer<typeof ProductPreviewUrlsSchema>
 
+export const ProductWhatsIncludedSchema = z.array(z.object({ icon: z.string().optional(), label: z.string(), description: z.string().optional() }))
+export type ProductWhatsIncluded = z.infer<typeof ProductWhatsIncludedSchema>
+
 export const ProductSchema = z.object({
   created_at: z.iso.datetime(),
   id: z.string(),
@@ -74,6 +77,7 @@ export const ProductSchema = z.object({
   }).optional().nullable(),
   tags: z.array(unionTags).optional(),
   is_exclusive: z.boolean().default(false),
+  whats_included: ProductWhatsIncludedSchema.optional().nullable(),
 })
 
 export type Product = z.infer<typeof ProductSchema>

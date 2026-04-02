@@ -1,21 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/ui-components/card';
-
 import AddToCartButton from '@/app/components/add-to-cart';
 import FallbackFileSVG from '@/public/file.svg';
 import { formatPrice } from '@/utils/helpers/product-helpers';
-import { truncateWords } from '@/utils/helpers/truncate';
 import type { Product } from '@/lib/schemas';
-import { Button } from '@/ui-components/button';
 import AudioPreviewList from '@/ui-components/audio-preview-list';
 
 type ProductCardProps = {
@@ -24,92 +13,166 @@ type ProductCardProps = {
 
 export function ProductCard({ product }: ProductCardProps) {
   const hasImage = Boolean(product.image?.url);
+  const tags = product.tags?.slice(0, 3) ?? [];
+  const hasAudio = Boolean(product.audio_preview?.preview_url);
 
   return (
-    <Card className="card-hover group overflow-hidden w-full max-w-xl flex flex-col">
-      <Link href={`/store/${product.handle}`}>
-        <CardHeader className="p-0">
-          <div className="relative w-full aspect-[3/2] bg-surface-2 overflow-hidden">
-            {hasImage ? (
-              <Image
-                src={product.image!.url as string}
-                alt={product.image?.altText || product.name}
-                placeholder="blur"
-                blurDataURL={product.image!.url as string}
-                fill
-                className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.02]"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full bg-surface-3/40 text-muted">
-                <Image src={FallbackFileSVG} alt={product.name} fill className="object-contain" />
-              </div>
-            )}
-
-            {product.is_exclusive && (
-              <div className="absolute top-3 right-3">
-                <span className="eyebrow bg-[color:var(--accent-primary-soft)] text-[color:var(--accent-primary)] px-2 py-1 rounded-full">
-                  Exclusive
-                </span>
-              </div>
-            )}
+    <div
+      className="group relative flex flex-col w-full h-full card-glass"
+      style={{ borderRadius: '14px', overflow: 'hidden' }}
+    >
+      {/* 3:4 image area */}
+      <Link
+        href={`/store/${product.handle}`}
+        className="relative block w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
+        style={{ aspectRatio: '3/4' }}
+      >
+        {hasImage ? (
+          <Image
+            src={product.image!.url as string}
+            alt={product.image?.altText || product.name}
+            fill
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full" style={{ background: 'rgba(255,255,255,0.04)' }}>
+            <Image src={FallbackFileSVG} alt={product.name} fill className="object-contain" />
           </div>
-        </CardHeader>
+        )}
+
+        {/* Glass info panel — bottom gradient */}
+        <div
+          className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4 transition-transform duration-300 ease-out group-hover:-translate-y-1"
+          style={{
+            height: '55%',
+            background:
+              'linear-gradient(to top, rgba(8,8,8,0.97) 0%, rgba(8,8,8,0.72) 50%, transparent 100%)',
+          }}
+        >
+          {/* Category + tags row */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+            {product.category && (
+              <span
+                style={{
+                  fontSize: '0.58rem',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent-primary)',
+                  opacity: 0.9,
+                }}
+              >
+                {product.category}
+              </span>
+            )}
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                style={{
+                  fontSize: '0.55rem',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(212,196,168,0.55)',
+                  background: 'rgba(255,255,255,0.07)',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <p
+            className="line-clamp-2 leading-tight"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '1.05rem',
+              letterSpacing: '0.02em',
+              color: '#F8F7F2',
+            }}
+          >
+            {product.name}
+          </p>
+        </div>
+
+        {/* Exclusive badge */}
+        {product.is_exclusive && (
+          <div className="absolute top-3 left-3">
+            <span
+              style={{
+                fontSize: '0.58rem',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                background: 'rgba(224,61,42,0.15)',
+                color: 'var(--accent-primary)',
+                padding: '3px 9px',
+                borderRadius: '999px',
+                border: '1px solid rgba(224,61,42,0.35)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              Exclusive
+            </span>
+          </div>
+        )}
       </Link>
 
-      <CardContent className="flex-1 px-6 pt-4 pb-0">
-        <div className="flex flex-col gap-2 flex-1">
-          <span className="eyebrow text-secondary">
-            {product.category}
-          </span>
-          <CardTitle className="text-2xl line-clamp-2 text-primary">
-            {product.name}
-          </CardTitle>
-        </div>
-        {product.description && (
-          <CardDescription className="text-body-s text-muted px-0.5 py-1.5">
-            {truncateWords(product.description, 10)}
-          </CardDescription>
-        )}
-        {product.audio_preview && product.audio_preview.preview_url && (
-          <AudioPreviewList previews={[product.audio_preview]} title={product.name} />
-        )}
-      </CardContent>
-
-      <CardFooter className="px-6 pb-5 pt-4 flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-2 flex-1">
-          {product.tags && product.tags.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-2">
-              {product.tags.slice(0, 4).map((tag) => (
-                <span
-                  key={tag}
-                  className="meta bg-surface-2/80 text-secondary px-2 py-1 rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <span className="price-text text-primary">
+      {/* Bottom section — price + actions + audio preview */}
+      <div
+        className="flex flex-col mt-auto"
+        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        {/* Price + action row */}
+        <div className="flex items-center justify-between gap-3 px-4 py-3">
+          <span
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: '1.1rem',
+              letterSpacing: '0.02em',
+              color: '#F8F7F2',
+            }}
+          >
             {formatPrice(product.price)}
           </span>
-        </div>
 
-        <div className="flex flex-col items-end gap-3">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              asChild
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              href={`/store/${product.handle}`}
+              className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
+              style={{
+                fontSize: '0.62rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'rgba(212,196,168,0.7)',
+                textDecoration: 'none',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                transition: 'border-color 150ms ease, color 150ms ease',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
             >
-              <Link href={`/store/${product.handle}`}>View product</Link>
-            </Button>
+              View
+            </Link>
             <AddToCartButton variantId={product.variantId} />
           </div>
         </div>
-      </CardFooter>
-    </Card>
+
+        {/* Audio preview — full width at bottom */}
+        {hasAudio && (
+          <div
+            style={{
+              borderTop: '1px solid rgba(255,255,255,0.05)',
+              padding: '0 0 4px 0',
+            }}
+          >
+            <AudioPreviewList previews={[product.audio_preview!]} title={product.name} />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
-

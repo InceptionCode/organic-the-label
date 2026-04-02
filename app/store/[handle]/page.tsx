@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import ProductContent, { type ProductHandleParam } from "@/app/store/[handle]/product-content";
+import ProductContent, { type ProductHandleParam } from "@/app/store/[handle]/components/product-content";
 import { LoadingState } from "@/ui-components";
 
 // import OwnedLine from "./owned-line";
