@@ -1,0 +1,86 @@
+name: Enforce PR Template
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  validate-pr-template:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: read
+      contents: read
+
+    steps:
+      - name: Validate PR template usage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || "";
+            const base = pr.base.ref;
+            const head = pr.head.ref;
+
+            function fail(message) {
+              core.setFailed(message);
+            }
+
+            const hasFeature = body.includes("<!-- pr-template: feature -->");
+            const hasDevToMain = body.includes("<!-- pr-template: dev-to-main -->");
+            const hasHotfixMain = body.includes("<!-- pr-template: hotfix-main -->");
+
+            const markers = [hasFeature, hasDevToMain, hasHotfixMain].filter(Boolean).length;
+
+            if (markers === 0) {
+              fail(
+                [
+                  "PR description is missing a valid template marker.",
+                  "Use one of the approved PR templates:",
+                  "- feature",
+                  "- dev-to-main",
+                  "- hotfix-main",
+                ].join("\n")
+              );
+              return;
+            }
+
+            if (markers > 1) {
+              fail("PR description contains multiple template markers. Use exactly one PR template.");
+              return;
+            }
+
+            // Rules:
+            // 1. feature/* -> dev must use feature template
+            // 2. dev -> main must use dev-to-main template
+            // 3. anything else -> main must use hotfix-main template
+
+            if (base === "dev") {
+              if (!hasFeature) {
+                fail(
+                  `PRs targeting 'dev' must use the 'feature' template.\nDetected head branch: '${head}'.`
+                );
+              }
+              return;
+            }
+
+            if (base === "main") {
+              if (head === "dev") {
+                if (!hasDevToMain) {
+                  fail("PR from 'dev' to 'main' must use the 'dev-to-main' template.");
+                }
+              } else {
+                if (!hasHotfixMain) {
+                  fail(
+                    `PRs targeting 'main' from non-'dev' branches must use the 'hotfix-main' template.\nDetected head branch: '${head}'.`
+                  );
+                }
+              }
+              return;
+            }
+
+            // Optional strict mode:
+            // Fail PRs to unexpected base branches.
+            fail(
+              `PR target branch '${base}' is not supported by this workflow. Allowed targets are 'dev' and 'main'.`
+            );
