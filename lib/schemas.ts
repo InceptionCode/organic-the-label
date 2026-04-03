@@ -248,7 +248,6 @@ export const ResetPasswordConfirmSchema = z.object({
     .min(8, 'Password must be at least 8 characters long.')
     .trim()
     .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), 'Password must contain capital letter and a number.'),
-  captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
 }).superRefine(({ confirmPassword, password }, ctx) => {
   if (confirmPassword !== password) {
     ctx.addIssue({
