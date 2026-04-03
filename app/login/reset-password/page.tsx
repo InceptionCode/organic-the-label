@@ -1,6 +1,5 @@
-import ResetPasswordForm from '../components/reset-password-form'
+import ResetPasswordForm from '@/app/login/components/reset-password-form'
 
-export default async function ResetPasswordPage() {
-
+export default function ResetPasswordPage() {
   return <ResetPasswordForm />
 }

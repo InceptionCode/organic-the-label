@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const token_hash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null
-  const username = searchParams.get('username')
   const next = searchParams.get('next') ?? '/explore'
 
   if (token_hash && type) {
@@ -30,12 +29,18 @@ export async function GET(request: NextRequest) {
         status: Number(error?.code) || 400
       })
     }
+    // Prefer query-param username (legacy), fall back to user_metadata set during signUp
+    const username =
+      searchParams.get('username') ??
+      (user.user_metadata?.username as string | undefined) ??
+      null
+
     // verify the user and merge the anonymous visitor into the user
     console.info('verifying user and merging anonymous visitor into user', user.id)
     await bootstrapAuthenticatedUser({
       userId: user.id,
       email: user.email,
-      emailVerified: user.confirmed_at !== null,
+      emailVerified: !!(user.email_confirmed_at ?? user.confirmed_at),
       displayName: username
     })
 
