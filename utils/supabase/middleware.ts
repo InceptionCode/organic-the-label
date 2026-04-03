@@ -13,7 +13,7 @@ export async function updateSession(request: NextRequest) {
   // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {

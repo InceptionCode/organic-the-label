@@ -3,7 +3,6 @@ import { createStore } from 'zustand/vanilla'
 
 export type AuthStoreState = {
     user?: User | null
-    resetPassword?: boolean
 }
 
 export type AuthStore = AuthStoreState; // may change when I need auth actions.
