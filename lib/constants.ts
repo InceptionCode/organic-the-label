@@ -77,7 +77,7 @@ export const STORE_CATEGORIES: StoreCategory[] = [
   {
     label: 'Free',
     description: 'Complimentary resources for all producers',
-    href: '/store?category=free',
+    href: '/store?tags=free',
     category: 'free',
   },
 ];
