@@ -7,6 +7,7 @@ import { parseSubmission } from '@conform-to/react/future';
 import { AuthError, EmailOtpType } from "@supabase/supabase-js"
 
 import { createSupabaseBrowserClient } from "@/utils/supabase/client-base"
+import { postLoginBootstrapAction } from "@/app/api/auth/post-login-action"
 
 export type LoginActionState = {
     ok: boolean;
@@ -43,6 +44,10 @@ export const signinAction = async (
             console.error(error ?? 'User not found')
             return submission.reply({ formErrors: [error?.message ?? 'User not found'] })
         }
+
+        // Claim any email-based entitlements and mark the anon visitor as claimed.
+        // Errors here are non-fatal — sign-in still succeeds.
+        await postLoginBootstrapAction();
     } catch (e) {
         console.error(e)
 
@@ -85,7 +90,7 @@ export const signupAction = async (
             password,
             options: {
                 data: { username, type: 'email' as EmailOtpType },
-                emailRedirectTo: process.env.NEXT_PUBLIC_SITE_URL,
+                emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/confirm?next=/account`,
                 captchaToken
             }
         })
