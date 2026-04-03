@@ -15,7 +15,6 @@ export async function FeaturedKits() {
 
   return (
     <div className="section-y-standard">
-      {/* Header */}
       <div className="content-container flex items-end justify-between mb-8">
         <div>
           <p className="eyebrow mb-8" style={{ color: 'var(--accent-primary)' }}>
@@ -36,8 +35,6 @@ export async function FeaturedKits() {
           <Link href="/store">View all →</Link>
         </Button>
       </div>
-
-      {/* Horizontal scroll carousel */}
       <div
         className="relative"
         style={{
@@ -93,7 +90,6 @@ export async function FeaturedKits() {
                   </div>
                 )}
 
-                {/* Glass info panel — bottom 45% */}
                 <div
                   className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4"
                   style={{
@@ -138,7 +134,6 @@ export async function FeaturedKits() {
                     >
                       {formatPrice(product.price)}
                     </span>
-                    {/* Quick View — fades in on hover */}
                     <span
                       className="opacity-0 group-hover:opacity-100"
                       style={{

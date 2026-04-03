@@ -33,11 +33,17 @@ export const updateUserAction = async (
       return submission.reply()
     }
 
-    const { password } = payload as UpdateUserForm
+    const { username, avatar_url, ...form } = payload as UpdateUserForm
+
+    const updates = {
+      ...form,
+      confirmPassword: null,
+      data: { username, avatar_url }
+    }
 
     console.info('updateUserAction: parsed update user form')
 
-    const { error } = await supabase.auth.updateUser({ password })
+    const { error } = await supabase.auth.updateUser(updates)
 
     if (error) {
       console.error('updateUserAction: Supabase updateUser failed', error)

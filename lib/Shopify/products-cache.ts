@@ -12,7 +12,7 @@ import { buildFilterKey } from "../product/build-filter-tag";
 export const getCachedProducts = (searchParams: NormalizedSearchParams, productTable: string) =>
   unstable_cache(
     async () => getProductsFetch(searchParams),
-    ["shopify:productsPage", productTable, ...buildFilterKey(searchParams)],
+    ["shopify:productsPage:v2", productTable, ...buildFilterKey(searchParams)],
     {
       revalidate: 900,
     }

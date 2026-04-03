@@ -1,4 +1,3 @@
-// app/api/activity/track/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ANON_COOKIE_MAX_AGE, ANON_COOKIE_NAME } from "@/lib/constants";
