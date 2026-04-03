@@ -1,4 +1,3 @@
-// lib/anonymous/eventSchema.ts
 import { z } from "zod";
 
 export const activityEventSchema = z.object({
