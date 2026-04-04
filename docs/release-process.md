@@ -11,11 +11,12 @@
 
 1. Branch from `dev`
 2. Implement feature
-3. Push branch
-4. Open PR into `dev`
-5. CI must pass
-6. Merge into `dev`
-7. Verify on `dev.organicsonics.com`
+3. Test local dev & prod (run pnpm serve for prod build testing)
+4. Push branch
+5. Open PR into `dev`
+6. CI must pass
+7. Merge into `dev`
+8. Verify on `dev.organicsonics.com`
 
 ## Production release workflow
 

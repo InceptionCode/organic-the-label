@@ -1,7 +1,7 @@
 import { User } from "@/lib/schemas";
-import { useAuthStore } from "@/store/auth-context";
+import { useUser } from "@/store/auth-context";
 
 export default function useSafeParseUser(initialUser: User) {
-  const user = useAuthStore((state) => state.user);
+  const user = useUser();
   return user ?? initialUser;
 }

@@ -1,7 +1,9 @@
 "use client";
 
 import type { ProductPreviewUrls } from "@/lib/schemas";
-import { cn } from "@/lib/utils";
+import { AudioPlayer } from "@/ui-components/audio-player";
+import { useTrackingReady } from "@/store/activity-hydrator";
+import { trackActivity } from "@/utils/helpers/activity/tracking";
 
 export default function AudioPreviewList({
   previews,
@@ -10,29 +12,40 @@ export default function AudioPreviewList({
   previews: ProductPreviewUrls;
   title?: string;
 }) {
+  const isTrackingReady = useTrackingReady();
+
   if (!previews.length) return null;
-  const gridCols = previews.length > 1 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'grid-cols-1';
+
+  const makeOnPlay = (previewTitle: string) => () => {
+    if (isTrackingReady) {
+      trackActivity({
+        eventType: "audio_preview_played",
+        eventProperties: {
+          audio_preview_name: previewTitle,
+          source: "audio_preview_list",
+        },
+      });
+    }
+  };
 
   return (
-    <div className="space-y-4 w-full">
-      <div className="text-2xl opacity-80">
-        {title ? `${title} Previews` : "Previews"}
-      </div>
-
-      <div className={cn("grid gap-4", gridCols)}>
+    <div className="space-y-3 w-full">
+      {title && (
+        <p
+          className="eyebrow"
+          style={{ color: "var(--accent-secondary)", letterSpacing: "0.12em" }}
+        >
+          {title} — Previews
+        </p>
+      )}
+      <div className="flex flex-col gap-2">
         {previews.map((preview, index) => (
-          <div
+          <AudioPlayer
             key={`${preview.preview_title}-${index}`}
-            className="flex flex-col gap-4 align-baseline"
-          >
-            <div className="font-bold opacity-75 text-lg">
-              Preview {preview.preview_title}
-            </div>
-            <audio controls preload="none" className="w-full">
-              <source src={preview.preview_url} type="audio/mpeg" />
-              Your browser does not support the audio element.
-            </audio>
-          </div>
+            src={preview.preview_url}
+            title={preview.preview_title}
+            onPlay={makeOnPlay(preview.preview_title)}
+          />
         ))}
       </div>
     </div>

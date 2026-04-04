@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "flowbite/src/themes/minimal";
@@ -12,12 +12,12 @@
 
 /* Map design tokens into Tailwind theme slots */
 @theme inline {
-  /* Typography tokens */
+  /* Typography */
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
   --font-mono: var(--font-geist-mono);
 
-  /* Core color tokens mapped from role-based variables */
+  /* Core color tokens */
   --color-background: var(--bg-canvas);
   --color-foreground: var(--text-primary);
 
@@ -43,7 +43,11 @@
   --color-input: var(--surface-2);
   --color-ring: var(--accent-primary);
 
-  /* Optional: keep existing chart/sidebar tokens for compatibility */
+  /* Brand color tokens exposed as Tailwind utilities */
+  --color-brand-red: var(--accent-primary);
+  --color-brand-beige: var(--accent-secondary);
+
+  /* Legacy sidebar/chart compatibility */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -58,62 +62,68 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
 
-  /* Radius scale aligned to design system */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
+  /* Radius — sharp editorial scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
 }
 
+/* ─────────────────────────────────────────────────────────
+   LIGHT MODE
+   Primary colors: red · beige · cream/white
+───────────────────────────────────────────────────────── */
 :root {
-  /* Radius */
-  --radius: 18px;
+  --radius: 12px;
 
-  /* Light mode palette (simplified, dark-first still focuses on .dark) */
-  --bg-canvas: #f9fafb;
-  --bg-subtle: #f3f4f6;
-  --bg-elevated: #ffffff;
-  --bg-overlay: rgba(15, 16, 19, 0.7);
+  --bg-canvas: #F8F7F2;
+  --bg-subtle: #EDE9E0;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(23, 23, 23, 0.72);
 
-  --surface-1: #ffffff;
-  --surface-2: #f9fafb;
-  --surface-3: #eef2ff;
+  --surface-1: #FFFFFF;
+  --surface-2: #F8F7F2;
+  --surface-3: #EDE9E0;
 
-  --text-primary: #0f172a;
-  --text-secondary: #4b5563;
-  --text-muted: #6b7280;
-  --text-disabled: #9ca3af;
+  --text-primary: #171717;
+  --text-secondary: #3D3730;
+  --text-muted: #7A7060;
+  --text-disabled: #AFA090;
 
-  --border-subtle: rgba(15, 23, 42, 0.06);
-  --border-default: rgba(15, 23, 42, 0.12);
-  --border-strong: rgba(15, 23, 42, 0.2);
-  --border-focus: rgba(79, 70, 229, 0.7);
+  --border-subtle: rgba(23, 23, 23, 0.07);
+  --border-default: rgba(23, 23, 23, 0.12);
+  --border-strong: rgba(23, 23, 23, 0.22);
+  --border-focus: rgba(224, 61, 42, 0.65);
 
-  --accent-primary: #4f46e5;
-  --accent-primary-hover: #6366f1;
-  --accent-primary-soft: rgba(79, 70, 229, 0.12);
-  --accent-contrast: #0a0b0f;
+  /* Brand red — slightly deeper for light mode contrast */
+  --accent-primary: #C8351F;
+  --accent-primary-hover: #A82C18;
+  --accent-primary-soft: rgba(200, 53, 31, 0.10);
+  --accent-contrast: #F8F7F2;
+
+  /* Brand beige — darker tone for light mode readability */
+  --accent-secondary: #8A7250;
+  --accent-secondary-hover: #705C3E;
+  --accent-secondary-soft: rgba(138, 114, 80, 0.12);
 
   --success: #22c55e;
   --warning: #facc15;
-  --danger: #f97373;
+  --danger: #C8351F;
   --info: #0ea5e9;
 
-  /* Shadows */
-  --shadow-sm-premium: 0 1px 1px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.32);
-  --shadow-md-premium: 0 1px 1px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-lg-premium: 0 1px 1px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 0 1px rgba(158, 168, 255, 0.4), 0 0 40px rgba(158, 168, 255, 0.35);
+  --shadow-sm-premium: 0 1px 2px rgba(23, 23, 23, 0.08), 0 4px 12px rgba(23, 23, 23, 0.06);
+  --shadow-md-premium: 0 2px 4px rgba(23, 23, 23, 0.08), 0 8px 24px rgba(23, 23, 23, 0.08);
+  --shadow-lg-premium: 0 4px 8px rgba(23, 23, 23, 0.08), 0 16px 48px rgba(200, 53, 31, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(200, 53, 31, 0.30), 0 0 32px rgba(200, 53, 31, 0.18);
 
-  /* Motion */
   --motion-fast: 150ms;
   --motion-medium: 200ms;
   --motion-slow: 250ms;
   --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-  /* Typography font variables (populated by next/font variables) */
-  --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  --font-heading: system-ui, -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  /* Font stack — next/font populates these vars; Bebas Neue is the fallback display font */
+  --font-body: 'Open Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-display, 'Bebas Neue', system-ui, sans-serif);
   --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
 
@@ -137,12 +147,11 @@
   --input: var(--surface-2);
   --ring: var(--accent-primary);
 
-  /* Legacy chart/sidebar tokens retained for compatibility */
-  --chart-1: #4f46e5;
+  --chart-1: #C8351F;
   --chart-2: #22c55e;
   --chart-3: #eab308;
-  --chart-4: #f97316;
-  --chart-5: #ec4899;
+  --chart-4: #D4C4A8;
+  --chart-5: #8A7250;
 
   --sidebar: var(--bg-elevated);
   --sidebar-foreground: var(--text-primary);
@@ -154,38 +163,54 @@
   --sidebar-ring: var(--accent-primary);
 }
 
+/* ─────────────────────────────────────────────────────────
+   DARK MODE  (default brand experience)
+   Primary colors: red · beige · black
+───────────────────────────────────────────────────────── */
 .dark {
-  /* Dark mode palette from Premium Producer brief */
-  --bg-canvas: #09090b;
-  --bg-subtle: #0f1013;
-  --bg-elevated: #14161a;
-  --bg-overlay: rgba(3, 4, 7, 0.84);
+  --bg-canvas: #171717;
+  --bg-subtle: #1C1C1C;
+  --bg-elevated: #212121;
+  --bg-overlay: rgba(8, 8, 8, 0.86);
 
-  --surface-1: #111318;
-  --surface-2: #171a20;
-  --surface-3: #1c2027;
+  --surface-1: #1E1E1E;
+  --surface-2: #252525;
+  --surface-3: #2C2C2C;
 
-  --text-primary: #f5f7fa;
-  --text-secondary: #c7cdd6;
-  --text-muted: #8c95a3;
-  --text-disabled: #5c6470;
+  --text-primary: #F8F7F2;
+  --text-secondary: #D8CFC0;
+  --text-muted: #9A8E7E;
+  --text-disabled: #4A4438;
 
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-focus: rgba(158, 168, 255, 0.7);
+  /* Beige-tinted borders — warm undertone on dark */
+  --border-subtle: rgba(212, 196, 168, 0.07);
+  --border-default: rgba(212, 196, 168, 0.12);
+  --border-strong: rgba(212, 196, 168, 0.22);
+  --border-focus: rgba(224, 61, 42, 0.70);
 
-  --accent-primary: #9ea8ff;
-  --accent-primary-hover: #b3bbff;
-  --accent-primary-soft: rgba(158, 168, 255, 0.14);
-  --accent-contrast: #0a0b0f;
+  /* Brand red — vivid on dark */
+  --accent-primary: #E03D2A;
+  --accent-primary-hover: #F04D3A;
+  --accent-primary-soft: rgba(224, 61, 42, 0.14);
+  --accent-contrast: #F8F7F2;
+
+  /* Brand beige */
+  --accent-secondary: #D4C4A8;
+  --accent-secondary-hover: #E2D4BC;
+  --accent-secondary-soft: rgba(212, 196, 168, 0.14);
 
   --success: #22c55e;
   --warning: #facc15;
-  --danger: #f97373;
+  --danger: #E03D2A;
   --info: #38bdf8;
 
-  /* Backwards-compatible tokens in dark mode */
+  /* Red-tinted shadows for depth and warmth */
+  --shadow-sm-premium: 0 1px 2px rgba(0, 0, 0, 0.60), 0 4px 16px rgba(0, 0, 0, 0.40);
+  --shadow-md-premium: 0 2px 4px rgba(0, 0, 0, 0.65), 0 8px 32px rgba(224, 61, 42, 0.08);
+  --shadow-lg-premium: 0 4px 8px rgba(0, 0, 0, 0.70), 0 16px 56px rgba(224, 61, 42, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(224, 61, 42, 0.40), 0 0 40px rgba(224, 61, 42, 0.22);
+
+  /* Backwards-compatible tokens */
   --background: var(--bg-canvas);
   --foreground: var(--text-primary);
   --card: var(--bg-elevated);
@@ -205,12 +230,11 @@
   --input: var(--surface-2);
   --ring: var(--accent-primary);
 
-  /* Legacy chart/sidebar tokens retained for compatibility */
-  --chart-1: #4f46e5;
+  --chart-1: #E03D2A;
   --chart-2: #22c55e;
   --chart-3: #eab308;
-  --chart-4: #f97316;
-  --chart-5: #ec4899;
+  --chart-4: #D4C4A8;
+  --chart-5: #8A7250;
 
   --sidebar: var(--surface-2);
   --sidebar-foreground: var(--text-primary);
@@ -229,71 +253,64 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Global link defaults — brand red on dark, deep red on light */
+  a:not([class]) {
+    color: var(--accent-primary);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft), opacity var(--motion-fast) var(--ease-soft);
+  }
+  a:not([class]):hover {
+    color: var(--accent-primary-hover);
+    text-decoration: underline;
+  }
+  a:not([class]):focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 }
 
 @layer utilities {
-  /* Semantic background and text utilities */
-  .bg-canvas {
-    background-color: var(--bg-canvas);
-  }
+  /* ── Scrollbar ── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
-  .bg-surface-1 {
-    background-color: var(--surface-1);
-  }
+  /* ── Background ── */
+  .bg-canvas        { background-color: var(--bg-canvas); }
+  .bg-surface-1     { background-color: var(--surface-1); }
+  .bg-surface-2     { background-color: var(--surface-2); }
+  .bg-surface-3     { background-color: var(--surface-3); }
+  .bg-overlay-surface { background-color: var(--bg-overlay); }
+  .bg-accent        { background-color: var(--accent-primary); color: var(--accent-contrast); }
+  .bg-accent-soft   { background-color: var(--accent-primary-soft); }
+  .bg-accent-secondary-soft { background-color: var(--accent-secondary-soft); }
 
-  .bg-surface-2 {
-    background-color: var(--surface-2);
-  }
+  /* ── Text ── */
+  .text-primary   { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted     { color: var(--text-muted); }
+  .text-disabled  { color: var(--text-disabled); }
+  .text-accent    { color: var(--accent-primary); }
+  .text-accent-secondary { color: var(--accent-secondary); }
 
-  .bg-surface-3 {
-    background-color: var(--surface-3);
-  }
+  /* ── Borders ── */
+  .border-subtle  { border-color: var(--border-subtle); }
+  .border-default { border-color: var(--border-default); }
+  .border-strong  { border-color: var(--border-strong); }
 
-  .bg-overlay-surface {
-    background-color: var(--bg-overlay);
-  }
-
-  .text-primary {
-    color: var(--text-primary);
-  }
-
-  .text-secondary {
-    color: var(--text-secondary);
-  }
-
-  .text-muted {
-    color: var(--text-muted);
-  }
-
-  .text-disabled {
-    color: var(--text-disabled);
-  }
-
-  .border-subtle {
-    border-color: var(--border-subtle);
-  }
-
-  .border-default {
-    border-color: var(--border-default);
-  }
-
-  .border-strong {
-    border-color: var(--border-strong);
-  }
-
-  .shadow-md-premium {
-    box-shadow: var(--shadow-md-premium);
-  }
-
-  .shadow-lg-premium {
-    box-shadow: var(--shadow-lg-premium);
-  }
+  /* ── Shadows ── */
+  .shadow-sm-premium  { box-shadow: var(--shadow-sm-premium); }
+  .shadow-md-premium  { box-shadow: var(--shadow-md-premium); }
+  .shadow-lg-premium  { box-shadow: var(--shadow-lg-premium); }
+  .shadow-glow        { box-shadow: var(--shadow-glow); }
 
   .ring-focus {
-    box-shadow: 0 0 0 1px var(--border-focus), 0 0 0 4px color-mix(in srgb, var(--border-focus) 40%, transparent);
+    box-shadow: 0 0 0 1px var(--border-focus),
+                0 0 0 4px color-mix(in srgb, var(--border-focus) 40%, transparent);
   }
 
-  /* Layout primitives */
+  /* ── Layout primitives ── */
   .page-shell {
     min-height: 100vh;
     background-color: var(--bg-canvas);
@@ -309,29 +326,25 @@
     padding-inline: 1.5rem;
   }
 
+  .content-container-xl {
+    width: 100%;
+    max-width: 100rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
   @media (min-width: 768px) {
-    .content-container {
+    .content-container, .content-container-xl {
       padding-inline: 3rem;
     }
   }
 
-  .section-wrapper {
-    padding-block: 3.5rem;
-  }
+  .section-wrapper   { padding-block: 3.5rem; }
+  .section-y-hero    { padding-block: 4.5rem; }
+  .section-y-standard { padding-block: 3.75rem; }
+  .section-y-compact { padding-block: 3rem; }
 
-  .section-y-hero {
-    padding-block: 4.5rem;
-  }
-
-  .section-y-standard {
-    padding-block: 3.75rem;
-  }
-
-  .section-y-compact {
-    padding-block: 3rem;
-  }
-
-  /* Card base and hover behavior */
+  /* ── Cards ── */
   .card-base {
     background-color: var(--surface-1);
     color: var(--text-primary);
@@ -342,17 +355,9 @@
     box-shadow: var(--shadow-md-premium);
   }
 
-  .card-padding-sm {
-    padding: 1rem;
-  }
-
-  .card-padding-md {
-    padding: 1.25rem;
-  }
-
-  .card-padding-lg {
-    padding: 1.5rem;
-  }
+  .card-padding-sm { padding: 1rem; }
+  .card-padding-md { padding: 1.25rem; }
+  .card-padding-lg { padding: 1.5rem; }
 
   .card-hover {
     transition:
@@ -369,132 +374,204 @@
     background-color: var(--surface-2);
   }
 
-  /* Typography scale */
+  /* ── Typography scale ──
+     Headings: Bebas Neue — condensed display, single weight (400)
+     Body:     Open Sans — clean, readable
+  ── */
   .text-display-xl {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    font-size: 3.6rem;
-    line-height: 1.1;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    font-size: 4rem;
+    line-height: 1.0;
   }
 
   .text-display-l {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    font-size: 3rem;
-    line-height: 1.15;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    font-size: 3.5rem;
+    line-height: 1.0;
   }
 
   .text-display-m {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.025em;
-    font-size: 2.5rem;
-    line-height: 1.18;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    font-size: 3rem;
+    line-height: 1.02;
   }
 
   .text-h1 {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    font-size: 2.25rem;
-    line-height: 2.75rem;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    font-size: 2.5rem;
+    line-height: 1.05;
   }
 
   .text-h2 {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    font-size: 1.875rem;
-    line-height: 2.375rem;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    font-size: 2rem;
+    line-height: 1.1;
   }
 
   .text-h3 {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.03em;
     font-size: 1.5rem;
-    line-height: 2rem;
+    line-height: 1.15;
   }
 
   .text-h4 {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.03em;
     font-size: 1.25rem;
-    line-height: 1.75rem;
+    line-height: 1.2;
   }
 
   .text-h5 {
-    font-family: var(--font-heading, var(--font-sans));
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.03em;
     font-size: 1.125rem;
-    line-height: 1.625rem;
+    line-height: 1.25;
   }
 
   .text-body-l {
-    font-family: var(--font-body, var(--font-sans));
+    font-family: var(--font-body);
     font-weight: 400;
     font-size: 1.125rem;
     line-height: 1.875rem;
   }
 
   .text-body-m {
-    font-family: var(--font-body, var(--font-sans));
+    font-family: var(--font-body);
     font-weight: 400;
     font-size: 1rem;
     line-height: 1.625rem;
   }
 
   .text-body-s {
-    font-family: var(--font-body, var(--font-sans));
+    font-family: var(--font-body);
     font-weight: 400;
     font-size: 0.875rem;
     line-height: 1.375rem;
   }
 
   .text-caption {
-    font-family: var(--font-body, var(--font-sans));
+    font-family: var(--font-body);
     font-weight: 500;
     font-size: 0.75rem;
     line-height: 1rem;
   }
 
   .eyebrow {
-    font-family: var(--font-heading, var(--font-sans));
+    font-family: var(--font-body);
     font-size: 0.6875rem;
     line-height: 1rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     font-weight: 600;
     color: var(--text-muted);
   }
 
   .meta {
-    font-family: var(--font-body, var(--font-sans));
+    font-family: var(--font-body);
     font-size: 0.8125rem;
     line-height: 1.1rem;
     color: var(--text-muted);
   }
 
   .price-text {
-    font-family: var(--font-heading, var(--font-sans));
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-    font-weight: 600;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: 0.025em;
   }
 
-  /* Interaction helpers */
+  /* ── Link ── */
+  .link {
+    color: var(--accent-primary);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft);
+    font-weight: 500;
+  }
+  .link:hover {
+    color: var(--accent-primary-hover);
+    text-decoration: underline;
+  }
+  .link-muted {
+    color: var(--text-muted);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft);
+  }
+  .link-muted:hover {
+    color: var(--text-primary);
+  }
+
+  /* ── Liquid Glass Card ── */
+  .card-glass {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    box-shadow:
+      0 4px 32px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      border-color 200ms ease,
+      box-shadow 200ms ease,
+      transform 200ms ease;
+  }
+  .card-glass:hover {
+    border-color: rgba(224, 61, 42, 0.24);
+    box-shadow:
+      0 0 0 1px rgba(224, 61, 42, 0.18),
+      0 0 28px rgba(224, 61, 42, 0.13),
+      0 4px 32px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Sonic visual animations (email section) ── */
+  @keyframes sonic-ring-expand {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) scale(3.8); opacity: 0; }
+  }
+  @keyframes sonic-center-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px 2px rgba(224, 61, 42, 0.65), 0 0 22px rgba(224, 61, 42, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 18px 5px rgba(224, 61, 42, 0.95), 0 0 44px rgba(224, 61, 42, 0.55);
+    }
+  }
+
+  /* ── Animated grain ── */
+  @keyframes grain-shift {
+    0%, 100% { transform: translate(0, 0); }
+    10%       { transform: translate(-3%, -3%); }
+    20%       { transform: translate(3%, 1%); }
+    30%       { transform: translate(-1%, 4%); }
+    40%       { transform: translate(4%, -2%); }
+    50%       { transform: translate(-2%, 3%); }
+    60%       { transform: translate(3%, -4%); }
+    70%       { transform: translate(-4%, 2%); }
+    80%       { transform: translate(2%, -1%); }
+    90%       { transform: translate(-3%, 3%); }
+  }
+  .grain-animated {
+    animation: grain-shift 8s steps(1) infinite;
+  }
+
+  /* ── Interaction helpers ── */
   .transition-soft {
-    transition-property:
-      color,
-      background-color,
-      border-color,
-      box-shadow,
-      transform,
-      opacity;
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
     transition-duration: var(--motion-medium);
     transition-timing-function: var(--ease-soft);
   }
@@ -514,22 +591,21 @@
     background-color: var(--surface-2);
   }
 
-  /* Responsive typography adjustments for mobile vs desktop */
+  /* ── Responsive display typography ── */
   @media (min-width: 768px) {
     .text-display-xl {
-      font-size: 4.5rem;
-      line-height: 5rem;
+      font-size: 5.5rem;
+      line-height: 1.0;
     }
 
     .text-display-l {
-      font-size: 3.5rem;
-      line-height: 4rem;
+      font-size: 4.5rem;
+      line-height: 1.0;
     }
 
     .text-display-m {
-      font-size: 2.75rem;
-      line-height: 3.25rem;
+      font-size: 3.75rem;
+      line-height: 1.02;
     }
   }
 }
-

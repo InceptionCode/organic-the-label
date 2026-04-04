@@ -49,3 +49,7 @@ Example:
 - www.organicsonics.com = production
 - dev.organicsonics.com = dev
 - DNS managed by Shopify
+
+## Supabase Auth Flow
+
+See `docs/supabase-auth-flow.md`.

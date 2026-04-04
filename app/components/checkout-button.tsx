@@ -2,6 +2,10 @@
 
 import Link from 'next/link';
 import { Button } from '@/ui-components/button';
+import { trackActivity } from '@/utils/helpers/activity/tracking';
+import { useEffect } from 'react';
+
+import { useTrackingReady } from '@/store/activity-hydrator';
 
 type CheckoutButtonProps = {
   checkoutUrl: string | null;
@@ -10,7 +14,16 @@ type CheckoutButtonProps = {
 };
 
 export function CheckoutButton({ checkoutUrl, disabled, className = '' }: CheckoutButtonProps) {
+  const isTrackingReady = useTrackingReady();
   const canCheckout = Boolean(checkoutUrl) && !disabled;
+
+  useEffect(() => {
+    if (canCheckout && isTrackingReady) {
+      trackActivity({
+        eventType: "checkout_clicked",
+      });
+    }
+  }, [canCheckout, isTrackingReady]);
 
   if (canCheckout && checkoutUrl) {
     return (
@@ -20,7 +33,7 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
         size="lg"
         className={`w-full justify-center ${className}`}
       >
-        <Link href={checkoutUrl}>Checkout</Link>
+        <Link href={checkoutUrl} target='_blank' rel='noopener noreferrer'>Checkout</Link>
       </Button>
     );
   }

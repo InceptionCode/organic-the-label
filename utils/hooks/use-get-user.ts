@@ -15,7 +15,7 @@ export const useGetUser = () => {
     }
 
     getInitialUser();
-  })
+  }, [])
 
   return initialUser
 }

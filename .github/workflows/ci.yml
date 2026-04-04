@@ -9,10 +9,22 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-
+    environment: preview
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check env presence
+        run: |
+          [ -n "$NEXT_PUBLIC_SUPABASE_URL" ] && echo "SUPABASE URL exists" || echo "SUPABASE URL missing"
+          [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ] && echo "SUPABASE KEY exists" || echo "SUPABASE KEY missing"
+          [ -n "$NEXT_PUBLIC_SITE_URL" ] && echo "SITE URL exists" || echo "SITE URL missing"
+          [ -n "$SUPABASE_SERVICE_ROLE_KEY" ] && echo "SUPABASE SERVICE ROLE KEY exists" || echo "SUPABASE SERVICE ROLE KEY missing"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
