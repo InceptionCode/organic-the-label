@@ -2,7 +2,7 @@
 
 import '@/app/styles/globals.css';
 
-import { inter, geistSans, geistMono } from '@/lib/font-tags';
+import { inter, bebasNeue, geistMono } from '@/lib/font-tags';
 
 import { ThemeProvider } from 'next-themes';
 import { Footer } from './components/footer';
@@ -24,7 +24,7 @@ export default function GlobalError({
     // global-error must include html and body tags
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} ${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col items-center`}
+        className={`${inter.variable} ${bebasNeue.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen flex flex-col items-center`}
       >
         <ThemeProvider
           attribute="class"

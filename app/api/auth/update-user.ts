@@ -1,61 +1,64 @@
 'use client'
 
-import { UpdateUserForm, UpdateUserFormSchema } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
-import { AuthError } from "@supabase/supabase-js"
-import { parseWithZod } from '@conform-to/zod/v4';
-import { parseSubmission } from '@conform-to/react/future';
+import {
+  type UpdateUserForm,
+  UpdateUserFormSchema,
+} from '@/lib/schemas'
+import { createSupabaseBrowserClient } from '@/utils/supabase/client-base'
+import { parseWithZod } from '@conform-to/zod/v4'
+import { parseSubmission } from '@conform-to/react/future'
 
 export type UpdateUserActionState = {
-  ok: boolean,
-  error: {
-    message: string;
-    error: AuthError | unknown | null;
-  } | null
+  ok: true
+  error: null
 }
 
-export const updateUserAction = async (_: unknown, formData: FormData): Promise<UpdateUserActionState> => {
+export const updateUserAction = async (
+  _: unknown,
+  formData: FormData
+): Promise<UpdateUserActionState | object> => {
   const supabase = createSupabaseBrowserClient()
 
-  console.info('instantiated supabase client')
+  console.info('updateUserAction: instantiated supabase client')
 
-  const { status, reply } = parseWithZod(formData, { schema: UpdateUserFormSchema })
-  const { payload } = parseSubmission(formData)
+  try {
+    const submission = parseWithZod(formData, { schema: UpdateUserFormSchema })
+    const { payload } = parseSubmission(formData)
 
-  if (status === 'error') {
-    console.error('Submission failed: replying...')
+    if (submission.status === 'error') {
+      console.error(
+        'updateUserAction: invalid form submission',
+        submission.error?.issues ?? submission
+      )
+      return submission.reply()
+    }
+
+    const { username, avatar_url, ...form } = payload as UpdateUserForm
+
+    const updates = {
+      ...form,
+      confirmPassword: null,
+      data: { username, avatar_url }
+    }
+
+    console.info('updateUserAction: parsed update user form')
+
+    const { error } = await supabase.auth.updateUser(updates)
+
+    if (error) {
+      console.error('updateUserAction: Supabase updateUser failed', error)
+      return submission.reply({ formErrors: [error.message] })
+    }
 
     return {
-      ok: false,
-      error: { message: 'Form submission error', error: reply() }
+      ok: true,
+      error: null,
     }
-  }
-
-  const { username, avatar_url, ...form } = payload as UpdateUserForm
-
-  console.info('parsed user form data')
-
-  const updates = {
-    ...form,
-    confirmPassword: null,
-    data: { username, avatar_url }
-  }
-
-  const { error } = await supabase.auth.updateUser(updates)
-
-  if (error) {
-    console.error(error)
-    return {
-      ok: false,
-      error: {
-        message: 'Error updating user info!',
-        error
-      }
-    }
-  }
-
-  return {
-    ok: true,
-    error: null
+  } catch (e) {
+    console.error('updateUserAction: unexpected error', e)
+    const submission = parseWithZod(formData, { schema: UpdateUserFormSchema })
+    return submission.reply({
+      formErrors: ['Something went wrong. Please try again.'],
+    })
   }
 }

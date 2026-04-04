@@ -13,7 +13,7 @@ export function getProductTags(handle: string, id?: string) {
 export function getCachedProductDetails(handle: string, id?: string) {
   return unstable_cache(
     async () => getProductDetailsFetch(handle),
-    ["shopify:productByHandle", handle],
+    ["shopify:productByHandle:v2", handle],
     {
       // Make it very “sticky”
       revalidate: 60 * 60 * 24 * 30, // 30 days

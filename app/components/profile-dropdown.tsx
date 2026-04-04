@@ -1,3 +1,4 @@
+'use client'
 import useSignOut from '@/utils/hooks/use-sign-out';
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/react';
 import Link from 'next/link';

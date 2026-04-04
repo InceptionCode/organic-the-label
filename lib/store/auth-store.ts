@@ -3,7 +3,6 @@ import { createStore } from 'zustand/vanilla'
 
 export type AuthStoreState = {
     user?: User | null
-    resetPassword?: boolean
 }
 
 export type AuthStore = AuthStoreState; // may change when I need auth actions.
@@ -13,7 +12,8 @@ export const defaultUserState: User = {
     created_at: '',
     confirmed_at: '',
     is_anon: true,
-    is_member: false
+    is_member: false,
+    email: ''
 }
 
 export const createAuthStore = (

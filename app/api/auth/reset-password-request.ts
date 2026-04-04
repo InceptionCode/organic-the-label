@@ -1,43 +1,41 @@
-'use client'
+'use server';
 
-import { SigninFormSchema, type SigninForm } from "@/lib/schemas";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client-base"
+import { ResetPasswordSchema, type ResetPassword } from "@/lib/schemas";
+import { createSupabasePublicClient } from "@/utils/supabase/base"
 import { parseWithZod } from "@conform-to/zod/v4";
 import { parseSubmission } from "@conform-to/react/future";
-import { AuthError } from "@supabase/supabase-js"
 
-export type ResetPasswordRequest = {
-  error?: AuthError | unknown | null;
-} | void
+export type ResetPasswordActionState = { ok: true; error: null };
 
-export const resetPasswordRequest = async (_: unknown, formData: FormData): Promise<ResetPasswordRequest> => {
-  const supabase = createSupabaseBrowserClient()
+export async function resetPasswordRequest(
+  _: unknown,
+  formData: FormData
+): Promise<ResetPasswordActionState | object> {
+  const submission = parseWithZod(formData, { schema: ResetPasswordSchema });
+  const { payload } = parseSubmission(formData);
 
-  const { status, reply } = parseWithZod(formData, { schema: SigninFormSchema.pick({ email: true }) })
-  const { payload } = parseSubmission(formData)
+  if (submission.status === 'error') {
+    console.error('Invalid reset password form submission', submission.error?.issues);
+    return submission.reply();
+  }
 
-  if (status === 'error') {
-    console.error('Submission failed: replying...')
+  const supabase = createSupabasePublicClient();
+  const { email, captchaToken } = payload as ResetPassword;
 
-    return {
-      error: { message: 'Form submission error', error: reply() }
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      captchaToken,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/confirm?next=/login/reset-password`,
+    });
+
+    if (error) {
+      console.error('Supabase resetPasswordForEmail failed', error);
+      return submission.reply({ formErrors: [error.message] });
     }
-  }
 
-  const { email } = payload as SigninForm
-
-
-  if (!email) {
-    const error = Error('Must provide a valid email')
-
-    console.log(error)
-    return { error }
-  }
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email)
-
-  if (error) {
-    console.error(error)
-    return { error }
+    return { ok: true, error: null };
+  } catch (e) {
+    console.error('Unexpected reset password error', e);
+    return submission.reply({ formErrors: ['Something went wrong. Please try again.'] });
   }
 }

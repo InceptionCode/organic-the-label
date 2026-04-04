@@ -12,7 +12,20 @@ import { ProductCategories, ProductTags as TagOptions } from '@/lib/schemas';
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc';
 type CategoryFilter = ProductCategories | 'all';
 
-const TagOptionsArray: TagOptions[] = ['ambient', 'melodic', 'vintage', 'r&b', 'hiphop', 'trap', 'dark', 'ost', 'opium', 'rage', 'digital'];
+const TagOptionsArray: TagOptions[] = [
+  'free',
+  'ambient',
+  'melodic',
+  'vintage',
+  'r&b',
+  'hiphop',
+  'trap',
+  'dark',
+  'ost',
+  'opium',
+  'rage',
+  'digital',
+];
 
 const categories: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -26,6 +39,7 @@ const categories: { value: CategoryFilter; label: string }[] = [
 ];
 
 const tagOptions: { value: TagOptions; label: string }[] = [
+  { value: 'free', label: 'Free' },
   { value: 'ambient', label: 'Ambient' },
   { value: 'melodic', label: 'Melodic' },
   { value: 'vintage', label: 'Vintage' },
@@ -68,7 +82,6 @@ export default function StoreFilters() {
   );
 
   const [exclusiveOnly, setExclusiveOnly] = useState(searchParams.get('exclusive') === 'true');
-
   // Update URL params when filters change
   const updateFilters = (updates: {
     search?: string;
