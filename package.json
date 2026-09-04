@@ -7,6 +7,8 @@
     "build": "next build",
     "generate-dev": "NODE_ENV=development pnpm generate-seed && NODE_OPTIONS='--inspect' next dev --turbopack",
     "generate-seed": "ts-node seed.ts",
+    "seed:free-resources:dev": "NODE_ENV=development ts-node seed-free-resources.ts",
+    "seed:free-resources:prod": "NODE_ENV=production ts-node seed-free-resources.ts",
     "start": "next start",
     "serve": "pnpm build && pnpm start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
