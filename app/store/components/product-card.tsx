@@ -25,6 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* 3:4 image area */}
       <Link
         href={`/store/${product.handle}`}
+        data-testid="product-card-link"
         className="relative block w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
         style={{ aspectRatio: '3/4' }}
       >

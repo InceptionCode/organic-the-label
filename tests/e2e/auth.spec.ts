@@ -226,9 +226,12 @@ test.describe('sign in / sign out', () => {
     await page.click('button[type="submit"]')
     await expect(page.locator('[data-testid="profile-menu"]')).toBeVisible({ timeout: 10_000 })
 
-    // Navigate to another page and confirm auth state persists
+    // Navigate to another page and confirm auth state persists.
+    // After a full navigation, onAuthStateChange fires asynchronously (may
+    // involve a token refresh round-trip), so allow the same budget as the
+    // post-login assertion above.
     await page.goto('/store')
-    await expect(page.locator('[data-testid="profile-menu"]')).toBeVisible()
+    await expect(page.locator('[data-testid="profile-menu"]')).toBeVisible({ timeout: 10_000 })
     await expect(page.locator('[data-testid="sign-in-link"]')).not.toBeVisible()
   })
 
