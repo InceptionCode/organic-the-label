@@ -164,10 +164,12 @@ describe('buildFilterKey', () => {
 
   // A falsy params argument means "fetch everything" — the key should reflect that.
   it('returns ["all"] for null params', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(buildFilterKey(null as any)).toEqual(['all'])
   })
 
   it('returns ["all"] for undefined params', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(buildFilterKey(undefined as any)).toEqual(['all'])
   })
 

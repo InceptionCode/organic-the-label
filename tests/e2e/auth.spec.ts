@@ -187,14 +187,19 @@ test.describe('sign in / sign out', () => {
   test('shows a validation error for an invalid email format', async ({ page }) => {
     // Always runs — verifies client-side Conform + Zod validation works.
     // Does not require test credentials.
+    //
+    // The login form is configured with shouldValidate: 'onBlur' — errors
+    // surface after the field loses focus, not after submit. The submit button
+    // is also disabled when loginForm.valid === false, so we validate via blur.
     await page.goto('/login')
 
     await page.fill('[name="email"]', 'not-an-email')
-    await page.fill('[name="password"]', 'SomePass1!')
-    await page.click('button[type="submit"]')
+    // Tab away to blur the email field — this triggers Conform's onBlur
+    // validation, which runs the Zod schema and surfaces the inline error.
+    await page.locator('[name="email"]').press('Tab')
 
-    // Conform surfaces the Zod email error inline — no network call needed.
-    await expect(page.getByText(/invalid email/i)).toBeVisible({ timeout: 3_000 })
+    // The login schema uses z.email('Please enter a valid email').
+    await expect(page.getByText(/please enter a valid email/i)).toBeVisible({ timeout: 3_000 })
   })
 
   test('user can sign in with email and password @smoke', async ({ page }) => {
@@ -249,14 +254,14 @@ test.describe('sign in / sign out', () => {
 })
 
 test.describe('auth-gated content', () => {
-  test.skip('non-member sees membership CTA on relevant pages', async ({ page }) => {
+  test.skip('non-member sees membership CTA on relevant pages', async () => {
     // Requires a signed-in non-member test account.
     // Deferred until PLAYWRIGHT_TEST_EMAIL is configured and the membership CTA
     // data-testid attribute is added to the relevant page component.
     // await expect(page.locator('[data-testid="membership-cta"]')).toBeVisible()
   })
 
-  test.skip('member does not see membership CTA', async ({ page }) => {
+  test.skip('member does not see membership CTA', async () => {
     // Requires a signed-in member test account.
     // await expect(page.locator('[data-testid="membership-cta"]')).not.toBeVisible()
   })
