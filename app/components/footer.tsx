@@ -8,7 +8,7 @@ import { STORE_CATEGORIES } from '@/lib/constants';
 const companyLinks = [
   { label: 'About', href: '/about' },
   { label: 'Explore', href: '/explore' },
-  { label: 'Support', href: '/support' },
+  { label: 'Contact', href: '/contact' },
   { label: 'Search', href: '/search' },
 ];
 

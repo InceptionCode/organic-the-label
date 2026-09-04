@@ -189,7 +189,7 @@ export default function StoreFilters() {
   const hasActiveFilters = search || category !== 'all' || sort !== 'newest' || exclusiveOnly;
 
   return (
-    <div className="mb-8 space-y-6">
+    <div data-testid="store-filters" className="mb-8 space-y-6">
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

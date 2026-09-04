@@ -11,7 +11,7 @@ export const ProfileDropdown = () => {
   return (
     <Menu as="div" className="relative ml-3">
       <div>
-        <MenuButton className="relative flex rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
+        <MenuButton data-testid="profile-menu" className="relative flex rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
           <span className="absolute -inset-1.5" />
           <span className="sr-only">Open user menu</span>
           <Image

@@ -29,6 +29,7 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
     return (
       <Button
         asChild
+        data-testid="checkout-btn"
         variant="default"
         size="lg"
         className={`w-full justify-center ${className}`}
@@ -39,7 +40,7 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
   }
 
   return (
-    <Button variant="default" size="lg" disabled className={`w-full justify-center opacity-60 ${className}`}>
+    <Button data-testid="checkout-btn" variant="default" size="lg" disabled className={`w-full justify-center opacity-60 ${className}`}>
       Checkout
     </Button>
   );

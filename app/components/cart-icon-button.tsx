@@ -9,6 +9,7 @@ export default function CartIconButton() {
   return (
     <button
       type="button"
+      data-testid="cart-icon"
       className="relative p-2 rounded-md text-secondary hover:text-primary hover:bg-surface-2 transition-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
       onClick={toggle}
       aria-label={count > 0 ? `Cart has ${count} items` : 'Open cart'}
