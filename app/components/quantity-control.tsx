@@ -25,6 +25,7 @@ export function QuantityControl({
     <div className="flex items-center gap-1">
       <Button
         type="button"
+        data-testid="qty-decrease"
         variant="outline"
         size="icon"
         aria-label="Decrease quantity"
@@ -39,6 +40,7 @@ export function QuantityControl({
       </span>
       <Button
         type="button"
+        data-testid="qty-increase"
         variant="outline"
         size="icon"
         aria-label="Increase quantity"

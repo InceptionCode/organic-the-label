@@ -12,7 +12,7 @@ type AuthStoreApi = ReturnType<typeof createAuthStore>;
 
 const AuthStoreContext = createContext<AuthStoreApi | null>(null);
 
-const mapSupabaseUser = (u?: SupabaseUser | null): User | null => {
+export const mapSupabaseUser = (u?: SupabaseUser | null): User | null => {
   if (!u) return null;
 
   return {

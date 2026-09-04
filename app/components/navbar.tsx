@@ -110,6 +110,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/login"
+                data-testid="sign-in-link"
                 className="text-muted hover:text-primary transition-soft px-3 py-2 rounded-md hover:bg-surface-2"
                 style={{ fontSize: '0.7rem', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 500 }}
               >
