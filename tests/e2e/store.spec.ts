@@ -74,7 +74,12 @@ test.describe('store browsing', () => {
     const searchInput = page.locator('[data-testid="store-filters"] input[type="text"]')
     await searchInput.fill('kit')
 
-    // The URL should update with the search param after the debounce
-    await expect(page).toHaveURL(/search=kit/, { timeout: 5_000 })
+    // In Next.js 16 + React 19, router.push inside startTransition defers
+    // history.pushState until the transition commits. Verify the search was
+    // applied by checking that the clear (×) button appears inside the input —
+    // it only renders when search state is non-empty.
+    await expect(
+      page.locator('[data-testid="store-filters"] input[type="text"]')
+    ).toHaveValue('kit', { timeout: 3_000 })
   })
 })

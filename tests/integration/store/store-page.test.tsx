@@ -6,7 +6,8 @@ import { mockProduct, mockExclusiveProduct, mockFreeProduct } from '../../fixtur
 // ProductCard renders next/image, which requires a real loader in jsdom.
 // Replace with a plain <img> so the component renders without loader errors.
 vi.mock('next/image', () => ({
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ alt = '', ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => <img alt={alt} {...props} />,
 }))
 
 // AudioPreviewList has audio playback that does not work in jsdom.

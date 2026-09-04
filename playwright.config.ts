@@ -13,8 +13,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   // Retry flaky tests on CI only
   retries: process.env.CI ? 2 : 0,
-  // Limit parallelism on CI to reduce flakiness
-  workers: process.env.CI ? 1 : undefined,
+  // Cap workers to prevent server overload causing navigation timeouts.
+  // CI runs sequentially (1 worker); local runs cap at 2 to keep the Next.js
+  // dev server responsive under parallel load.
+  workers: process.env.CI ? 1 : 2,
   reporter: process.env.CI ? 'github' : 'html',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',

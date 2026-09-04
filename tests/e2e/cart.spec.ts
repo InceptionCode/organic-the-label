@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
 /**
  * E2E tests for the cart flow.
@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test'
 // ---------------------------------------------------------------------------
 // Helper: navigate to the store, click the first product, add it to cart
 // ---------------------------------------------------------------------------
-async function addFirstProductToCart(page: Parameters<typeof test>[1]) {
+async function addFirstProductToCart(page: Page) {
   await page.goto('/store')
 
   // Wait for product cards to load
