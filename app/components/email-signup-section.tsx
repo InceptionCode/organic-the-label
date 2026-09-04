@@ -6,23 +6,49 @@ import { Button } from "@/ui-components";
 import { EmailVisual } from "@/app/components/email-visual";
 
 export function EmailSignupSection() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!name.trim()) {
-      setError("Please enter your name.");
+
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please enter a valid email address.");
       return;
     }
-    if (!email.includes("@")) {
-      setError("Please enter a valid email.");
+    if (!marketingOptIn) {
+      setError("Please check the consent box to continue.");
       return;
     }
-    setSubmitted(true);
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/email/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          firstName: firstName.trim() || undefined,
+          source: "footer",
+          marketingOptIn,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,7 +151,7 @@ export function EmailSignupSection() {
                     className="text-body-m font-medium"
                     style={{ color: "#C8351F" }}
                   >
-                    You&apos;re in. Welcome to the community ✦
+                    You&apos;re on the list. I&apos;ll send sounds, notes, and updates when they&apos;re actually worth opening. ✦
                   </p>
                 </div>
               ) : (
@@ -139,6 +165,7 @@ export function EmailSignupSection() {
                       className="text-body-s"
                       style={{ color: "#C8351F" }}
                       role="alert"
+                      aria-live="polite"
                     >
                       {error}
                     </p>
@@ -146,11 +173,11 @@ export function EmailSignupSection() {
                   <div className="grid sm:grid-cols-2 gap-3">
                     <input
                       type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      aria-label="Your name"
+                      placeholder="First name (optional)"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      aria-label="First name"
+                      autoComplete="given-name"
                       className="w-full px-4 py-3 rounded-md text-body-m focus:outline-none transition-soft"
                       style={{
                         background: "#FFFFFF",
@@ -166,6 +193,8 @@ export function EmailSignupSection() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       aria-label="Email address"
+                      autoComplete="email"
+                      inputMode="email"
                       className="w-full px-4 py-3 rounded-md text-body-m focus:outline-none transition-soft"
                       style={{
                         background: "#FFFFFF",
@@ -175,13 +204,69 @@ export function EmailSignupSection() {
                       }}
                     />
                   </div>
-                  <Button type="submit" size="lg" className="w-full sm:w-auto">
-                    Sign up for free
+
+                  {/* Consent checkbox */}
+                  <label
+                    className="flex items-start gap-3 cursor-pointer"
+                    style={{ minHeight: "44px" }}
+                  >
+                    <span
+                      className="relative flex-shrink-0 mt-0.5"
+                      style={{ width: "20px", height: "20px" }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={marketingOptIn}
+                        onChange={(e) => setMarketingOptIn(e.target.checked)}
+                        aria-label="I agree to receive marketing emails"
+                        className="sr-only"
+                      />
+                      <span
+                        className="flex items-center justify-center rounded transition-soft"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          border: marketingOptIn
+                            ? "2px solid #C8351F"
+                            : "2px solid rgba(23,23,23,0.22)",
+                          background: marketingOptIn ? "#C8351F" : "#FFFFFF",
+                        }}
+                        aria-hidden
+                      >
+                        {marketingOptIn && (
+                          <svg
+                            width="11"
+                            height="8"
+                            viewBox="0 0 11 8"
+                            fill="none"
+                          >
+                            <path
+                              d="M1 3.5L4 6.5L10 1"
+                              stroke="#F8F7F2"
+                              strokeWidth="1.8"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </span>
+                    </span>
+                    <span className="text-caption" style={{ color: "#7A7060", lineHeight: "1.5" }}>
+                      I agree to receive marketing emails from Organic Sonics,
+                      including new drops, free samples, and exclusive deals.
+                      Unsubscribe at any time.
+                    </span>
+                  </label>
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                    disabled={loading}
+                    aria-busy={loading}
+                  >
+                    {loading ? "Signing up…" : "Sign up for free"}
                   </Button>
-                  <p className="text-caption" style={{ color: "#7A7060" }}>
-                    By signing up you agree to receive marketing emails from
-                    Organic Sonics. Unsubscribe at any time.
-                  </p>
                 </form>
               )}
             </div>
