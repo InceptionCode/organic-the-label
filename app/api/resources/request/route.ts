@@ -77,17 +77,25 @@ export async function POST(req: Request) {
       .select("id")
       .single()
 
-    await sendFreeResourceEmail({
-      to: email,
-      firstName,
-      resourceName: resource.name,
-      downloadUrl: resource.download_url,
-    })
+    const [emailResult] = await Promise.allSettled([
+      sendFreeResourceEmail({
+        to: email,
+        firstName,
+        resourceName: resource.name,
+        downloadUrl: resource.download_url,
+      }),
+    ])
+
+    if (emailResult.status === "rejected") {
+      console.error("[/api/resources/request] email send failed:", emailResult.reason)
+    }
 
     if (downloadRecord?.id) {
       await supabase
         .from("resource_downloads")
-        .update({ email_sent_at: new Date().toISOString() })
+        .update({
+          email_sent_at: emailResult.status === "fulfilled" ? new Date().toISOString() : null,
+        })
         .eq("id", downloadRecord.id)
     }
 

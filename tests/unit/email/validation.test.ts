@@ -134,7 +134,7 @@ describe('SupportPayloadSchema', () => {
   })
 
   it('defaults category to "general" when omitted', () => {
-    const { category: _, ...rest } = valid
+    const rest = { name: valid.name, email: valid.email, message: valid.message }
     const result = SupportPayloadSchema.safeParse(rest)
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.category).toBe('general')
