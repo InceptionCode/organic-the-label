@@ -15,6 +15,10 @@ jobs:
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_FROM_DOWNLOADS: ${{ secrets.EMAIL_FROM_DOWNLOADS }}
+      EMAIL_FROM_SUPPORT: ${{ secrets.EMAIL_FROM_SUPPORT }}
+      SUPPORT_FORWARD_EMAIL: ${{ secrets.SUPPORT_FORWARD_EMAIL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

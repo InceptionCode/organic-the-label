@@ -18,12 +18,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
+      data-testid="product-card"
       className="group relative flex flex-col w-full h-full card-glass"
       style={{ borderRadius: '14px', overflow: 'hidden' }}
     >
       {/* 3:4 image area */}
       <Link
         href={`/store/${product.handle}`}
+        data-testid="product-card-link"
         className="relative block w-full overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
         style={{ aspectRatio: '3/4' }}
       >

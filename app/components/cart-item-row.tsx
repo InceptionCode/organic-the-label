@@ -19,7 +19,7 @@ export function CartItemRow({ line, onSetQty, onRemove, disabled }: CartItemRowP
   const productUrl = `/store/${line.merchandise.product.handle}`;
 
   return (
-    <div className="grid grid-cols-[72px_1fr] gap-4 py-4 border-b border-subtle last:border-b-0">
+    <div data-testid="cart-item" className="grid grid-cols-[72px_1fr] gap-4 py-4 border-b border-subtle last:border-b-0">
       <div className="relative w-[72px] h-[72px] shrink-0 rounded-md overflow-hidden bg-surface-3">
         {img?.url ? (
           <Image
