@@ -18,6 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
+      data-testid="product-card"
       className="group relative flex flex-col w-full h-full card-glass"
       style={{ borderRadius: '14px', overflow: 'hidden' }}
     >

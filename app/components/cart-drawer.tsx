@@ -40,7 +40,7 @@ export default function CartDrawer() {
 
   return (
     <Drawer isOpen={isOpen} onClose={close} placement="right">
-      <div className="flex flex-col h-full pt-10">
+      <div data-testid="cart-drawer" className="flex flex-col h-full pt-10">
         <h2 className="text-h3 text-primary mb-6">Cart</h2>
 
         {isEmpty ? (
