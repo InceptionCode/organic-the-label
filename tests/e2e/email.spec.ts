@@ -28,7 +28,7 @@ test.describe('/free — starter kit request form', () => {
     await page.goto('/free')
 
     // Fill required email field
-    await page.getByPlaceholder('your@email.com').first().fill('e2e-free@example.com')
+    await page.getByPlaceholder('your@email.com').first().fill('delivered@resend.dev')
 
     // Optionally fill first name
     await page.getByPlaceholder('Jay').fill('E2E Test')
@@ -37,7 +37,7 @@ test.describe('/free — starter kit request form', () => {
     await page.locator('button[type="submit"]').click()
 
     // Success state: "IT'S ON THE WAY" heading should appear
-    await expect(page.getByText(/on the way/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('does not submit when email field is empty', async ({ page }) => {
@@ -53,12 +53,12 @@ test.describe('/free — starter kit request form', () => {
   test('first name field is optional — form submits without it', async ({ page }) => {
     await page.goto('/free')
 
-    await page.getByPlaceholder('your@email.com').first().fill('e2e-noname@example.com')
+    await page.getByPlaceholder('your@email.com').first().fill('delivered@resend.dev')
     // Leave first name blank intentionally
 
     await page.locator('button[type="submit"]').click()
 
-    await expect(page.getByText(/on the way/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 10000 })
   })
 })
 
@@ -80,7 +80,7 @@ test.describe('/contact — support form', () => {
     await page.goto('/contact')
 
     await page.getByPlaceholder('Your name').fill('E2E Tester')
-    await page.getByPlaceholder('your@email.com').fill('e2e-contact@example.com')
+    await page.getByPlaceholder('your@email.com').fill('delivered@resend.dev')
     await page.getByPlaceholder(/Tell us what/i).fill('This is an automated E2E test message for the contact form.')
 
     await page.locator('button[type="submit"]').click()
@@ -93,7 +93,7 @@ test.describe('/contact — support form', () => {
     await page.goto('/contact')
 
     await page.getByPlaceholder('Your name').fill('E2E Tester')
-    await page.getByPlaceholder('your@email.com').fill('e2e-contact@example.com')
+    await page.getByPlaceholder('your@email.com').fill('delivered@resend.dev')
     await page.getByPlaceholder(/Tell us what/i).fill('Too short')
 
     await page.locator('button[type="submit"]').click()
@@ -120,7 +120,7 @@ test.describe('/contact — support form', () => {
     await page.goto('/contact')
 
     // Leave name blank
-    await page.getByPlaceholder('your@email.com').fill('e2e-contact@example.com')
+    await page.getByPlaceholder('your@email.com').fill('delivered@resend.dev')
     await page.getByPlaceholder(/Tell us what/i).fill('A long enough test message here.')
 
     await page.locator('button[type="submit"]').click()

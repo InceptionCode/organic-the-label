@@ -72,35 +72,35 @@ describe('syncContactToSupabase', () => {
   it('calls supabase.from("email_contacts").upsert with lowercased email', async () => {
     await syncContactToSupabase({ email: 'USER@Example.COM' })
     expect(mockFrom).toHaveBeenCalledWith('email_contacts')
-    const upsertArg = mockUpsert.mock.calls[0][0]
+    const upsertArg = (mockUpsert.mock.calls as unknown as Record<string, unknown>[][])[0]![0]!
     expect(upsertArg.email).toBe('user@example.com')
   })
 
   it('includes firstName as first_name when provided', async () => {
     await syncContactToSupabase({ email: 'user@example.com', firstName: 'Jay' })
-    const upsertArg = mockUpsert.mock.calls[0][0]
+    const upsertArg = (mockUpsert.mock.calls as unknown as Record<string, unknown>[][])[0]![0]!
     expect(upsertArg.first_name).toBe('Jay')
   })
 
   it('sets first_name to null when firstName is omitted', async () => {
     await syncContactToSupabase({ email: 'user@example.com' })
-    const upsertArg = mockUpsert.mock.calls[0][0]
+    const upsertArg = (mockUpsert.mock.calls as unknown as Record<string, unknown>[][])[0]![0]!
     expect(upsertArg.first_name).toBeNull()
   })
 
   it('defaults source to "website" when not provided', async () => {
     await syncContactToSupabase({ email: 'user@example.com' })
-    const upsertArg = mockUpsert.mock.calls[0][0]
+    const upsertArg = (mockUpsert.mock.calls as unknown as Record<string, unknown>[][])[0]![0]!
     expect(upsertArg.source).toBe('website')
   })
 
   it('upserts tags when tags array is provided', async () => {
     // Subsequent upsert calls (for tags) also need the chain mock
     const tagUpsertMock = vi.fn().mockResolvedValue({ error: null })
-    mockFrom.mockImplementation((table: string) => {
+    mockFrom.mockImplementation(((table: string) => {
       if (table === 'email_contact_tags') return { upsert: tagUpsertMock }
       return { upsert: mockUpsert, insert: mockInsert, update: mockUpdate }
-    })
+    }) as unknown as typeof mockFrom)
 
     await syncContactToSupabase({
       email: 'user@example.com',
@@ -185,7 +185,7 @@ describe('syncContactToMailerLite', () => {
 describe('logContactEvent', () => {
   it('inserts a row into email_contact_events', async () => {
     const insertMock = vi.fn().mockResolvedValue({ error: null })
-    mockFrom.mockReturnValue({ insert: insertMock })
+    mockFrom.mockReturnValue({ insert: insertMock } as unknown as ReturnType<typeof mockFrom>)
 
     await logContactEvent({
       contactId: 'contact-uuid-1',
@@ -203,7 +203,7 @@ describe('logContactEvent', () => {
 
   it('includes provider and providerEventId when provided', async () => {
     const insertMock = vi.fn().mockResolvedValue({ error: null })
-    mockFrom.mockReturnValue({ insert: insertMock })
+    mockFrom.mockReturnValue({ insert: insertMock } as unknown as ReturnType<typeof mockFrom>)
 
     await logContactEvent({
       contactId: 'contact-uuid-1',
@@ -223,7 +223,7 @@ describe('logContactEvent', () => {
   it('does not throw when Supabase insert fails — only warns', async () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const insertMock = vi.fn().mockResolvedValue({ error: { message: 'db error' } })
-    mockFrom.mockReturnValue({ insert: insertMock })
+    mockFrom.mockReturnValue({ insert: insertMock } as unknown as ReturnType<typeof mockFrom>)
 
     await expect(
       logContactEvent({ contactId: 'contact-uuid-1', eventType: 'subscribed' })
@@ -238,7 +238,7 @@ describe('logContactEvent', () => {
 
   it('defaults metadata to empty object when not provided', async () => {
     const insertMock = vi.fn().mockResolvedValue({ error: null })
-    mockFrom.mockReturnValue({ insert: insertMock })
+    mockFrom.mockReturnValue({ insert: insertMock } as unknown as ReturnType<typeof mockFrom>)
 
     await logContactEvent({ contactId: 'c-1', eventType: 'test' })
 
