@@ -19,7 +19,8 @@ vi.mock('next/navigation', () => ({
 
 // Navbar and ProfileDropdown render next/image for the logo and avatar.
 vi.mock('next/image', () => ({
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ alt = '', ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => <img alt={alt} {...props} />,
 }))
 
 // CartIconButton (inside Navbar) calls useTrackingReady. Returning false

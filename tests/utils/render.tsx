@@ -1,4 +1,4 @@
-import { render, renderHook, RenderOptions } from '@testing-library/react'
+import { render, RenderOptions } from '@testing-library/react'
 import { ReactElement } from 'react'
 import { CartStoreProvider } from '@/store/cart-context'
 

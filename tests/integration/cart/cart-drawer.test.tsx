@@ -31,7 +31,8 @@ vi.mock('@/utils/helpers/activity/tracking', () => ({
 // CartItemRow renders a next/image, which requires a real loader in jsdom.
 // The mock replaces it with a plain <img> so the component renders without errors.
 vi.mock('next/image', () => ({
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} />,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ alt = '', ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => <img alt={alt} {...props} />,
 }))
 
 import { useCartStore } from '@/store/cart-context'
