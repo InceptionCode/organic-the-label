@@ -36,8 +36,10 @@ test.describe('store browsing', () => {
   test('user can navigate to a product detail page', async ({ page }) => {
     await page.goto('/store')
 
-    // Click the first product card link to navigate to the detail page.
-    await page.locator('[data-testid="product-card"]').first().click()
+    // Click the image link of the first product card to navigate to the detail page.
+    // (Clicking the outer card div can land on the audio player for products that
+    // have a preview, so we target the dedicated image link instead.)
+    await page.locator('[data-testid="product-card-link"]').first().click()
 
     // The URL should now be /store/<handle>
     await expect(page).toHaveURL(/\/store\/.+/)
