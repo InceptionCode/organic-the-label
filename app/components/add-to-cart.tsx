@@ -16,7 +16,7 @@ export default function AddToCartButton({
   const addToCart = useCartStore((s) => s.addToCart);
 
   return (
-    <Button className="flex-1" onClick={() => addToCart(variantId, quantity, { openDrawer })} disabled={isLoading}>
+    <Button data-testid="add-to-cart-btn" className="flex-1" onClick={() => addToCart(variantId, quantity, { openDrawer })} disabled={isLoading}>
       {isLoading ? "Adding..." : "Add to cart"}
     </Button>
   );
