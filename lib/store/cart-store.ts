@@ -1,4 +1,5 @@
 import { Cart } from '@/lib/schemas';
+import { jsonFetch } from '@/utils/helpers/json-fetch';
 import { createStore } from 'zustand/vanilla'
 
 type CartStoreState = {
@@ -22,26 +23,6 @@ export type CartStore = CartStoreState;
 
 type CartApiOk<T> = { ok: true } & T;
 
-type CartApiErrorShape = {
-  ok?: boolean;
-  error?: string;
-  errors?: { message?: string }[];
-};
-
-async function jsonFetch<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, init);
-  const data = (await res.json()) as T & CartApiErrorShape;
-
-  if (!res.ok || data?.ok === false) {
-    const msg =
-      data?.error ||
-      (Array.isArray(data?.errors) ? data.errors.map((e) => e?.message).join(", ") : null) ||
-      "Request failed";
-    throw new Error(msg);
-  }
-  return data as T;
-}
-
 export const createCartStore = () => {
   // Add logic to update local storage when an element is added to the cart
   return createStore<CartStore>((set, get) => ({
@@ -60,10 +41,11 @@ export const createCartStore = () => {
       set({ isLoading: true, error: null });
 
       try {
-        const data = await jsonFetch<CartApiOk<{ cart: Cart | null }>>("/api/store/cart/get", {
-          method: "GET",
-          cache: "no-store",
-        });
+        const data = await jsonFetch<CartApiOk<{ cart: Cart | null }>>(
+          "/api/store/cart/get",
+          { method: "GET", cache: "no-store" },
+          { failOnOkFalse: true },
+        );
 
         set({ cart: data.cart, isLoading: false });
       } catch (e: unknown) {
@@ -76,11 +58,15 @@ export const createCartStore = () => {
       set({ isLoading: true, error: null });
 
       try {
-        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>("/api/store/cart/add", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ variantId, quantity }),
-        });
+        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>(
+          "/api/store/cart/add",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ variantId, quantity }),
+          },
+          { failOnOkFalse: true },
+        );
 
         set({
           cart: data.cart,
@@ -99,11 +85,15 @@ export const createCartStore = () => {
 
       set({ isLoading: true, error: null });
       try {
-        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>("/api/store/cart/update", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lineId, quantity: q }),
-        });
+        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>(
+          "/api/store/cart/update",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lineId, quantity: q }),
+          },
+          { failOnOkFalse: true },
+        );
 
         set({ cart: data.cart, isLoading: false });
       } catch (e: unknown) {
@@ -115,11 +105,15 @@ export const createCartStore = () => {
     removeLine: async (lineIds) => {
       set({ isLoading: true, error: null });
       try {
-        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>("/api/store/cart/remove", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lineIds }),
-        });
+        const data = await jsonFetch<CartApiOk<{ cart: Cart }>>(
+          "/api/store/cart/remove",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lineIds }),
+          },
+          { failOnOkFalse: true },
+        );
 
         set({ cart: data.cart, isLoading: false });
       } catch (e: unknown) {
