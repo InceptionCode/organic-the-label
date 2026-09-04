@@ -1,6 +1,13 @@
 import { Resend } from "resend"
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
+let _resend: Resend | null = null
+
+export function getResend(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY)
+  }
+  return _resend
+}
 
 export async function sendFreeResourceEmail({
   to,
@@ -13,7 +20,7 @@ export async function sendFreeResourceEmail({
   resourceName: string
   downloadUrl: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: process.env.EMAIL_FROM_DOWNLOADS!,
     replyTo: process.env.EMAIL_FROM_SUPPORT!,
     to,
@@ -47,7 +54,7 @@ export async function sendSupportConfirmationEmail({
   name: string
   supportRequestId: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: process.env.EMAIL_FROM_SUPPORT!,
     to,
     subject: "We got your message",
@@ -80,7 +87,7 @@ export async function sendSupportNotificationEmail({
   subject?: string
   message: string
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: process.env.EMAIL_FROM_SUPPORT!,
     to: process.env.SUPPORT_FORWARD_EMAIL!,
     subject: `New Organic Sonics support request: ${category.replace(/_/g, " ")}`,
