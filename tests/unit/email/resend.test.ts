@@ -18,6 +18,7 @@ vi.mock('resend', () => ({
 import {
   sendFreeResourceEmail,
   sendSupportConfirmationEmail,
+  sendSupportStatusEmail,
   sendSupportNotificationEmail,
 } from '@/lib/email/resend'
 
@@ -159,5 +160,71 @@ describe('sendSupportNotificationEmail', () => {
 
     const args = sendSpy.mock.calls[0][0]
     expect(args.html).not.toContain('Order #')
+  })
+})
+
+// ─── sendSupportStatusEmail ───────────────────────────────────────────────────
+
+describe('sendSupportStatusEmail', () => {
+  const base = {
+    to: 'user@example.com',
+    name: 'Darrell',
+    supportRequestId: 'req-status-001',
+  }
+
+  it('sends "pending" email with correct subject', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'pending' })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.to).toBe('user@example.com')
+    expect(args.subject).toBe('We need a bit more information')
+    expect(args.from).toBe(process.env.EMAIL_FROM_SUPPORT)
+  })
+
+  it('sends "closed" email with correct subject', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'closed' })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.subject).toBe('Your request has been resolved')
+  })
+
+  it('includes resolutionNote in the body when provided', async () => {
+    await sendSupportStatusEmail({
+      ...base,
+      status: 'closed',
+      resolutionNote: 'We refunded your order.',
+    })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.html).toContain('We refunded your order.')
+  })
+
+  it('falls back to default copy when resolutionNote is absent', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'closed' })
+
+    const args = sendSpy.mock.calls[0][0]
+    // No note → show the fallback copy, not empty
+    expect(args.html).toContain('further questions')
+  })
+
+  it('falls back to default copy when resolutionNote is null', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'pending', resolutionNote: null })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.html).toContain('reply to this email')
+  })
+
+  it('includes the reference ID in the body', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'closed' })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.html).toContain('req-status-001')
+  })
+
+  it('personalises the email with the user name', async () => {
+    await sendSupportStatusEmail({ ...base, status: 'pending' })
+
+    const args = sendSpy.mock.calls[0][0]
+    expect(args.html).toContain('Darrell')
   })
 })
