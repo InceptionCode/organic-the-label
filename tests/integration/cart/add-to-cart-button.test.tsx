@@ -26,11 +26,12 @@ vi.mock('@/store/cart-context', async (importOriginal) => {
 })
 
 import { useCartStore } from '@/store/cart-context'
+import { CartStore } from '@/lib/store/cart-store'
 
 // Builds a controlled addToCart mock that returns a pending promise.
 // Call resolveAdd() to let the in-flight request complete.
 function pendingAddToCart() {
-  let resolve: () => void = () => {}
+  let resolve: () => void = () => { }
   const promise = new Promise<void>((res) => { resolve = res })
   const addToCart = vi.fn(() => promise)
   return { addToCart, resolveAdd: resolve }
@@ -47,7 +48,7 @@ describe('AddToCartButton — per-button loading isolation', () => {
   // After the fix, each button uses local useState, so only the clicked one changes.
   it('only the clicked button shows "Adding..." while its request is in flight', async () => {
     const { addToCart, resolveAdd } = pendingAddToCart()
-    vi.mocked(useCartStore).mockImplementation((selector: (s: unknown) => unknown) =>
+    vi.mocked(useCartStore).mockImplementation((selector: (s: CartStore) => unknown) =>
       selector({ addToCart } as never)
     )
 
@@ -89,7 +90,7 @@ describe('AddToCartButton — per-button loading isolation', () => {
   // a fast double-click would fire addToCart twice, adding duplicate items.
   it('prevents a double-click from firing addToCart more than once', async () => {
     const { addToCart, resolveAdd } = pendingAddToCart()
-    vi.mocked(useCartStore).mockImplementation((selector: (s: unknown) => unknown) =>
+    vi.mocked(useCartStore).mockImplementation((selector: (s: CartStore) => unknown) =>
       selector({ addToCart } as never)
     )
 
@@ -114,7 +115,7 @@ describe('AddToCartButton — per-button loading isolation', () => {
   // (e.g. to increase quantity from the store grid before opening the drawer).
   it('returns to "Add to cart" after the request resolves', async () => {
     const { addToCart, resolveAdd } = pendingAddToCart()
-    vi.mocked(useCartStore).mockImplementation((selector: (s: unknown) => unknown) =>
+    vi.mocked(useCartStore).mockImplementation((selector: (s: CartStore) => unknown) =>
       selector({ addToCart } as never)
     )
 
@@ -133,7 +134,7 @@ describe('AddToCartButton — per-button loading isolation', () => {
   // "Adding..." forever, which would leave the user unable to retry.
   it('returns to "Add to cart" even when addToCart throws', async () => {
     const addToCart = vi.fn(() => Promise.reject(new Error('Network error')))
-    vi.mocked(useCartStore).mockImplementation((selector: (s: unknown) => unknown) =>
+    vi.mocked(useCartStore).mockImplementation((selector: (s: CartStore) => unknown) =>
       selector({ addToCart } as never)
     )
 

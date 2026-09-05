@@ -1,6 +1,9 @@
 'use server'
 
+import { headers } from "next/headers"
 import { createSupabaseServerClient } from "@/utils/supabase/server-base"
+import { mapSupabaseUser } from "@/lib/supabase/map-user"
+import { AUTH_USER_HEADER } from "@/lib/supabase/auth-header"
 import type { AuthStoreState } from "@/lib/store"
 import { AuthError } from "@supabase/supabase-js"
 
@@ -10,6 +13,19 @@ export type GetUserActionState = {
 }
 
 export const getUserAction = async (): Promise<GetUserActionState> => {
+  const headerList = await headers()
+  const forwardedUser = headerList.get(AUTH_USER_HEADER)
+
+  if (forwardedUser !== null) {
+    if (forwardedUser === '') return { user: null, error: null }
+
+    try {
+      return { user: JSON.parse(forwardedUser), error: null }
+    } catch {
+      // Malformed header — fall through to a real check below.
+    }
+  }
+
   const supabase = await createSupabaseServerClient()
 
   try {
@@ -20,19 +36,7 @@ export const getUserAction = async (): Promise<GetUserActionState> => {
       return { user: null, error }
     }
 
-    return {
-      user: {
-        username: user.user_metadata.username || user.email!,
-        email: user.email!,
-        is_anon: user.is_anonymous!,
-        is_member: user.user_metadata.is_member!,
-        created_at: user.created_at,
-        confirmed_at: user.confirmed_at ?? '',
-        updated_at: user.updated_at,
-        last_signed_in: user.last_sign_in_at
-      },
-      error: null
-    }
+    return { user: mapSupabaseUser(user), error: null }
 
   } catch (e) {
     console.error(e)

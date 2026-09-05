@@ -34,7 +34,13 @@ async function addFirstProductToCart(page: Page) {
   // The app may auto-open the cart drawer after a successful add. Close it so
   // every test that calls this helper starts with the drawer in a known-closed
   // state — otherwise the drawer overlay intercepts clicks on the cart-icon.
+  //
+  // isVisible() is a single point-in-time check, not auto-retrying — if the
+  // drawer is still mid open-animation at the instant of the check it can
+  // read false and skip closing. Give it a short grace window to finish
+  // opening first so that read is accurate.
   const drawer = page.locator('[data-testid="cart-drawer"]')
+  await drawer.waitFor({ state: 'visible', timeout: 1_000 }).catch(() => {})
   if (await drawer.isVisible()) {
     await page.getByRole('button', { name: 'Close drawer' }).click()
     await expect(drawer).not.toBeVisible({ timeout: 3_000 })
