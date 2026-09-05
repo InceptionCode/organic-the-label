@@ -21,6 +21,7 @@ export const BRAND_WAVEFORM_PALETTE_RGB: [number, number, number][] = [
 export const navLinks = [
   { name: 'Explore', href: '/explore' },
   { name: 'Store', href: '/store' },
+  { name: 'Composition', href: '/composition' },
 ];
 
 

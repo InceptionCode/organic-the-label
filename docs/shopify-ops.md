@@ -45,6 +45,18 @@ Example:
 - Full deliverables are attached there
 - Public previews are hosted in Shopify Files
 
+## /composition free loop downloads
+
+- Route: `/composition` lists rows from the Supabase `compositions` table
+- Each row's deliverables (full loop audio + terms-of-use file) live in **Shopify Files**
+  (Shopify admin → Content → Files), not the Digital Downloads app — that app has no on-demand API
+- `/api/composition/download/[slug]` fetches both Shopify Files URLs server-side, zips them with
+  `fflate`, and streams one `.zip` (`<slug>/<audio file>` + `<slug>/Terms of Use.<ext>`)
+- Content ops per loop: upload the audio + terms files to Shopify Files, copy their `cdn.shopify.com`
+  URLs into `audio_file_url` / `terms_file_url`, set `embed_url` to the Instagram permalink or
+  YouTube Short URL, then insert the row (or run `pnpm seed:compositions:dev`)
+- A shared `organic-sonics-terms-of-use.txt` in Shopify Files can back every row's `terms_file_url`
+
 ## Domains / DNS
 
 - www.organicsonics.com = production
