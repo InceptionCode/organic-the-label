@@ -192,6 +192,22 @@ describe('cart store — setQty', () => {
     expect(store.getState().error).toBe('Update quantity failed')
     expect(store.getState().isLoading).toBe(false)
   })
+
+  // When a cart was completed or expired, the update route returns { ok: true, cart: null }
+  // and clears the cartId cookie. The store must accept null here so the UI can
+  // render the empty state rather than keeping a ghost cart on screen.
+  it('sets cart to null when update returns { cart: null } (stale/converted cart)', async () => {
+    // Pre-populate the store so we can verify the null replaces a real value.
+    store.setState({ cart: mockCart })
+    server.use(
+      http.post('/api/store/cart/update', () =>
+        HttpResponse.json({ ok: true, cart: null })
+      )
+    )
+    await store.getState().setQty('line-1', 3)
+    expect(store.getState().cart).toBeNull()
+    expect(store.getState().isLoading).toBe(false)
+  })
 })
 
 describe('cart store — removeLine', () => {
@@ -216,6 +232,36 @@ describe('cart store — removeLine', () => {
     await store.getState().removeLine(['line-1'])
     expect(store.getState().isLoading).toBe(false)
     expect(store.getState().error).toBe('Remove item failed')
+  })
+
+  // When a cart was already converted to an order or expired, the remove route
+  // returns { ok: true, cart: null } and clears the cartId cookie. The store
+  // must accept null so the drawer shows the empty state rather than crashing
+  // or holding on to a ghost cart.
+  it('sets cart to null when remove returns { cart: null } (stale/converted cart)', async () => {
+    store.setState({ cart: mockCart })
+    server.use(
+      http.post('/api/store/cart/remove', () =>
+        HttpResponse.json({ ok: true, cart: null })
+      )
+    )
+    await store.getState().removeLine(['line-1'])
+    expect(store.getState().cart).toBeNull()
+    expect(store.getState().isLoading).toBe(false)
+  })
+
+  // Verify that multiple line IDs are forwarded to the API correctly.
+  // A bug here would silently ignore the second (and beyond) line IDs.
+  it('sends all provided line IDs to the remove endpoint', async () => {
+    let sentBody: Record<string, unknown> = {}
+    server.use(
+      http.post('/api/store/cart/remove', async ({ request }) => {
+        sentBody = await request.json() as Record<string, unknown>
+        return HttpResponse.json({ ok: true, cart: emptyCart })
+      })
+    )
+    await store.getState().removeLine(['line-1', 'line-2'])
+    expect(sentBody.lineIds).toEqual(['line-1', 'line-2'])
   })
 })
 

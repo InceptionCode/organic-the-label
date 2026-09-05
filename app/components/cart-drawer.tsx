@@ -26,7 +26,10 @@ export default function CartDrawer() {
   const isTrackingReady = useTrackingReady();
 
   useEffect(() => {
-    if (isTrackingReady) {
+    // Fire only on the actual open transition, not on every cart content change
+    // (this effect previously depended on totalItems/cartItems, so it re-fired
+    // on every add/remove/qty change even while the drawer was closed).
+    if (isTrackingReady && isOpen) {
       trackActivity({
         eventType: "cart_opened",
         eventProperties: {
@@ -36,7 +39,8 @@ export default function CartDrawer() {
         },
       });
     }
-  }, [isTrackingReady, totalItems, cartItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally excludes totalItems/cartItems so this only fires on the open transition
+  }, [isTrackingReady, isOpen]);
 
   return (
     <Drawer isOpen={isOpen} onClose={close} placement="right">

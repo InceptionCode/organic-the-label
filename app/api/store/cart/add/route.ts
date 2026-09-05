@@ -55,6 +55,37 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
       return NextResponse.json({ ok: false, errors }, { status: 500 });
     }
 
+    // A cart that was already converted to an order (or expired) mutates to a
+    // response with no cart back. Self-heal: start a fresh cart instead of
+    // surfacing an error and leaving the stale cartId cookie in place.
+    if (!data.cartLinesAdd.cart) {
+      console.warn('cartLinesAdd returned no cart for existing cartId — treating as stale, creating a new cart', {
+        userErrors: data.cartLinesAdd.userErrors,
+      });
+
+      const { data: createData, errors: createErrors } = await shopifyClient.request<CartCreateResponse>(
+        CART_CREATE_MUTATION,
+        { variables: { lines: [line] } },
+      );
+
+      if (createErrors?.networkStatusCode || !createData?.cartCreate?.cart) {
+        console.error('errors', createErrors);
+        return NextResponse.json({ ok: false, errors: createErrors }, { status: 500 });
+      }
+
+      const cart = createData.cartCreate.cart;
+      const res = NextResponse.json({ ok: true, cart });
+
+      res.cookies.set(CART_COOKIE, cart.id, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      });
+
+      return res;
+    }
+
     const cart = data.cartLinesAdd.cart;
     return NextResponse.json({ ok: true, cart });
   }
