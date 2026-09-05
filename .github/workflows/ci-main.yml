@@ -3,7 +3,9 @@ name: CI — Main
 on:
   push:
     branches: [main, dev]
-
+permissions:
+  statuses: write
+  contents: read
 jobs:
   full-validate:
     name: Full Validation (Lint, Typecheck, Build, Tests, E2E)
