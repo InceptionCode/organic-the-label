@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     } = await supabaseServerClient.auth.getUser();
 
     if (authError) {
-      console.error("activity auth lookup failed", authError);
+      if (authError.name !== 'AuthSessionMissingError') {
+        console.error("activity auth lookup failed", authError);
+      }
     }
 
     if (user) {

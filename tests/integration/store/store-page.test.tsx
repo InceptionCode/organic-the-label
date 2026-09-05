@@ -24,16 +24,18 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(''),
 }))
 
-// AddToCartButton (inside ProductCard) calls useCartStore to get isLoading.
-// CartStoreProvider in render.tsx calls refreshCart() on mount, which briefly
-// sets isLoading: true — causing the button to render as "Adding..." instead of
-// "Add to cart". Mocking useCartStore prevents this transient loading state.
+// AddToCartButton (inside ProductCard) calls useCartStore to get addToCart.
+// Mocking useCartStore prevents real network calls to /api/store/cart/add
+// during these rendering-focused tests, which are concerned with the card's
+// visual output — not the cart mutation behaviour.
+// Note: AddToCartButton no longer reads isLoading from the store; it manages
+// its own local isPending state so only the clicked button shows "Adding...".
 vi.mock('@/store/cart-context', async (importOriginal) => {
   const mod = await importOriginal<typeof import('@/store/cart-context')>()
   return {
     ...mod,
     useCartStore: vi.fn((selector: (s: unknown) => unknown) =>
-      selector({ isLoading: false, addToCart: vi.fn() } as never)
+      selector({ addToCart: vi.fn() } as never)
     ),
   }
 })

@@ -3,7 +3,9 @@ name: CI — Main
 on:
   push:
     branches: [main, dev]
-
+permissions:
+  statuses: write
+  contents: read
 jobs:
   full-validate:
     name: Full Validation (Lint, Typecheck, Build, Tests, E2E)
@@ -13,14 +15,25 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_HCAPTCHA_SITE_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN: ${{ secrets.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN }}
-      NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${{ secrets.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN }}
-      SUPABASE_HCAPTCHA_SECRET: ${{ secrets.SUPABASE_HCAPTCHA_SECRET }}
+      SHOPIFY_DEV_STORE_DOMAIN: ${{ secrets.SHOPIFY_DEV_STORE_DOMAIN }}
+      SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${{ secrets.SHOPIFY_STOREFRONT_ACCESS_TOKEN }}
+      SHOPIFY_REVALIDATE_SECRET: ${{ secrets.SHOPIFY_REVALIDATE_SECRET }}
+      SHOPIFY_WEBHOOK_SECRET: ${{ secrets.SHOPIFY_WEBHOOK_SECRET }}
+      SHOPIFY_ORDER_PAID_SECRET: ${{ secrets.SHOPIFY_ORDER_PAID_SECRET }}
+      MAILERLITE_API_KEY: ${{ secrets.MAILERLITE_API_KEY }}
+      MAILERLITE_GROUP_NEWSLETTER_ID: ${{ secrets.MAILERLITE_GROUP_NEWSLETTER_ID }}
+      MAILERLITE_GROUP_FREE_RESOURCE_LEADS_ID: ${{ secrets.MAILERLITE_GROUP_FREE_RESOURCE_LEADS_ID }}
+      MAILERLITE_GROUP_DOWNLOADED_STARTER_KIT_ID: ${{ secrets.MAILERLITE_GROUP_DOWNLOADED_STARTER_KIT_ID }}
+      MAILERLITE_GROUP_CUSTOMERS_ID: ${{ secrets.MAILERLITE_GROUP_CUSTOMERS_ID }}
+      MAILERLITE_WEBHOOK_SECRET: ${{ secrets.MAILERLITE_WEBHOOK_SECRET }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       EMAIL_FROM_DOWNLOADS: ${{ secrets.EMAIL_FROM_DOWNLOADS }}
       EMAIL_FROM_SUPPORT: ${{ secrets.EMAIL_FROM_SUPPORT }}
       SUPPORT_FORWARD_EMAIL: ${{ secrets.SUPPORT_FORWARD_EMAIL }}
+      INTERNAL_SUPABASE_WEBHOOK_SECRET: ${{ secrets.INTERNAL_SUPABASE_WEBHOOK_SECRET }}
+      SUPABASE_SUPPORT_WEBHOOK_SECRET: ${{ secrets.SUPABASE_SUPPORT_WEBHOOK_SECRET }}
 
     steps:
       - name: Checkout
@@ -59,6 +72,8 @@ jobs:
         run: pnpm test:e2e
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_TEST_EMAIL: ${{ secrets.PLAYWRIGHT_TEST_EMAIL }}
+          PLAYWRIGHT_TEST_PASSWORD: ${{ secrets.PLAYWRIGHT_TEST_PASSWORD }}
 
       - name: Upload Playwright report on failure
         uses: actions/upload-artifact@v4
@@ -67,3 +82,8 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          
+      - name: notify vercel
+        uses: 'vercel/repository-dispatch/actions/status@v1'
+        with:
+          name: 'Vercel - organic-the-label: Full Validation'

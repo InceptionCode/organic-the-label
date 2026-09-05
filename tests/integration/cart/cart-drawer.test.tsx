@@ -156,3 +156,26 @@ describe('cart drawer — loading state', () => {
     expect(screen.getByRole('button', { name: /increase quantity/i })).toBeDisabled()
   })
 })
+
+describe('cart drawer — stale/null cart', () => {
+  // When a Shopify cart is converted to an order (checkout completed) or expires,
+  // the server-side routes return { ok: true, cart: null } and clear the cartId
+  // cookie. The Zustand store sets cart to null. The drawer must render the
+  // empty state gracefully — not crash or show ghost line items.
+
+  it('shows the empty state when cart is null (stale/converted cart)', () => {
+    setupCartStore({ cart: null })
+    render(<CartDrawer />)
+    expect(screen.getByText('Your cart is empty.')).toBeInTheDocument()
+    expect(screen.getByText('Add something from the store to get started.')).toBeInTheDocument()
+  })
+
+  // When the cart is null the drawer renders only the empty state — the checkout
+  // button is conditionally rendered inside the non-empty branch and must not
+  // appear. Rendering it (even disabled) would be confusing when the cart is gone.
+  it('does not render the checkout button when cart is null', () => {
+    setupCartStore({ cart: null, isOpen: true })
+    render(<CartDrawer />)
+    expect(screen.queryByTestId('checkout-btn')).not.toBeInTheDocument()
+  })
+})

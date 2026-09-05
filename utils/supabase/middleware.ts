@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { mapSupabaseUser } from '@/lib/supabase/map-user'
+import { AUTH_USER_HEADER } from '@/lib/supabase/auth-header'
 // NOTE: Add logger for server operations
 // NOTE: Set Roles and Policies for tables and general access on supabase.
 // NOTE: Add recaptcha confirm for NEW anon users. Confirmed anon users should almost never see recaptcha again.
@@ -7,9 +9,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 export const privateRoutes: string[] = []
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  let cookiesToApply: { name: string; value: string; options?: Record<string, unknown> }[] = []
+
   // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,12 +22,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet: []) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          cookiesToApply = cookiesToSet
         },
       },
     }
@@ -44,12 +40,26 @@ export async function updateSession(request: NextRequest) {
 
   // NOTE: Revisit redirect and authorization logic when membership becomes a thing.
   if (privateRoutes.includes(request.nextUrl.pathname) && user?.is_anonymous) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
 
     return NextResponse.redirect(url)
   }
+
+  // Forward the user we just verified to Server Components/actions via a
+  // request header, so getUserAction doesn't need a second
+  // supabase.auth.getUser() network round-trip for the same request (see
+  // AUTH_USER_HEADER for the read side).
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set(AUTH_USER_HEADER, user ? JSON.stringify(mapSupabaseUser(user)) : '')
+
+  const supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
+
+  cookiesToApply.forEach(({ name, value, options }) =>
+    supabaseResponse.cookies.set(name, value, options)
+  )
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:

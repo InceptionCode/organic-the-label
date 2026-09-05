@@ -1,21 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
 
-/**
- * E2E tests for auth flows.
- *
- * Uses a real test user account — do NOT use production user credentials.
- * Store test credentials in .env.test (never commit them):
- *   PLAYWRIGHT_TEST_EMAIL=test@example.com
- *   PLAYWRIGHT_TEST_PASSWORD=TestPassword1
- *
- * IMPORTANT before writing tests:
- * Add data-testid attributes to key elements:
- *   - app/components/navbar.tsx              → data-testid="sign-in-btn"
- *   - app/login/components/                  → data-testid="login-form"
- *   - app/components/profile-dropdown.tsx    → data-testid="profile-menu"
- *   - app/components/navbar.tsx              → data-testid="sign-out-btn"
- */
-
 // ---------------------------------------------------------------------------
 // hCaptcha test key set (Publisher / Pro account — "always passes" in siteverify)
 // Source: hCaptcha documentation test key set
@@ -165,9 +149,10 @@ test.describe('sign up', () => {
 //   PLAYWRIGHT_TEST_EMAIL=your-test-user@example.com
 //   PLAYWRIGHT_TEST_PASSWORD=YourTestPass1!
 //
-// The sign-in flow uses a Next.js server action (signinAction) — the Supabase
-// call happens server-side, so it cannot be intercepted via page.route().
-// We skip gracefully when credentials are not configured.
+// The sign-in flow calls supabase.auth.signInWithPassword from the browser
+// client (signinAction is 'use client', not a server action), so it cannot
+// be intercepted via page.route(). We skip gracefully when credentials are
+// not configured.
 // ---------------------------------------------------------------------------
 
 const hasTestCredentials = Boolean(
@@ -226,10 +211,12 @@ test.describe('sign in / sign out', () => {
     await page.click('button[type="submit"]')
     await expect(page.locator('[data-testid="profile-menu"]')).toBeVisible({ timeout: 10_000 })
 
-    // Navigate to another page and confirm auth state persists.
-    // After a full navigation, onAuthStateChange fires asynchronously (may
-    // involve a token refresh round-trip), so allow the same budget as the
-    // post-login assertion above.
+    // Navigate to another page and confirm auth state persists. A full
+    // navigation re-renders InitAuthStore server-side, which seeds the auth
+    // store from the request's cookies before first paint — the profile menu
+    // should already be present, not waiting on client-side onAuthStateChange.
+    // Keep the same generous budget as the post-login assertion above as a
+    // safety margin against CI/network jitter.
     await page.goto('/store')
     await expect(page.locator('[data-testid="profile-menu"]')).toBeVisible({ timeout: 10_000 })
     await expect(page.locator('[data-testid="sign-in-link"]')).not.toBeVisible()

@@ -13,7 +13,7 @@ import { Suspense } from 'react';
 import '@/app/styles/globals.css';
 import { CartStoreProvider } from '@/store/cart-context';
 import { LoadingState } from '@/ui-components';
-import { AuthStoreProvider } from '@/store/auth-context';
+import InitAuthStore from '@/store/init-auth-store';
 import ActivityHydrator from '@/store/activity-hydrator';
 
 /* Global State
@@ -95,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </>
             }
           >
-            <AuthStoreProvider>
+            <InitAuthStore>
               <CartStoreProvider>
                 <HtmlDocumentBody>
                   {/* Render dynamic cart widget (store) */}
@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {children}
                 </HtmlDocumentBody>
               </CartStoreProvider>
-            </AuthStoreProvider>
+            </InitAuthStore>
           </Suspense>
         </ThemeProvider>
       </body>
