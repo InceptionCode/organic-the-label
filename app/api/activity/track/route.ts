@@ -27,7 +27,13 @@ export async function POST(req: Request) {
     } = await supabaseServerClient.auth.getUser();
 
     if (authError) {
-      console.error("activity auth lookup failed", authError);
+      // AuthSessionMissingError (name: 'AuthSessionMissingError', status: 400)
+      // simply means there is no active session — an expected, fully-handled
+      // state for anonymous visitors. Logging it as an error creates misleading
+      // noise in tests and production logs. Only surface unexpected auth failures.
+      if (authError.name !== 'AuthSessionMissingError') {
+        console.error("activity auth lookup failed", authError);
+      }
     }
 
     if (user) {
