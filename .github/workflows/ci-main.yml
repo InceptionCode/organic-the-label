@@ -59,6 +59,8 @@ jobs:
         run: pnpm test:e2e
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_TEST_EMAIL: ${{ secrets.PLAYWRIGHT_TEST_EMAIL }}
+          PLAYWRIGHT_TEST_PASSWORD: ${{ secrets.PLAYWRIGHT_TEST_PASSWORD }}
 
       - name: Upload Playwright report on failure
         uses: actions/upload-artifact@v4

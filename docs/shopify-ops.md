@@ -22,8 +22,9 @@ Used for:
 
 ### orders/paid
 
-- Purpose: future entitlement reconciliation / analytics
-- Endpoint: TBD
+- Purpose: entitlement grants (writes to `entitlements` table) after successful payment
+- Endpoint: /api/store/orders/paid
+- Auth: `?secret=` shared-secret query gate + Shopify HMAC verification
 
 ## Product metafields
 

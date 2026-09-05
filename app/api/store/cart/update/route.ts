@@ -20,9 +20,8 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
   const line = { id: lineId, quantity };
 
   if (!cartId) {
-    console.error("Cart does not exist!")
-
-    throw new Error("Cart could not be updated")
+    // No cart to update (cookie missing/expired) — nothing to do, not an error.
+    return NextResponse.json({ ok: true, cart: null });
   }
 
   const { data, errors } = await shopifyClient.request<CartLinesUpdateResponse>(CART_LINES_UPDATE_MUTATION, {
@@ -37,5 +36,13 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
   const added = data?.cartLinesUpdate;
   if (added?.userErrors?.message) return NextResponse.json({ ok: false, errors: added.userErrors }, { status: 400 });
 
-  return NextResponse.json({ ok: true, cart: added?.cart });
+  // Cart was already converted/expired — clear the stale cookie so the next
+  // add-to-cart starts a fresh cart instead of repeating this failure.
+  if (!added?.cart) {
+    const res = NextResponse.json({ ok: true, cart: null });
+    res.cookies.delete(CART_COOKIE);
+    return res;
+  }
+
+  return NextResponse.json({ ok: true, cart: added.cart });
 }

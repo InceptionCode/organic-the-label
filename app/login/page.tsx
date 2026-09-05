@@ -15,13 +15,14 @@ import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod/v4';
 import Link from 'next/link';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import MagicLink from '@/app/components/auth/magic-link';
 import ResetPassword from '@/app/components/auth/reset-password';
 
 // TODO: Include error handling and error boundary. Display toast for login failure. Display toast for successful state.
 // Later version will include the option to sign in via the Google provider.
 export default function Login() {
+  const router = useRouter();
   const [signinState, signinSubmitAction, signinPending] = useActionState(signinAction, undefined);
   const lastResult = signinState && typeof signinState === 'object' && !('ok' in signinState) ? signinState : null;
 
@@ -52,9 +53,9 @@ export default function Login() {
       });
       fetch('/api/auth/bootstrap', { method: 'POST', credentials: 'include' })
         .then((res) => res.json())
-        .then((data) => { if (data.ok) redirect('/explore'); });
+        .then((data) => { if (data.ok) router.push('/explore'); });
     }
-  }, [loginFields.email.value, signinState]);
+  }, [loginFields.email.value, signinState, router]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-16">

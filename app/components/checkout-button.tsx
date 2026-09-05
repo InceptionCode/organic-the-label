@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Button } from '@/ui-components/button';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
-import { useEffect } from 'react';
 
 import { useTrackingReady } from '@/store/activity-hydrator';
 
@@ -17,13 +16,16 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
   const isTrackingReady = useTrackingReady();
   const canCheckout = Boolean(checkoutUrl) && !disabled;
 
-  useEffect(() => {
-    if (canCheckout && isTrackingReady) {
+  // checkout_clicked previously fired from a useEffect keyed on canCheckout, which
+  // meant it logged the moment the button became enabled (e.g. right after any
+  // add-to-cart), not when the user actually clicked it. Fire it on the real click instead.
+  const handleCheckoutClick = () => {
+    if (isTrackingReady) {
       trackActivity({
         eventType: "checkout_clicked",
       });
     }
-  }, [canCheckout, isTrackingReady]);
+  };
 
   if (canCheckout && checkoutUrl) {
     return (
@@ -34,7 +36,7 @@ export function CheckoutButton({ checkoutUrl, disabled, className = '' }: Checko
         size="lg"
         className={`w-full justify-center ${className}`}
       >
-        <Link href={checkoutUrl} target='_blank' rel='noopener noreferrer'>Checkout</Link>
+        <Link href={checkoutUrl} target='_blank' rel='noopener noreferrer' onClick={handleCheckoutClick}>Checkout</Link>
       </Button>
     );
   }
