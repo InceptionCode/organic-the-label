@@ -286,6 +286,46 @@ export type ShopifyOrderPaidPayload = {
 };
 
 // --------------------
+// COMPOSITIONS (free loop previews — /composition)
+// --------------------
+
+export const COMPOSITION_PAGE_COUNT = 24
+
+const compositionPlatformInstagram = z.literal("instagram")
+const compositionPlatformYoutube = z.literal("youtube")
+
+export const unionCompositionPlatform = z.union([compositionPlatformInstagram, compositionPlatformYoutube])
+export type CompositionPlatform = z.infer<typeof unionCompositionPlatform>
+
+// Full row (server-only — includes the Shopify Files URLs used to build the zip).
+export const CompositionSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  bpm: z.number().nullable().optional(),
+  musical_key: z.string().nullable().optional(),
+  tags: z.array(z.string()).default([]),
+  platform: unionCompositionPlatform,
+  embed_url: z.string(),
+  posted_at: z.string(),
+  audio_file_url: z.string(),
+  terms_file_url: z.string(),
+  audio_file_name: z.string().nullable().optional(),
+  active: z.boolean().default(true),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+})
+
+export type Composition = z.infer<typeof CompositionSchema>
+
+
+export type CompositionListItem = Omit<
+  Composition,
+  "audio_file_url" | "terms_file_url" | "audio_file_name" | "active" | "created_at" | "updated_at"
+>
+
+// --------------------
 // SUPABASE TABLES (SQL)
 // --------------------
 

@@ -1,6 +1,6 @@
 {
   "name": "organic-the-label",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,6 +9,8 @@
     "generate-seed": "ts-node seed.ts",
     "seed:free-resources:dev": "NODE_ENV=development ts-node seed-free-resources.ts",
     "seed:free-resources:prod": "NODE_ENV=production ts-node seed-free-resources.ts",
+    "seed:compositions:dev": "NODE_ENV=development ts-node seed-compositions.ts",
+    "seed:compositions:prod": "NODE_ENV=production ts-node seed-compositions.ts",
     "start": "next start",
     "serve": "pnpm build && pnpm start",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
@@ -46,6 +48,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.41.0",
+    "fflate": "^0.8.2",
     "framer-motion": "^12.38.0",
     "future": "link:@conform-to/react/future",
     "lucide-react": "^0.488.0",
