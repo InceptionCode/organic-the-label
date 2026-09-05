@@ -30,7 +30,6 @@ export default defineConfig({
         // Type-only files
         'lib/filters/types.ts',
         // Store hydrator components (React components, not testable pure logic)
-        'store/init-auth-store.tsx',
         'store/activity-hydrator.tsx',
       ],
     },

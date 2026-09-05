@@ -18,9 +18,8 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
   const cartId = jar.get(CART_COOKIE)?.value ?? null;
 
   if (!cartId) {
-    console.error("Cart does not exist!")
-
-    throw new Error("Cart (item) could not be remove")
+    // No cart to remove from (cookie missing/expired) — nothing to do, not an error.
+    return NextResponse.json({ ok: true, cart: null });
   }
 
   const { data, errors } = await shopifyClient.request<CartLinesRemove>(CART_LINES_REMOVE_MUTATION, {
@@ -35,9 +34,13 @@ export async function POST(req: Request): Promise<NextResponse<CartState>> {
   const removed = data?.cartLinesRemove;
   if (removed?.userErrors?.message) return NextResponse.json({ ok: false, errors: removed.userErrors }, { status: 400 });
 
-  if (removed?.cart?.totalQuantity === 0) {
-    jar.delete(CART_COOKIE)
+  // Empty cart or a cart that was already converted/expired (no cart back at all) —
+  // either way, clear the stale cookie so the next add-to-cart starts fresh.
+  if (!removed?.cart || removed.cart.totalQuantity === 0) {
+    const res = NextResponse.json({ ok: true, cart: removed?.cart ?? null });
+    res.cookies.delete(CART_COOKIE);
+    return res;
   }
 
-  return NextResponse.json({ ok: true, cart: removed?.cart });
+  return NextResponse.json({ ok: true, cart: removed.cart });
 }
