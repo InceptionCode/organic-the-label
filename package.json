@@ -24,7 +24,10 @@
     "test:e2e:smoke": "playwright test --grep @smoke",
     "test:ci": "vitest run tests/unit && vitest run tests/integration",
     "test:all": "pnpm test:ci && pnpm test:e2e",
-    "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql"
+    "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql",
+    "changelog": "git-cliff -o CHANGELOG.md",
+    "release": "bash scripts/release.sh",
+    "prepare": "husky"
   },
   "dependencies": {
     "@conform-to/react": "^1.13.3",
@@ -67,6 +70,8 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@eslint/eslintrc": "^3.3.1",
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
@@ -88,6 +93,8 @@
     "eslint": "^9.24.0",
     "eslint-config-next": "^16.0.1",
     "flowbite": "^4.0.1",
+    "git-cliff": "^2.13.1",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lodash": "^4.17.21",
     "msw": "^2.12.14",
