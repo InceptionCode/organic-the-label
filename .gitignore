@@ -43,6 +43,10 @@ env
 *.tsbuildinfo
 next-env.d.ts
 
+# local seed files (copy from *.example.ts — do not commit real URLs)
+/seed-free-resources.ts
+/seed-compositions.ts
+
 # supabase
 /supabase/*
 

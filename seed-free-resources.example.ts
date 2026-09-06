@@ -1,22 +1,43 @@
 /**
- * seed-free-resources.ts
+ * seed-free-resources.example.ts
  *
- * Inserts the "starter-kit" free resource row into the free_resources table.
+ * Template for seeding the `free_resources` table. This file is safe to commit.
+ * Do not put real download URLs or production data here.
  *
- * Usage:
- *   Dev:  NODE_ENV=development ts-node seed-free-resources.ts
- *   Prod: NODE_ENV=production  ts-node seed-free-resources.ts
+ * ---------------------------------------------------------------------------
+ * How to seed
+ * ---------------------------------------------------------------------------
+ * 1. Copy this template to a local (gitignored) file:
+ *      cp seed-free-resources.example.ts seed-free-resources.ts
  *
- * Or via pnpm scripts (see package.json):
- *   pnpm seed:free-resources:dev
- *   pnpm seed:free-resources:prod
+ * 2. Fill in real values in FREE_RESOURCES below:
+ *    - slug: unique key used for upserts (onConflict: 'slug')
+ *    - name / description: shown to subscribers
+ *    - download_url: a direct link (Google Drive, Dropbox, S3, etc.) that can
+ *      be emailed without requiring a login. Replace the placeholder before
+ *      running against production.
+ *    - active: false to insert a row without exposing it yet
+ *
+ * 3. Ensure env vars exist in `.env.development` or `.env.production`:
+ *      SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)
+ *      SUPABASE_SERVICE_ROLE_KEY
+ *
+ * 4. Run against the matching environment:
+ *      Dev:  pnpm seed:free-resources:dev
+ *      Prod: pnpm seed:free-resources:prod
+ *
+ *    Or:
+ *      NODE_ENV=development ts-node seed-free-resources.ts
+ *      NODE_ENV=production  ts-node seed-free-resources.ts
+ *
+ * The script upserts by slug, so re-running updates the same row instead of
+ * duplicating it. Never commit seed-free-resources.ts.
  */
 
 import { existsSync } from 'fs'
 import { config } from 'dotenv'
 import { resolve } from 'path'
 
-// Pick env file based on NODE_ENV
 const isProd = process.env.NODE_ENV === 'production'
 const envFile = isProd ? '.env.production' : '.env.development'
 const envPath = resolve(process.cwd(), envFile)
@@ -32,14 +53,10 @@ import { createClient } from '@supabase/supabase-js'
 
 const FREE_RESOURCES = [
   {
-    slug: 'starter-kit',
-    name: 'Organic Sonics Starter Kit',
-    description:
-      'A curated collection of drums, one-shots, and samples to get you started.',
-    // ⚠️  Replace with the real download URL before running against production.
-    // This should be a direct link (Google Drive, Dropbox, S3, etc.) that can
-    // be emailed to subscribers without requiring a login.
-    download_url: 'https://drive.google.com/drive/folders/1BKu5IKQwHeEUTXs-JBwvxLfhamXSVjuT?usp=drive_link',
+    slug: 'your-resource-slug',
+    name: 'Your Resource Name',
+    description: 'Short description of what the download includes.',
+    download_url: 'https://example.com/your-direct-download-link',
     active: true,
   },
 ]

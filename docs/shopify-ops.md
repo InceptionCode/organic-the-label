@@ -54,7 +54,8 @@ Example:
   `fflate`, and streams one `.zip` (`<slug>/<audio file>` + `<slug>/Terms of Use.<ext>`)
 - Content ops per loop: upload the audio + terms files to Shopify Files, copy their `cdn.shopify.com`
   URLs into `audio_file_url` / `terms_file_url`, set `embed_url` to the Instagram permalink or
-  YouTube Short URL, then insert the row (or run `pnpm seed:compositions:dev`)
+  YouTube Short URL, then insert the row (or copy `seed-compositions.example.ts` to
+  `seed-compositions.ts` and run `pnpm seed:compositions:dev`)
 - A shared `organic-sonics-terms-of-use.txt` in Shopify Files can back every row's `terms_file_url`
 
 ## Domains / DNS
