@@ -4,8 +4,6 @@ import { zipSync } from 'fflate';
 import { createSupabaseAdminClient } from '@/utils/supabase/base';
 import { ANON_COOKIE_NAME } from '@/lib/constants';
 
-export const runtime = 'nodejs';
-
 const TAG = '[/api/composition/download]';
 const MAX_TOTAL_BYTES = 100 * 1024 * 1024;
 
