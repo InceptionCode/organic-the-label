@@ -2,7 +2,7 @@ name: CI — Main
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, release/**]
 permissions:
   statuses: write
   contents: read
