@@ -8,7 +8,7 @@ import {
 const TAG = '[getCompositions]';
 
 const LIST_COLUMNS =
-  'id, slug, title, description, bpm, musical_key, tags, platform, embed_url, posted_at';
+  'id, slug, title, description, bpm, musical_key, tags, platform, embed_url, posted_at, audio_file_url';
 
 export type GetCompositionsResult = {
   compositions: CompositionListItem[];

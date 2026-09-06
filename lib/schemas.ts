@@ -286,7 +286,7 @@ export type ShopifyOrderPaidPayload = {
 };
 
 // --------------------
-// COMPOSITIONS (free loop previews — /composition)
+// COMPOSITIONS (free loop previews — /compositions)
 // --------------------
 
 export const COMPOSITION_PAGE_COUNT = 24
@@ -322,7 +322,7 @@ export type Composition = z.infer<typeof CompositionSchema>
 
 export type CompositionListItem = Omit<
   Composition,
-  "audio_file_url" | "terms_file_url" | "audio_file_name" | "active" | "created_at" | "updated_at"
+  "terms_file_url" | "audio_file_name" | "active" | "created_at" | "updated_at"
 >
 
 // --------------------

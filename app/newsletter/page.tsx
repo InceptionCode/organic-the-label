@@ -26,15 +26,16 @@ export default function NewsletterPage() {
   return (
     <main className="w-full">
       <div className="content-container py-12 md:py-16">
-        <p className="eyebrow mb-3" style={{ color: 'var(--accent-secondary)' }}>
+        <p className="eyebrow mb-4" style={{ color: 'var(--accent-secondary)' }}>
           Organic Sonics
         </p>
         <h1
-          className="mb-4 leading-none text-primary"
+          className="mb-5 text-primary"
           style={{
             fontFamily: 'var(--font-heading)',
             fontSize: 'clamp(2.5rem, 6vw, 4rem)',
             letterSpacing: '0.02em',
+            lineHeight: 1.1,
           }}
         >
           The newsletter
