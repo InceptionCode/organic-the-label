@@ -145,9 +145,9 @@ export function InquiryForm() {
           className="relative overflow-hidden"
           style={{
             borderRadius: "20px",
-            border: "1px solid var(--border-default)",
+            border: "1px solid rgba(224,61,42,0.28)",
             background: "var(--surface-1)",
-            boxShadow: "var(--shadow-lg-premium)",
+            boxShadow: "0 0 0 1px rgba(224,61,42,0.08), var(--shadow-lg-premium)",
           }}
         >
           <div className="px-6 py-8 md:px-10 md:py-10">

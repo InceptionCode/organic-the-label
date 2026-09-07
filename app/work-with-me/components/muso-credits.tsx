@@ -36,8 +36,8 @@ export function MusoCredits() {
   if (!src) {
     return (
       <div
-        className="card-base card-padding-lg flex flex-col gap-4"
-        style={{ minHeight: "220px", justifyContent: "center" }}
+        className="wwm-card card-padding-lg flex flex-col gap-4"
+        style={{ minHeight: "240px", justifyContent: "center" }}
       >
         <span
           className="flex h-11 w-11 items-center justify-center rounded-full"
@@ -68,7 +68,7 @@ export function MusoCredits() {
   }
 
   return (
-    <div ref={containerRef} className="card-base overflow-hidden" style={{ minHeight: "220px" }}>
+    <div ref={containerRef} className="wwm-card overflow-hidden" style={{ minHeight: "240px" }}>
       {visible ? (
         <iframe
           src={src}

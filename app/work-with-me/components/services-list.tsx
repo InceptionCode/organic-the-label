@@ -19,14 +19,18 @@ export function ServicesList() {
         title="Ways to work together"
       />
 
-      <ul className="mt-7 grid gap-4 sm:grid-cols-2">
+      <ul className="mt-8 grid gap-4 sm:grid-cols-2">
         {SERVICES.map((service) => {
           const Icon = ICONS[service.icon];
           return (
-            <li key={service.title} className="card-base card-padding-lg flex flex-col gap-3">
+            <li key={service.title} className="wwm-card card-padding-lg flex flex-col gap-3">
               <span
-                className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)]"
-                style={{ background: "var(--accent-primary-soft)", color: "var(--accent-primary)" }}
+                className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-md)]"
+                style={{
+                  background: "var(--accent-primary-soft)",
+                  color: "var(--accent-primary)",
+                  border: "1px solid rgba(224,61,42,0.2)",
+                }}
               >
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
