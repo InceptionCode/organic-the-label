@@ -5,6 +5,45 @@
 const SPOTIFY_EMBED_KINDS = ["track", "album", "artist", "playlist", "show", "episode"] as const;
 
 /**
+ * Pull the @handle out of a YouTube channel URL (youtube.com/@handle[/...]).
+ * Returns the handle without the leading "@", or null.
+ */
+export function youtubeHandleFromUrl(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (!/(^|\.)youtube\.com$/.test(url.hostname)) return null;
+    const seg = url.pathname.split("/").filter(Boolean)[0] ?? "";
+    if (!seg.startsWith("@")) return null;
+    const handle = seg.slice(1);
+    return /^[A-Za-z0-9._-]+$/.test(handle) ? handle : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Pull the artist id out of any Spotify artist URL (open.spotify.com/artist/<id>
+ * or its /embed/ form). Returns null if the link is not a Spotify artist link.
+ */
+export function spotifyArtistIdFromUrl(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (!/(^|\.)spotify\.com$/.test(url.hostname)) return null;
+    const parts = url.pathname.split("/").filter(Boolean);
+    const idx = parts[0] === "embed" ? 1 : 0;
+    if (parts[idx] !== "artist") return null;
+    const id = parts[idx + 1];
+    return id && /^[A-Za-z0-9]+$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Accept a Spotify link and return its `open.spotify.com/embed/...` form.
  * Handles both a bare `open.spotify.com/artist/<id>` URL and one that already
  * points at `/embed/`. Returns null for anything that is not an https
