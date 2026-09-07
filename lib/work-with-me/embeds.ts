@@ -24,10 +24,11 @@ export function youtubeHandleFromUrl(raw: string): string | null {
 }
 
 /**
- * Pull the artist id out of any Spotify artist URL (open.spotify.com/artist/<id>
- * or its /embed/ form). Returns null if the link is not a Spotify artist link.
+ * Pull the id of a given kind out of any Spotify URL — bare
+ * (open.spotify.com/<kind>/<id>) or its /embed/ form. Returns null if the link
+ * is not a Spotify link of that kind.
  */
-export function spotifyArtistIdFromUrl(raw: string): string | null {
+export function spotifyIdFromUrl(raw: string, kind: "artist" | "track" | "album"): string | null {
   const value = raw.trim();
   if (!value) return null;
   try {
@@ -35,13 +36,16 @@ export function spotifyArtistIdFromUrl(raw: string): string | null {
     if (!/(^|\.)spotify\.com$/.test(url.hostname)) return null;
     const parts = url.pathname.split("/").filter(Boolean);
     const idx = parts[0] === "embed" ? 1 : 0;
-    if (parts[idx] !== "artist") return null;
+    if (parts[idx] !== kind) return null;
     const id = parts[idx + 1];
     return id && /^[A-Za-z0-9]+$/.test(id) ? id : null;
   } catch {
     return null;
   }
 }
+
+export const spotifyArtistIdFromUrl = (raw: string) => spotifyIdFromUrl(raw, "artist");
+export const spotifyTrackIdFromUrl = (raw: string) => spotifyIdFromUrl(raw, "track");
 
 /**
  * Accept a Spotify link and return its `open.spotify.com/embed/...` form.

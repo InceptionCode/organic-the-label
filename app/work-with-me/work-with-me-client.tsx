@@ -73,7 +73,7 @@ export function WorkWithMeClient({ spotify, recentPosts }: WorkWithMeClientProps
         </RevealSection>
 
         <RevealSection threshold={0.08} distance={40}>
-          <PlacementsGrid />
+          <PlacementsGrid placements={spotify.placements} />
         </RevealSection>
 
         <RevealSection threshold={0.08} distance={40}>

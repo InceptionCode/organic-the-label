@@ -19,6 +19,14 @@ export type SpotifyArtist = {
   spotifyUrl: string;
 };
 
+export type SpotifyTrackMeta = {
+  id: string;
+  name: string;
+  artistName: string;
+  albumImageUrl: string | null;
+  spotifyUrl: string;
+};
+
 export type SpotifyRelease = {
   id: string;
   name: string;
@@ -130,6 +138,30 @@ export async function getSpotifyArtist(artistId: string): Promise<SpotifyArtist 
     genres: data.genres ?? [],
     popularity: data.popularity ?? 0,
     spotifyUrl: data.external_urls?.spotify ?? `https://open.spotify.com/artist/${data.id}`,
+  };
+}
+
+export async function getSpotifyTrack(trackId: string): Promise<SpotifyTrackMeta | null> {
+  if (!trackId) return null;
+  console.info(`${TAG} fetching track`, { trackId });
+
+  const data = await spotifyGet<{
+    id: string;
+    name: string;
+    artists: { name: string }[];
+    external_urls: { spotify: string };
+    album: { images: { url: string; width: number }[] };
+  }>(`/tracks/${trackId}`);
+
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    name: data.name,
+    artistName: data.artists?.[0]?.name ?? "",
+    albumImageUrl:
+      [...(data.album?.images ?? [])].sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]?.url ?? null,
+    spotifyUrl: data.external_urls?.spotify ?? `https://open.spotify.com/track/${data.id}`,
   };
 }
 
