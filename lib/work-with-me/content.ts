@@ -87,8 +87,7 @@ export const YOUTUBE_HANDLE =
 
 // ─────────────────────────────────────────────────────────────
 // Major placements & credits
-//   • Curated highlights below (FILL BEFORE RELEASE — real placements only,
-//     empty ⇒ the highlight grid is hidden)
+//   • Curated highlights below (6 total)
 //   • The Muso.ai embed is the fuller, self-updating list shown beneath them
 // ─────────────────────────────────────────────────────────────
 
@@ -98,7 +97,25 @@ export const PLACEMENTS: Placement[] = [
     track: "Like The Rest",
     role: "Producer, Mastering Engineer",
     href: "https://open.spotify.com/track/2dscDmPAiY0NoCZImNXXCR?si=8a706e7ec74e4dec"
-  }
+  },
+  {
+    artist: "RRForeverSolid",
+    track: "Something To See",
+    role: "Producer, Mastering Engineer",
+    href: "https://open.spotify.com/track/7sB9pnsYK9KiwFkVjwSLld?si=abcb47a5ceda4ffb"
+  },
+  {
+    artist: "RRForeverSolid",
+    track: "Double Up",
+    role: "Producer, Mastering Engineer",
+    href: "https://open.spotify.com/track/72RbpkRqYj5p5MWqDQSUfU?si=cee4058bb38245f2"
+  },
+  {
+    artist: "RRForeverSolid",
+    track: "Muddies",
+    role: "Producer",
+    href: "https://open.spotify.com/track/7sjmDwOaN9WBPj73uDxYlg?si=b4bf53dd5e0445fd"
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────

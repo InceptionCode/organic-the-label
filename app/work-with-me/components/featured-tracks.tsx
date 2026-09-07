@@ -10,32 +10,27 @@ type FeaturedTracksProps = {
 
 const GRAIN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
+/**
+ * Spotify's compact embed (152px) fills exactly — a taller iframe leaves a white
+ * band because the artist widget doesn't grow to fill it. Full-width strip.
+ */
 function Embed() {
   const src = spotifyEmbedSrc(SPOTIFY_EMBED_URL);
   if (!src) return null;
   return (
-    <div
-      className="overflow-hidden"
-      style={{
-        height: "352px",
-        borderRadius: "var(--radius-lg)",
-        background: "rgba(0,0,0,0.35)",
-        border: "1px solid rgba(233,220,198,0.14)",
-      }}
-    >
-      <iframe
-        src={src}
-        title="JUICEMAN — featured tracks on Spotify"
-        loading="lazy"
-        className="h-full w-full border-0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      />
-    </div>
+    <iframe
+      src={src}
+      title="JUICEMAN on Spotify"
+      loading="lazy"
+      className="w-full border-0"
+      style={{ height: "152px", borderRadius: "var(--radius-lg)" }}
+      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    />
   );
 }
 
 export function FeaturedTracks({ releases }: FeaturedTracksProps) {
-  const items = releases.slice(0, 6);
+  const items = releases.slice(0, 8);
   const hasEmbed = Boolean(spotifyEmbedSrc(SPOTIFY_EMBED_URL));
 
   return (
@@ -77,8 +72,8 @@ export function FeaturedTracks({ releases }: FeaturedTracksProps) {
         </h2>
 
         {items.length > 0 ? (
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12 lg:items-start">
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <>
+            <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
               {items.map((release) => (
                 <li key={release.id}>
                   <a
@@ -96,12 +91,12 @@ export function FeaturedTracks({ releases }: FeaturedTracksProps) {
                           src={release.imageUrl}
                           alt={release.name}
                           fill
-                          sizes="(min-width: 1024px) 14vw, (min-width: 640px) 22vw, 42vw"
+                          sizes="(min-width: 1280px) 15vw, (min-width: 768px) 22vw, (min-width: 640px) 30vw, 45vw"
                           className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
                         />
                       ) : (
-                        <span className="flex h-full w-full items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }}>
-                          <Music className="h-6 w-6" style={{ color: "rgba(233,220,198,0.4)" }} aria-hidden />
+                        <span className="flex h-full w-full items-center justify-center" style={{ background: "#000000" }}>
+                          <Music className="h-6 w-6" style={{ color: "rgba(212,196,168,0.4)" }} aria-hidden />
                         </span>
                       )}
                       <span
@@ -122,10 +117,18 @@ export function FeaturedTracks({ releases }: FeaturedTracksProps) {
                 </li>
               ))}
             </ul>
-            <Embed />
-          </div>
+
+            {hasEmbed && (
+              <div className="mt-10">
+                <p className="eyebrow mb-3" style={{ color: "#E9DCC6" }}>
+                  Listen
+                </p>
+                <Embed />
+              </div>
+            )}
+          </>
         ) : hasEmbed ? (
-          <div className="mt-8 max-w-3xl">
+          <div className="mt-8">
             <Embed />
           </div>
         ) : (
