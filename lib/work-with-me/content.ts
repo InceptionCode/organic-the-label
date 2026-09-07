@@ -20,7 +20,7 @@ export type Placement = {
   artist: string;
   track: string;
   role: string;
-  artworkUrl: string;
+  /** Spotify track URL. Cover art is pulled from it; missing/non-Spotify ⇒ icon fallback. */
   href?: string;
 };
 
@@ -80,8 +80,6 @@ export const ARTIST_LINKS: ArtistLink[] = [
 
 // ─────────────────────────────────────────────────────────────
 // Recent posts — auto-pulled
-//   • YouTube: latest uploads from YOUTUBE_HANDLE (needs YOUTUBE_API_KEY)
-//   • Instagram: newest instagram-platform rows from the /compositions table
 // ─────────────────────────────────────────────────────────────
 
 export const YOUTUBE_HANDLE =
@@ -94,7 +92,14 @@ export const YOUTUBE_HANDLE =
 //   • The Muso.ai embed is the fuller, self-updating list shown beneath them
 // ─────────────────────────────────────────────────────────────
 
-export const PLACEMENTS: Placement[] = [];
+export const PLACEMENTS: Placement[] = [
+  {
+    artist: "RRForeverSolid",
+    track: "Like The Rest",
+    role: "Producer, Mastering Engineer",
+    href: "https://open.spotify.com/track/2dscDmPAiY0NoCZImNXXCR?si=8a706e7ec74e4dec"
+  }
+];
 
 // ─────────────────────────────────────────────────────────────
 // Services — the only pre-filled list
@@ -125,19 +130,9 @@ export const SERVICES: Service[] = [
 
 // ─────────────────────────────────────────────────────────────
 // Proof of work — Spotify featured tracks embed
-// FILL BEFORE RELEASE — a Spotify artist, album, or playlist URL.
-// Empty ⇒ placeholder card.
 // ─────────────────────────────────────────────────────────────
 
 export const SPOTIFY_EMBED_URL = "https://open.spotify.com/embed/artist/1rfSEaVxpWG8WXtL6Wj0SH?utm_source=generator&si=9fa2e27ecd514fc0"
-
-// ─────────────────────────────────────────────────────────────
-// Spotify dynamic data
-// The artist id is derived from the Spotify link in ARTIST_LINKS above.
-// Set SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET in the environment to enable
-// the live artist photo, follower count, and top tracks. Without them the page
-// falls back to HERO.imageUrl and the static embed.
-// ─────────────────────────────────────────────────────────────
 
 export const SPOTIFY_ARTIST_ID =
   spotifyArtistIdFromUrl(ARTIST_LINKS.find((link) => link.platform === "spotify")?.url ?? "") ?? "";

@@ -2,17 +2,39 @@ import { cacheLife } from "next/cache";
 import {
   getSpotifyArtist,
   getSpotifyArtistReleases,
+  getSpotifyTrack,
   type SpotifyArtist,
   type SpotifyRelease,
 } from "@/lib/spotify/artist";
-import { SPOTIFY_ARTIST_ID } from "./content";
+import { PLACEMENTS, SPOTIFY_ARTIST_ID, type Placement } from "./content";
+import { spotifyTrackIdFromUrl } from "./embeds";
 
 const TAG = "[work-with-me/spotify-data]";
+
+export type EnrichedPlacement = Placement & {
+  /** Cover art resolved from the Spotify track href, or null for the icon fallback. */
+  artworkUrl: string | null;
+};
 
 export type WorkWithMeSpotify = {
   artist: SpotifyArtist | null;
   releases: SpotifyRelease[];
+  placements: EnrichedPlacement[];
 };
+
+async function enrichPlacements(): Promise<EnrichedPlacement[]> {
+  if (PLACEMENTS.length === 0) return [];
+  console.info(`${TAG} enriching placements`, { count: PLACEMENTS.length });
+
+  return Promise.all(
+    PLACEMENTS.map(async (placement) => {
+      const trackId = spotifyTrackIdFromUrl(placement.href ?? "");
+      if (!trackId) return { ...placement, artworkUrl: null };
+      const track = await getSpotifyTrack(trackId);
+      return { ...placement, artworkUrl: track?.albumImageUrl ?? null };
+    }),
+  );
+}
 
 /**
  * One call for everything the Work With Me page pulls from Spotify. Returns a
@@ -23,21 +45,17 @@ export async function getWorkWithMeSpotify(): Promise<WorkWithMeSpotify> {
   "use cache";
   cacheLife("hours");
 
-  if (!SPOTIFY_ARTIST_ID) {
-    console.info(`${TAG} SPOTIFY_ARTIST_ID not set — using content fallbacks`);
-    return { artist: null, releases: [] };
-  }
-
-  console.info(`${TAG} loading`, { artistId: SPOTIFY_ARTIST_ID });
-  const [artist, releases] = await Promise.all([
-    getSpotifyArtist(SPOTIFY_ARTIST_ID),
-    getSpotifyArtistReleases(SPOTIFY_ARTIST_ID),
+  const [artist, releases, placements] = await Promise.all([
+    SPOTIFY_ARTIST_ID ? getSpotifyArtist(SPOTIFY_ARTIST_ID) : Promise.resolve(null),
+    SPOTIFY_ARTIST_ID ? getSpotifyArtistReleases(SPOTIFY_ARTIST_ID) : Promise.resolve([]),
+    enrichPlacements(),
   ]);
 
   console.info(`${TAG} loaded`, {
     hasArtist: Boolean(artist),
     releaseCount: releases.length,
+    placementCount: placements.length,
   });
 
-  return { artist, releases };
+  return { artist, releases, placements };
 }
