@@ -39,10 +39,17 @@ test.describe('store browsing', () => {
     // Click the image link of the first product card to navigate to the detail page.
     // (Clicking the outer card div can land on the audio player for products that
     // have a preview, so we target the dedicated image link instead.)
-    await page.locator('[data-testid="product-card-link"]').first().click()
+    const link = page.locator('[data-testid="product-card-link"]').first()
+    await link.waitFor()
 
-    // The URL should now be /store/<handle>
-    await expect(page).toHaveURL(/\/store\/.+/)
+    // The card links are server-rendered <a> tags that next/link upgrades to
+    // client navigation on hydration. A click that lands inside the hydration
+    // window can be dropped (the anchor default is prevented before the router
+    // is ready) — only observable on slow CI runners. Retry until the URL moves.
+    await expect(async () => {
+      if (!/\/store\/.+/.test(page.url())) await link.click({ timeout: 3_000 })
+      await page.waitForURL(/\/store\/.+/, { timeout: 1_500 })
+    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] })
   })
 
   test('user can apply a category filter @smoke', async ({ page }) => {

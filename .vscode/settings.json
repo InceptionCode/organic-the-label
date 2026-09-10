@@ -1,0 +1,37 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority"
+  },
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.run": "onSave",
+  "eslint.format.enable": false,
+  "search.followSymlinks": false,
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/coverage/**": true,
+    "**/playwright-report/**": true,
+    "**/test-results/**": true,
+    "**/temporary screenshots/**": true,
+    "**/.git/objects/**": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/coverage": true,
+    "**/playwright-report": true,
+    "**/test-results": true,
+    "**/temporary screenshots": true,
+    "**/pnpm-lock.yaml": true,
+    "**/CHANGELOG.md": true
+  },
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/*.tsbuildinfo": true
+  }
+}

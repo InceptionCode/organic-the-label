@@ -2,8 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ScrollScrubHero } from "@/ui-components/scroll-scrub-hero";
+import dynamic from "next/dynamic";
 import { useStorage } from "@/utils/hooks/use-storage";
+
+const ScrollScrubHero = dynamic(
+  () => import("@/ui-components/scroll-scrub-hero").then((m) => m.ScrollScrubHero),
+  { ssr: false, loading: () => null },
+);
 
 const SPLASH_KEY = "splashSeen";
 
