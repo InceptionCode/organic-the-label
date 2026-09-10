@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import Image from "next/image";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X, ExternalLink } from "lucide-react";
+import { X, ExternalLink, Play } from "lucide-react";
 import type { RecentPostsData } from "@/lib/work-with-me/recent-posts-data";
 import { instagramEmbedSrc } from "@/lib/composition/embed-url";
 import { SectionHeading } from "./section-heading";
@@ -16,10 +17,12 @@ type PlayerMeta = {
   kind: "youtube" | "instagram";
   embedSrc: string;
   href: string;
-  /** IG only — direct .mp4 for inline playback; falls back to embedSrc when null. */
+  /** IG only — same-origin proxy path for inline playback; null when it links out. */
   videoUrl?: string | null;
-  /** IG only — poster frame for the <video>. */
+  /** IG only — poster frame for the <video> / link-out card. */
   poster?: string;
+  /** IG only — the post is a video/Reel (drives the play glyph on the link-out card). */
+  isVideoPost?: boolean;
 };
 
 /** Interleave YouTube + Instagram so the coverflow alternates sources. */
@@ -49,6 +52,7 @@ function buildSlides(data: RecentPostsData): CoverflowSlide[] {
         href: p.url,
         videoUrl: p.videoUrl,
         poster: p.imageUrl ?? undefined,
+        isVideoPost: p.isVideoPost,
       } satisfies PlayerMeta,
     }));
 
@@ -63,10 +67,14 @@ function buildSlides(data: RecentPostsData): CoverflowSlide[] {
 export function RecentPosts({ data }: RecentPostsProps) {
   const slides = useMemo(() => buildSlides(data), [data]);
   const [active, setActive] = useState<{ slide: CoverflowSlide; meta: PlayerMeta } | null>(null);
+  const [videoError, setVideoError] = useState(false);
 
   const onActivate = useCallback((slide: CoverflowSlide) => {
     const meta = slide.meta as PlayerMeta | undefined;
-    if (meta?.embedSrc) setActive({ slide, meta });
+    if (meta?.embedSrc) {
+      setVideoError(false);
+      setActive({ slide, meta });
+    }
   }, []);
 
   if (slides.length === 0) return null;
@@ -79,7 +87,7 @@ export function RecentPosts({ data }: RecentPostsProps) {
         id="wwm-posts-title"
         eyebrow="Lately"
         title="Recent posts"
-        description="New sessions, breakdowns, and drops — pulled straight from YouTube and Instagram. Tap the center card to play."
+        description="New sessions, breakdowns, and drops — pulled straight from YouTube and Instagram. Tap the center card to watch."
       />
 
       <div className="mt-6">
@@ -124,11 +132,8 @@ export function RecentPosts({ data }: RecentPostsProps) {
                     />
                   </div>
                 ) : (
-                  <div className="h-[72vh] max-h-[760px] w-full bg-black">
-                    {active.meta.videoUrl ? (
-                      // Video posts play inline from media_url. Image posts and
-                      // reels whose media_url is withheld fall back to the
-                      // /embed/ iframe (a click-through card to instagram.com).
+                  <div className="relative h-[72vh] max-h-[760px] w-full bg-black">
+                    {active.meta.videoUrl && !videoError ? (
                       <video
                         key={active.meta.videoUrl}
                         src={active.meta.videoUrl}
@@ -139,16 +144,57 @@ export function RecentPosts({ data }: RecentPostsProps) {
                         loop
                         playsInline
                         preload="auto"
+                        onError={() => setVideoError(true)}
                       />
                     ) : (
-                      <iframe
-                        key={active.meta.embedSrc}
-                        src={active.meta.embedSrc}
-                        title={active.slide.title ?? "Instagram post"}
-                        className="h-full w-full border-0"
-                        scrolling="no"
-                        allow="clipboard-write; encrypted-media; picture-in-picture; web-share"
-                      />
+                      <a
+                        key={active.meta.href}
+                        href={active.meta.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group absolute inset-0 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--accent-primary)]"
+                      >
+                        {active.meta.poster && (
+                          <Image
+                            src={active.meta.poster}
+                            alt=""
+                            fill
+                            sizes="(min-width: 768px) 400px, 92vw"
+                            className="object-cover"
+                          />
+                        )}
+                        <span
+                          aria-hidden
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.55))",
+                          }}
+                        />
+                        <span className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+                          <span
+                            className="flex h-16 w-16 items-center justify-center rounded-full transition-transform duration-200 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-active:scale-95 motion-reduce:transition-none"
+                            style={{
+                              background: "var(--accent-primary)",
+                              boxShadow: "var(--shadow-glow)",
+                            }}
+                          >
+                            {active.meta.isVideoPost ? (
+                              <Play className="h-7 w-7" style={{ color: "#fff", marginLeft: 3 }} aria-hidden />
+                            ) : (
+                              <ExternalLink className="h-6 w-6" style={{ color: "#fff" }} aria-hidden />
+                            )}
+                          </span>
+                          <span
+                            className="text-body-s font-medium text-white"
+                            style={{ textShadow: "0 1px 14px rgba(0,0,0,0.65)" }}
+                          >
+                            {active.meta.isVideoPost
+                              ? "Watch this Reel on Instagram"
+                              : "View this post on Instagram"}
+                          </span>
+                        </span>
+                      </a>
                     )}
                   </div>
                 ))}

@@ -11,6 +11,8 @@ export type InstagramPost = {
   caption: string;
   postedAt: string;
   imageUrl: string | null;
+  /** The post is a video or Reel (whether or not we can stream it on-page). */
+  isVideoPost: boolean;
   videoUrl: string | null;
 };
 
@@ -40,6 +42,7 @@ async function getInstagram(limit: number): Promise<InstagramPost[]> {
     caption: m.caption,
     postedAt: m.timestamp,
     imageUrl: m.imageUrl,
-    videoUrl: m.videoUrl,
+    isVideoPost: m.isVideoPost,
+    videoUrl: m.videoStreamable ? `/api/instagram/video/${encodeURIComponent(m.id)}` : null,
   }));
 }
