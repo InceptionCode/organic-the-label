@@ -39,10 +39,19 @@ test.describe('store browsing', () => {
     // Click the image link of the first product card to navigate to the detail page.
     // (Clicking the outer card div can land on the audio player for products that
     // have a preview, so we target the dedicated image link instead.)
-    await page.locator('[data-testid="product-card-link"]').first().click()
+    const link = page.locator('[data-testid="product-card-link"]').first()
+    await expect(link).toBeVisible()
 
-    // The URL should now be /store/<handle>
-    await expect(page).toHaveURL(/\/store\/.+/)
+    // The card links are server-rendered <a href> tags. A pre-hydration click
+    // follows the native href (full nav); a post-hydration click is intercepted
+    // by next/link (client nav). Either way the URL must move to /store/<handle>.
+    // globalSetup pre-compiles this route so hydration is quick on CI, and
+    // Playwright retries the whole test twice on failure — a single click with a
+    // generous nav wait is enough without brittle toPass polling.
+    await Promise.all([
+      page.waitForURL(/\/store\/.+/),
+      link.click(),
+    ])
   })
 
   test('user can apply a category filter @smoke', async ({ page }) => {
@@ -62,8 +71,8 @@ test.describe('store browsing', () => {
     // history.pushState until the transition commits (after the data fetch). The
     // smoke test verifies the filter is APPLIED, not the exact URL timing.
     // "Clear all filters" only appears when hasActiveFilters is true — clicking
-    // any non-default filter sets it.
-    await expect(page.getByText('Clear all filters')).toBeVisible({ timeout: 5_000 })
+    // any non-default filter sets it. Inherit the CI-aware global expect timeout.
+    await expect(page.getByText('Clear all filters')).toBeVisible()
   })
 
   test('user can search for a product', async ({ page }) => {
@@ -82,6 +91,6 @@ test.describe('store browsing', () => {
     // it only renders when search state is non-empty.
     await expect(
       page.locator('[data-testid="store-filters"] input[type="text"]')
-    ).toHaveValue('kit', { timeout: 3_000 })
+    ).toHaveValue('kit')
   })
 })

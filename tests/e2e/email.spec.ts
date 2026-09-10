@@ -37,7 +37,7 @@ test.describe('/free — starter kit request form', () => {
     await page.locator('button[type="submit"]').click()
 
     // Success state: "IT'S ON THE WAY" heading should appear
-    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 20_000 })
   })
 
   test('does not submit when email field is empty', async ({ page }) => {
@@ -58,7 +58,7 @@ test.describe('/free — starter kit request form', () => {
 
     await page.locator('button[type="submit"]').click()
 
-    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /on the way/i })).toBeVisible({ timeout: 20_000 })
   })
 })
 
@@ -86,7 +86,7 @@ test.describe('/contact — support form', () => {
     await page.locator('button[type="submit"]').click()
 
     // Success: "MESSAGE RECEIVED" heading should appear
-    await expect(page.getByText(/message received/i)).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(/message received/i)).toBeVisible({ timeout: 20_000 })
   })
 
   test('shows an error when message is too short', async ({ page }) => {

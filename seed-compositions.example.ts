@@ -30,8 +30,8 @@
  *      Prod: pnpm seed:compositions:prod
  *
  *    Or:
- *      NODE_ENV=development ts-node seed-compositions.ts
- *      NODE_ENV=production  ts-node seed-compositions.ts
+ *      NODE_ENV=development tsx seed-compositions.ts
+ *      NODE_ENV=production  tsx seed-compositions.ts
  *
  * The script upserts by slug, so re-running updates the same row instead of
  * duplicating it. Never commit seed-compositions.ts.

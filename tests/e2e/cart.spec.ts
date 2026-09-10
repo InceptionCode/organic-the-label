@@ -14,14 +14,24 @@ async function addFirstProductToCart(page: Page) {
   await page.goto('/store')
 
   // Wait for product cards to load
-  await page.locator('[data-testid="product-card"]').first().waitFor()
+  await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible()
 
   // Navigate to the first product detail page by clicking the image link inside
   // the card. Clicking the outer div is unreliable — the bottom section (price,
   // buttons, audio preview) is not a link, so the center of a tall card can miss
   // the navigation anchor. The first <a> inside each card is the image link.
-  await page.locator('[data-testid="product-card"] a').first().click()
-  await page.waitForURL(/\/store\/.+/)
+  //
+  // The link is a server-rendered <a href>: a pre-hydration click follows the
+  // native href, a post-hydration click is a next/link client nav — either way
+  // the URL moves. globalSetup pre-compiles the route so hydration is quick on
+  // CI; a single click with a generous nav wait is enough (Playwright also
+  // retries the whole test twice on CI).
+  const cardLink = page.locator('[data-testid="product-card"] a').first()
+  await expect(cardLink).toBeVisible()
+  await Promise.all([
+    page.waitForURL(/\/store\/.+/),
+    cardLink.click(),
+  ])
 
   // Click the primary Add to Cart button (first match — product detail pages also
   // render add-to-cart buttons in the "you might also like" row, causing a strict
@@ -40,7 +50,7 @@ async function addFirstProductToCart(page: Page) {
   // read false and skip closing. Give it a short grace window to finish
   // opening first so that read is accurate.
   const drawer = page.locator('[data-testid="cart-drawer"]')
-  await drawer.waitFor({ state: 'visible', timeout: 1_000 }).catch(() => {})
+  await drawer.waitFor({ state: 'visible', timeout: 1_000 }).catch(() => { })
   if (await drawer.isVisible()) {
     await page.getByRole('button', { name: 'Close drawer' }).click()
     await expect(drawer).not.toBeVisible({ timeout: 3_000 })
@@ -112,17 +122,17 @@ test('user can remove an item from the cart', async ({ page }) => {
 
 test('only the clicked product card button shows "Adding..." — others stay idle', async ({ page }) => {
   await page.goto('/store')
-  await page.locator('[data-testid="product-card"]').first().waitFor()
+  await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible()
 
   // This test requires at least 2 product cards so we can prove button isolation.
   const cardCount = await page.locator('[data-testid="product-card"]').count()
   test.skip(cardCount < 2, 'Needs at least 2 product cards in the dev store')
 
-  // Intercept the cart/add request and stall it so we can inspect the
-  // in-flight button state before it resolves.
-  let releaseRoute: () => void = () => {}
+  // Hold the add request open for 3s so the in-flight button state stays
+  // observable — long enough for a slow CI runner to poll it, short enough not
+  // to stall the (single-worker) suite.
   await page.route('**/api/store/cart/add', async (route) => {
-    await new Promise<void>((resolve) => { releaseRoute = resolve })
+    await new Promise((resolve) => setTimeout(resolve, 3_000))
     await route.continue()
   })
 
@@ -130,20 +140,26 @@ test('only the clicked product card button shows "Adding..." — others stay idl
   const firstBtn = allAddBtns.first()
   const secondBtn = allAddBtns.nth(1)
 
-  // Click without awaiting — the intercepted route holds the request open.
-  firstBtn.click()
+  // AddToCartButton is a client component — a click that lands before it
+  // hydrates is dropped (React does not replay pre-hydration clicks) and the
+  // loading state never appears. globalSetup pre-compiles /store so this is
+  // rare on CI, but retry the click a couple of times to stay resilient. The
+  // retry only re-clicks while the button is still idle/enabled (a dropped
+  // click), never while it's mid-request.
+  await expect(async () => {
+    if (await firstBtn.isEnabled()) await firstBtn.click()
+    await expect(firstBtn).toHaveText('Adding...', { timeout: 2_000 })
+  }).toPass({ timeout: 30_000, intervals: [1_000, 2_000] })
 
-  // Only the clicked button should enter the loading state.
-  await expect(firstBtn).toHaveText('Adding...')
+  // Only the clicked button should be in the loading state.
   await expect(firstBtn).toBeDisabled()
 
   // Every other button must remain idle — this is the regression we're guarding.
   await expect(secondBtn).toHaveText('Add to cart')
   await expect(secondBtn).not.toBeDisabled()
 
-  // Release the stalled request and verify the clicked button recovers.
-  releaseRoute()
-  await expect(firstBtn).toHaveText('Add to cart', { timeout: 5_000 })
+  // Once the delayed request resolves, the clicked button recovers.
+  await expect(firstBtn).toHaveText('Add to cart', { timeout: 10_000 })
 })
 
 test('checkout button is present and links to Shopify @smoke', async ({ page }) => {

@@ -40,8 +40,11 @@ test.describe('compositions browsing', () => {
 
     await page.getByLabel('Search loops').fill('loop')
 
-    await expect(page.getByLabel('Search loops')).toHaveValue('loop', { timeout: 3_000 })
-    await expect(page.getByRole('button', { name: /clear all/i })).toBeVisible({ timeout: 5_000 })
+    // "clear all" only appears once the client filter code has hydrated and
+    // reacted to the input — inherit the CI-aware global expect timeout rather
+    // than a tight local override.
+    await expect(page.getByLabel('Search loops')).toHaveValue('loop')
+    await expect(page.getByRole('button', { name: /clear all/i })).toBeVisible()
   })
 
   test('the download endpoint returns a zip attachment (no external redirect)', async ({
