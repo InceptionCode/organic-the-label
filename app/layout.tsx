@@ -15,6 +15,7 @@ import { CartStoreProvider } from '@/store/cart-context';
 import { LoadingState } from '@/ui-components';
 import InitAuthStore from '@/store/init-auth-store';
 import ActivityHydrator from '@/store/activity-hydrator';
+import { SessionSplash } from '@/app/components/session-splash';
 
 /* Global State
 - Because layout runs for every route. The store providers will wrap the main content here.
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.variable} ${bebasNeue.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <SessionSplash />
           <Suspense
             fallback={
               <>

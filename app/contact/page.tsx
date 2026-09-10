@@ -3,19 +3,14 @@
 import Image from "next/image";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/ui-components";
-import { SupportCategories } from "@/lib/validation/support";
+import {
+  CONTACT_FORM_CATEGORIES,
+  SUPPORT_CATEGORY_LABELS,
+  type SupportCategory,
+} from "@/lib/validation/support";
 
 // ── Grain SVG data URI ─────────────────────────────────────────────────────
 const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
-
-// ── Category display labels ────────────────────────────────────────────────
-const CATEGORY_LABELS: Record<(typeof SupportCategories)[number], string> = {
-  order_issue: "Order issue",
-  download_issue: "Download issue",
-  licensing_question: "Licensing question",
-  collaboration: "Collaboration",
-  general: "General inquiry",
-};
 
 // ── Shared input style ─────────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -61,7 +56,7 @@ function Field({
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [category, setCategory] = useState<(typeof SupportCategories)[number]>("general");
+  const [category, setCategory] = useState<SupportCategory>("general");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [marketingOptIn, setMarketingOptIn] = useState(false);
@@ -316,9 +311,7 @@ export default function ContactPage() {
                   <select
                     id="contact-category"
                     value={category}
-                    onChange={(e) =>
-                      setCategory(e.target.value as (typeof SupportCategories)[number])
-                    }
+                    onChange={(e) => setCategory(e.target.value as SupportCategory)}
                     style={{
                       ...inputStyle,
                       appearance: "none",
@@ -328,9 +321,9 @@ export default function ContactPage() {
                       paddingRight: "40px",
                     }}
                   >
-                    {SupportCategories.map((cat) => (
+                    {CONTACT_FORM_CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>
-                        {CATEGORY_LABELS[cat]}
+                        {SUPPORT_CATEGORY_LABELS[cat]}
                       </option>
                     ))}
                   </select>
