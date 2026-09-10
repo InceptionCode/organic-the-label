@@ -27,8 +27,8 @@
  *      Prod: pnpm seed:free-resources:prod
  *
  *    Or:
- *      NODE_ENV=development ts-node seed-free-resources.ts
- *      NODE_ENV=production  ts-node seed-free-resources.ts
+ *      NODE_ENV=development tsx seed-free-resources.ts
+ *      NODE_ENV=production  tsx seed-free-resources.ts
  *
  * The script upserts by slug, so re-running updates the same row instead of
  * duplicating it. Never commit seed-free-resources.ts.

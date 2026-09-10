@@ -1,14 +1,6 @@
-import type { ComponentType } from "react";
-import { SlidersHorizontal, Users, Tag, Layers, type LucideProps } from "lucide-react";
-import { SERVICES, type ServiceIconKey } from "@/lib/work-with-me/content";
+import { SERVICES } from "@/lib/work-with-me/content";
 import { SectionHeading } from "./section-heading";
-
-const ICONS: Record<ServiceIconKey, ComponentType<LucideProps>> = {
-  mixing: SlidersHorizontal,
-  collab: Users,
-  leasing: Tag,
-  suite: Layers,
-};
+import { SERVICE_ICONS } from "./service-icons";
 
 export function ServicesList() {
   return (
@@ -21,7 +13,7 @@ export function ServicesList() {
 
       <ul className="mt-8 grid gap-4 sm:grid-cols-2">
         {SERVICES.map((service) => {
-          const Icon = ICONS[service.icon];
+          const Icon = SERVICE_ICONS[service.icon];
           return (
             <li key={service.title} className="wwm-card card-padding-lg flex flex-col gap-3">
               <span

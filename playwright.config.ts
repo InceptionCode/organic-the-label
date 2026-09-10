@@ -23,6 +23,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
+    // Skip the first-visit splash (and steady other ambient animations) during e2e.
+    contextOptions: { reducedMotion: 'reduce' },
   },
   projects: [
     {
