@@ -40,16 +40,18 @@ test.describe('store browsing', () => {
     // (Clicking the outer card div can land on the audio player for products that
     // have a preview, so we target the dedicated image link instead.)
     const link = page.locator('[data-testid="product-card-link"]').first()
-    await link.waitFor()
+    await expect(link).toBeVisible()
 
-    // The card links are server-rendered <a> tags that next/link upgrades to
-    // client navigation on hydration. A click that lands inside the hydration
-    // window can be dropped (the anchor default is prevented before the router
-    // is ready) — only observable on slow CI runners. Retry until the URL moves.
-    await expect(async () => {
-      if (!/\/store\/.+/.test(page.url())) await link.click({ timeout: 3_000 })
-      await page.waitForURL(/\/store\/.+/, { timeout: 1_500 })
-    }).toPass({ timeout: 20_000, intervals: [250, 500, 1_000] })
+    // The card links are server-rendered <a href> tags. A pre-hydration click
+    // follows the native href (full nav); a post-hydration click is intercepted
+    // by next/link (client nav). Either way the URL must move to /store/<handle>.
+    // globalSetup pre-compiles this route so hydration is quick on CI, and
+    // Playwright retries the whole test twice on failure — a single click with a
+    // generous nav wait is enough without brittle toPass polling.
+    await Promise.all([
+      page.waitForURL(/\/store\/.+/),
+      link.click(),
+    ])
   })
 
   test('user can apply a category filter @smoke', async ({ page }) => {
@@ -69,8 +71,8 @@ test.describe('store browsing', () => {
     // history.pushState until the transition commits (after the data fetch). The
     // smoke test verifies the filter is APPLIED, not the exact URL timing.
     // "Clear all filters" only appears when hasActiveFilters is true — clicking
-    // any non-default filter sets it.
-    await expect(page.getByText('Clear all filters')).toBeVisible({ timeout: 5_000 })
+    // any non-default filter sets it. Inherit the CI-aware global expect timeout.
+    await expect(page.getByText('Clear all filters')).toBeVisible()
   })
 
   test('user can search for a product', async ({ page }) => {
@@ -89,6 +91,6 @@ test.describe('store browsing', () => {
     // it only renders when search state is non-empty.
     await expect(
       page.locator('[data-testid="store-filters"] input[type="text"]')
-    ).toHaveValue('kit', { timeout: 3_000 })
+    ).toHaveValue('kit')
   })
 })
