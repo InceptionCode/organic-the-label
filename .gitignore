@@ -59,3 +59,6 @@ next-env.d.ts
 /screenshot.mjs
 /public/brand-assets/organic-sonics-brand-guidelines.png
 /docs/internal-docs
+# macOS Spotlight exclusion marker (per-machine)
+.metadata_never_index
+.eslintcache

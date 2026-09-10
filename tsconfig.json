@@ -18,6 +18,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "plugins": [
       {
         "name": "next"
@@ -37,6 +38,14 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "coverage",
+    "dist",
+    "out",
+    "temporary screenshots",
+    "playwright-report",
+    "test-results",
+    ".claude",
+    ".cursor"
   ]
 }
