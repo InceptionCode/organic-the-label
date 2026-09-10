@@ -101,8 +101,9 @@ test.describe('sign up', () => {
     await page.fill('[name="confirmPassword"]', 'TestPass1!')
 
     // Wait for the hCaptcha stub to auto-verify and enable the submit button.
-    // The button is disabled until captchaToken state is truthy.
-    await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 5_000 })
+    // The button is disabled until captchaToken state is truthy — this needs the
+    // form to have hydrated, so inherit the CI-aware global expect timeout.
+    await expect(page.locator('button[type="submit"]')).toBeEnabled()
 
     await page.click('button[type="submit"]')
 
@@ -111,7 +112,7 @@ test.describe('sign up', () => {
     // its field state when lastResult becomes null on a { ok: true } response —
     // that is the current app behaviour, so we do not assert on the email text.
     const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible({ timeout: 8_000 })
+    await expect(dialog).toBeVisible()
     await expect(dialog.getByText('CHECK YOUR EMAIL')).toBeVisible()
     await expect(dialog.getByText(/We sent a confirmation link to/)).toBeVisible()
   })
@@ -125,8 +126,9 @@ test.describe('sign up', () => {
     await page.fill('[name="password"]', 'TestPass1!')
     await page.fill('[name="confirmPassword"]', 'WrongPass9!')
 
-    // Wait for the captcha stub to auto-verify so the button becomes enabled.
-    await expect(page.locator('button[type="submit"]')).toBeEnabled({ timeout: 5_000 })
+    // Wait for the captcha stub to auto-verify so the button becomes enabled
+    // (requires the form to have hydrated) — inherit the global expect timeout.
+    await expect(page.locator('button[type="submit"]')).toBeEnabled()
 
     // Submit — Conform's client-side onValidate runs Zod synchronously, catches
     // the superRefine mismatch, and surfaces the error without ever reaching the
@@ -135,7 +137,7 @@ test.describe('sign up', () => {
 
     await expect(
       page.getByText('Password and confirm password must match')
-    ).toBeVisible({ timeout: 3_000 })
+    ).toBeVisible()
 
     // Form is invalid so the button is re-disabled after the failed submission.
     await expect(page.locator('button[type="submit"]')).toBeDisabled()
@@ -184,7 +186,7 @@ test.describe('sign in / sign out', () => {
     await page.locator('[name="email"]').press('Tab')
 
     // The login schema uses z.email('Please enter a valid email').
-    await expect(page.getByText(/please enter a valid email/i)).toBeVisible({ timeout: 3_000 })
+    await expect(page.getByText(/please enter a valid email/i)).toBeVisible()
   })
 
   test('user can sign in with email and password @smoke', async ({ page }) => {

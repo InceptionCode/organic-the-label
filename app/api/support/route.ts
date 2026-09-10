@@ -11,12 +11,16 @@ import {
   sendSupportNotificationEmail,
 } from "@/lib/email/resend"
 
+const TAG = "[/api/support]"
+
 export async function POST(req: Request) {
   try {
+    console.info(`${TAG} received request`)
     const body = await req.json()
     const parsed = SupportPayloadSchema.safeParse(body)
 
     if (!parsed.success) {
+      console.warn(`${TAG} payload rejected`, parsed.error.issues[0]?.message)
       return NextResponse.json(
         { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request" },
         { status: 400 }
@@ -24,6 +28,7 @@ export async function POST(req: Request) {
     }
 
     const { name, email, category, subject, message, marketingOptIn } = parsed.data
+    console.info(`${TAG} payload accepted`, { category, marketingOptIn })
 
     const supabase = createSupabaseAdminClient()
 
@@ -45,6 +50,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Failed to save request." }, { status: 500 })
     }
 
+    console.info(`${TAG} request stored`, { id: supportRequest.id, category })
+
     await Promise.allSettled([
       sendSupportConfirmationEmail({
         to: email,
@@ -60,6 +67,8 @@ export async function POST(req: Request) {
         message,
       }),
     ])
+
+    console.info(`${TAG} notifications dispatched`, { id: supportRequest.id })
 
     if (marketingOptIn) {
       const contact = await syncContactToSupabase({
@@ -85,8 +94,11 @@ export async function POST(req: Request) {
         eventType: "support_request_created",
         metadata: { support_request_id: supportRequest.id, category },
       })
+
+      console.info(`${TAG} marketing opt-in synced`, { id: supportRequest.id })
     }
 
+    console.info(`${TAG} done`, { id: supportRequest.id })
     return NextResponse.json({ ok: true, id: supportRequest.id })
   } catch (err) {
     console.error("[/api/support]", err)
