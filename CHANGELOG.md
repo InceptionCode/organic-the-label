@@ -4,6 +4,28 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.7.0] - 2026-09-10
+
+### 🚀 Features
+
+- New work-with-me route + API integrations and splash page ([`e744d03`](https://github.com/InceptionCode/organic-the-label/commit/e744d03c6e753ae06a4e1c0e87aa1b95e8cb42b3))
+
+### 🐛 Bug Fixes
+
+- Added an attempt to proxy reels for playback ([`54513c8`](https://github.com/InceptionCode/organic-the-label/commit/54513c80bec9f25e7b5a7aa5fc9e331dc4ead29a))
+
+### ⚡ Performance
+
+- Improve tooling for faster DX + update global CI config ([`ca08a65`](https://github.com/InceptionCode/organic-the-label/commit/ca08a653028bfaa53d723b8d2a7e10339860358e))
+- Improve tooling for faster DX + added timeouts for CI testing ([`1b91a4e`](https://github.com/InceptionCode/organic-the-label/commit/1b91a4e60fba60048377885dae65d3ca2f39de5c))
+
+### 📚 Documentation
+
+- Updated release-process.md ([`225b599`](https://github.com/InceptionCode/organic-the-label/commit/225b5997ab7438881552a0c3d44241d49b0319ee))
+
+### 🧹 Chores
+
+- Release v1.6.1 CHANGELOG + composition route (#19) ([`57a6b48`](https://github.com/InceptionCode/organic-the-label/commit/57a6b48bea643c846e06998ece3fcdddbe942110)) in [#19](https://github.com/InceptionCode/organic-the-label/pull/19)
 ## [1.6.1] - 2026-09-05
 
 ### 🚀 Features
