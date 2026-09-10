@@ -21,6 +21,7 @@ const tagMelodic = z.literal('melodic');
 const tagVintage = z.literal('vintage');
 const tagRnB = z.literal('r&b');
 const tagHipHop = z.literal('hiphop');
+const tagRap = z.literal('rap');
 const tagTrap = z.literal('trap');
 const tagDark = z.literal('dark');
 const tagOST = z.literal('ost');
@@ -38,7 +39,7 @@ const promoSource = z.literal("promo")
 export const unionCategories = z.union([categoryBank, categoryBeat, categoryFree, categoryKit, categoryMerch, categoryPack, categoryPlugin, categorySuite]);
 export type ProductCategories = z.infer<typeof unionCategories>
 
-export const unionTags = z.union([tagFree, tagAmbient, tagMelodic, tagVintage, tagRnB, tagHipHop, tagTrap, tagDark, tagOST, tagOpium, tagRage, tagDigital])
+export const unionTags = z.union([tagFree, tagAmbient, tagMelodic, tagVintage, tagRnB, tagHipHop, tagTrap, tagRap, tagDark, tagOST, tagOpium, tagRage, tagDigital])
 export type ProductTags = z.infer<typeof unionTags>
 
 export const unionOrderSources = z.union([orderSource, membershipSource, manualSource, promoSource])

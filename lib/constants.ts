@@ -22,6 +22,7 @@ export const navLinks = [
   { name: 'Explore', href: '/explore' },
   { name: 'Store', href: '/store' },
   { name: 'Compositions', href: '/compositions' },
+  { name: 'Work With Me', href: '/work-with-me' },
 ];
 
 

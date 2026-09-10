@@ -552,6 +552,91 @@
     }
   }
 
+  /* ── Work With Me: premium card with red edge + hover glow ── */
+  .wwm-card {
+    position: relative;
+    background-color: var(--surface-1);
+    border: 1px solid rgba(224, 61, 42, 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md-premium);
+    transition:
+      transform var(--motion-medium) var(--ease-soft),
+      box-shadow var(--motion-medium) var(--ease-soft),
+      border-color var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(90deg, var(--accent-primary), rgba(224, 61, 42, 0.05));
+    opacity: 0.5;
+    transition: opacity var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(224, 61, 42, 0.4);
+    box-shadow: var(--shadow-glow), var(--shadow-lg-premium);
+  }
+  .wwm-card:hover::before {
+    opacity: 1;
+  }
+
+  .wwm-tile {
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(224, 61, 42, 0.16);
+    box-shadow: var(--shadow-md-premium);
+    transition:
+      transform var(--motion-medium) var(--ease-soft),
+      box-shadow var(--motion-medium) var(--ease-soft),
+      border-color var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-tile:hover {
+    transform: translateY(-3px);
+    border-color: rgba(224, 61, 42, 0.5);
+    box-shadow: var(--shadow-glow), var(--shadow-lg-premium);
+  }
+
+  .wwm-pill {
+    transition:
+      transform var(--motion-fast) var(--ease-soft),
+      border-color var(--motion-fast) var(--ease-soft),
+      background-color var(--motion-fast) var(--ease-soft),
+      box-shadow var(--motion-fast) var(--ease-soft);
+  }
+  .wwm-pill:hover {
+    transform: translateY(-2px);
+    border-color: rgba(224, 61, 42, 0.55);
+    background-color: var(--surface-2);
+    box-shadow: 0 0 0 1px rgba(224, 61, 42, 0.25), 0 0 22px rgba(224, 61, 42, 0.14);
+  }
+
+  /* ── Work With Me: ambient drift + marquee ── */
+  @keyframes wwm-drift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(0, -1.5%, 0) scale(1.06); }
+  }
+  .wwm-drift { animation: wwm-drift 26s ease-in-out infinite alternate; }
+
+  @keyframes wwm-marquee {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+  .wwm-marquee-track {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    animation: wwm-marquee 62s linear infinite;
+    will-change: transform;
+  }
+  .wwm-marquee:hover .wwm-marquee-track { animation-play-state: paused; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwm-drift { animation: none; }
+    .wwm-marquee-track { animation: none; }
+  }
+
   /* ── Animated grain ── */
   @keyframes grain-shift {
     0%, 100% { transform: translate(0, 0); }
