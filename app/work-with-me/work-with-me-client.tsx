@@ -66,7 +66,7 @@ export function WorkWithMeClient({ spotify, recentPosts }: WorkWithMeClientProps
       <div className="relative z-[1]">
         <Hero onPrimaryCta={scrollToForm} artist={spotify.artist} />
 
-        <Marquee items={["Production", "Mixing", "Mastering", "Beat Leasing", "Collabs", "Sound Design"]} />
+        <Marquee />
 
         <RevealSection threshold={0.08} distance={40}>
           <BioRow onCta={scrollToForm} artist={spotify.artist} />

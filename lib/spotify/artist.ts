@@ -1,10 +1,3 @@
-/**
- * Read-only Spotify Web API access using the Client Credentials flow
- * (server-to-server, no user login). Powers dynamic bits of the Work With Me
- * page — the artist photo, follower count, and top tracks — with a graceful
- * fallback to hand-entered content when credentials or data are missing.
- */
-
 const TAG = "[spotify/artist]";
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const API_BASE = "https://api.spotify.com/v1";
@@ -68,7 +61,6 @@ async function getAccessToken(): Promise<string | null> {
         Authorization: `Basic ${Buffer.from(`${creds.id}:${creds.secret}`).toString("base64")}`,
       },
       body: "grant_type=client_credentials",
-      next: { revalidate: 3000 },
     });
 
     if (!res.ok) {
@@ -96,7 +88,6 @@ async function spotifyGet<T>(path: string): Promise<T | null> {
   try {
     const res = await fetch(`${API_BASE}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 3600 },
     });
     if (!res.ok) {
       console.error(`${TAG} GET ${path} failed`, res.status);

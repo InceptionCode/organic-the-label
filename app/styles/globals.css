@@ -627,7 +627,7 @@
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
-    animation: wwm-marquee 24s linear infinite;
+    animation: wwm-marquee 62s linear infinite;
     will-change: transform;
   }
   .wwm-marquee:hover .wwm-marquee-track { animation-play-state: paused; }

@@ -1,24 +1,11 @@
 "use client";
 
-import {
-  Button,
-  Dialog,
-  DialogContent,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/ui-components';
-import useSafeParseUser from '@/utils/hooks/use-safe-parse-user';
-import { useStorage } from '@/utils/hooks/use-storage';
+import { Button } from '@/ui-components';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { trackActivity } from '@/utils/helpers/activity/tracking';
-import { defaultUserState } from '@/lib/store/auth-store';
 import { useTrackingReady } from '@/store/activity-hydrator';
 import { STORE_CATEGORIES } from '@/lib/constants';
 import dynamic from 'next/dynamic';
@@ -50,29 +37,7 @@ export default function HomeClient({
   latestDropSection,
   statsBarSection,
 }: HomeClientProps) {
-  const router = useRouter();
-  const user = useSafeParseUser(defaultUserState);
   const isTrackingReady = useTrackingReady();
-
-  const { setStorage, initItem: initCTAFlag } = useStorage('session', 'showSignUpCTA', {
-    initMethod: 'get',
-    item: 'true',
-  });
-
-  const shouldShowCTA = initCTAFlag === 'true' && (!user || user?.is_anon);
-  const [dismissed, setDismissed] = useState(false);
-  const open = shouldShowCTA && !dismissed;
-
-  const onConfirm = () => {
-    router.push('/signup');
-    setDismissed(true);
-    setStorage('session', 'showSignUpCTA', 'false');
-  };
-
-  const onClose = () => {
-    setDismissed(true);
-    setStorage('session', 'showSignUpCTA', 'false');
-  };
 
   useEffect(() => {
     if (isTrackingReady) {
@@ -82,32 +47,6 @@ export default function HomeClient({
 
   return (
     <>
-      {/* ── Sign-up modal ── */}
-      <Dialog open={open}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="gap-3">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
-              style={{ background: 'var(--accent-primary-soft)', color: 'var(--accent-primary)' }}
-            >
-              ✦
-            </div>
-            <DialogTitle className="text-h3">Start Free Membership</DialogTitle>
-          </DialogHeader>
-          <DialogDescription className="text-body-m text-black">
-            Sign up and receive exclusive content, discounts, and early access from Organic Sonics.
-          </DialogDescription>
-          <DialogFooter className="gap-2">
-            <DialogClose asChild>
-              <Button variant="ghost" onClick={onClose}>
-                Maybe later
-              </Button>
-            </DialogClose>
-            <Button onClick={onConfirm}>Join free</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* ══════════════════════════════════════════
           HERO
       ══════════════════════════════════════════ */}

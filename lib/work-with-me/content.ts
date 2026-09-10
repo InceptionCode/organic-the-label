@@ -122,10 +122,14 @@ export const PLACEMENTS: Placement[] = [
 // Services — the only pre-filled list
 // ─────────────────────────────────────────────────────────────
 
+/** Top-left heading of the marquee / services band. */
+export const SERVICES_HEADING =
+  "A skilled craftsman and artist offering a range of services";
+
 export const SERVICES: Service[] = [
   {
     title: "Mixing & Mastering",
-    blurb: "Industry-standard sonic quality — clean, loud, and translation-ready.",
+    blurb: "Industry-standard sonic quality — clean, loud, and DSP-ready.",
     icon: "mixing",
   },
   {
@@ -135,7 +139,7 @@ export const SERVICES: Service[] = [
   },
   {
     title: "Beat Leasing",
-    blurb: "License from an exclusive catalog of unreleased instrumentals.",
+    blurb: "License from an exclusive catalog of instrumentals.",
     icon: "leasing",
   },
   {
