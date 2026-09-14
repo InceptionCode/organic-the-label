@@ -22,89 +22,68 @@ Organic Sonics is a community-driven platform that connects music producers and 
   - Future recommendations and deals based on user preferences (`Recommendations`)
 - **Future Premium Membership**: Access to premium content and exclusive features
 
+
+
 ## Shopify Storefront Integration
 
 The store experience is backed by the **Shopify Storefront API**, with a thin integration layer in `lib/Shopify` and the `/store` route.
 
 - **GraphQL Query & Types**
-
   - `lib/Shopify/queries.ts` defines all GraphQL queries and `PageResponse` types.
-
 - **Normalization & Validation**
   - `lib/schemas.ts` defines Zod schemas used for normalization and validation between the client and server.
   - Any parsing errors are surfaced with context to help debug upstream Shopify data.
 
+
+
 ## Local Development
+
+
 
 ### Prerequisites
 
 - Node.js (v18 or higher)
 - pnpm (recommended) or npm/yarn
 - Supabase account and project
-- Stripe account (for payment processing)
 - Shopify Storefront SDK
+
+
 
 ### Setup
 
 1. **Clone the repository**
-
-   ```bash
+  ```bash
    git clone <repository-url>
    cd organic-the-label
-   ```
-
+  ```
 2. **Install dependencies**
-
-   ```bash
+  ```bash
    pnpm install
    # or
    npm install
-   ```
-
+  ```
 3. **Set up environment variables**
-
-   Create a `.env.local` file in the root directory with the following variables:
-
-   ```env
-   # Supabase
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   INTERNAL_SUPABASE_WEBHOOK_SECRET=your_webhook_secretkey
-
-   # Stripe
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-
-   # Database (if using Turso)
-   TURSO_DATABASE_URL=your_turso_database_url
-   TURSO_AUTH_TOKEN=your_turso_auth_token
-
-   # Shopify Storefront
-   SHOPIFY_DEV_STORE_DOMAIN=your-dev-store.myshopify.com
-   SHOPIFY_PROD_STORE_DOMAIN=your-prod-store.myshopify.com
-   SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_storefront_access_token
-   SHOPIFY_PUBLIC_ACCESS_TOKEN=your_storefront_public_token
-   ```
-
+  Copy `[.env.example](./.env.example)` to `.env.local` in the project root, then replace the placeholders with keys from your own Supabase, Shopify, and email dashboards. Never commit real secrets.
+  ```bash
+  cp .env.example .env.local
+  ```
 4. **Run the development server**
 
-   ```bash
-   pnpm dev
-   # or
-   npm run dev
-   ```
+```bash
+ pnpm dev
+ # or
+ npm run dev
+```
 
-   The dev server will:
+ The dev server will:
 
-   - Generate seed data automatically
-   - Start the Next.js development server with Turbopack
-   - Run on [http://localhost:3000](http://localhost:3000)
+- Generate seed data automatically
+- Start the Next.js development server with Turbopack
+- Run on [http://localhost:3000](http://localhost:3000)
 
-5. **Open your browser**
+1. **Open your browser**
 
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Available Scripts
 
@@ -116,16 +95,13 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 - `pnpm generate-dev` - Start development server with seed data generation
 - `pnpm generate-seed` - Generate seed data for development
 
+
+
 ### Project Structure
 
 ```
 / (root)
 ├── app/                              # Next.js App Router
-│   ├── account/                      # Account dashboard
-│   ├── explore/                      # Personalized explore route (+ page tracker)
-│   ├── login/                        # Sign-in; reset-password sub-route
-│   ├── signup/
-│   ├── search/
 │   ├── store/                        # Shopify-backed storefront
 │   │   ├── [handle]/                 # Product detail page (PDP) + product components
 │   │   ├── components/               # Filters, grid, cart widget, layout pieces
@@ -134,9 +110,16 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 │   ├── global-error-test/            # Dev-only error UI experiments
 │   ├── api/                          # Route handlers + colocated server modules
 │   │   ├── activity/track/           # Activity event ingestion
-│   │   ├── auth/                     # Bootstrap, confirm, init routes; magic link & user helpers
+│   │   ├── auth/                     # Bootstrap, confirm, init; magic link & user helpers
+│   │   ├── composition/download/     # Zip + stream composition files
+│   │   ├── cron/                     # Instagram token refresh
+│   │   ├── email/                    # Newsletter subscribe
+│   │   ├── instagram/                # Media proxy
 │   │   ├── membership-cta/dismiss/
-│   │   └── store/                    # Products, cart CRUD, entitlements, revalidation, orders
+│   │   ├── resources/                # Free resource requests
+│   │   ├── store/                    # Products, cart CRUD, entitlements, revalidation, orders
+│   │   ├── support/
+│   │   └── webhooks/                 # MailerLite, compositions, support status
 │   ├── components/                   # App chrome & marketing sections (navbar, cart, hero, etc.)
 │   │   └── auth/                     # hCaptcha, magic link, reset-password UI
 │   ├── styles/
@@ -145,108 +128,62 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 │   ├── page.tsx                      # Home (featured kits, latest drop, etc.)
 │   ├── global-error.tsx
 │   └── not-found.tsx
-├── features/                         # Feature slices (co-located UI + config)
-│   └── explore/                      # Explore sections, feature flags, mock data, types
+├── features/                         # Feature slices (co-located UI + config) / feature flags, mock data, types
+│   └── explore/                      # Explore sections
 ├── lib/                              # Domain logic & integrations
 │   ├── Shopify/                      # Storefront client, GraphQL queries/mutations, caches
-│   ├── store/                        # Zustand stores (auth, cart, activity), cart cookie, parsers
-│   ├── supabase/                     # Profiles, anon visitor flow, activity insert, Zod schemas
+│   ├── composition/                  # Composition cache + embed URL helpers
+│   ├── email/                        # Resend + MailerLite clients, contact sync
+│   ├── instagram/                    # Token + media fetch
 │   ├── membership-cta/               # CTA visibility helpers
 │   ├── product/                      # Filter / search param builders
 │   ├── filters/                      # Shared filter types
+│   ├── spotify/                      # Artist catalog
+│   ├── store/                        # Zustand stores (auth, cart, activity), cart cookie, parsers
+│   ├── supabase/                     # Profiles, anon visitor flow, activity insert, Zod schemas
+│   ├── validation/                   # Email, support, work-with-me Zod schemas
+│   ├── work-with-me/                 # Page content, embeds, recent posts
+│   ├── youtube/                      # Channel fetch
 │   ├── schemas.ts                    # Zod schemas (products, users, entitlements, …)
 │   ├── constants.ts
 │   ├── font-tags.ts
 │   └── utils.ts
 ├── store/                            # Client providers & hydration
-│   ├── auth-context.tsx
-│   ├── cart-context.tsx
-│   ├── activity-hydrator.tsx
-│   └── init-auth-store.tsx
 ├── ui-components/                    # Shared primitives (Radix-based), audio/hero helpers, icons/
-├── utils/                            # Cross-cutting helpers
-│   ├── helpers/                      # checks, tokens, parsers; activity, analytics, Shopify utils
-│   ├── hooks/                        # use-get-user, use-sign-out, use-storage, use-safe-parse-user
-│   └── supabase/                     # Browser/server Supabase clients; session refresh (proxy)
+├── utils/
 ├── public/                           # Static assets
 │   ├── brand-assets/                 # Logos & brand reference (preferred over placeholders)
+│   ├── organic-sonics-hero/          # Scroll-scrub hero frames
 │   ├── *.svg
 │   └── sample-data.json
-├── docs/                             # Runbooks & internal notes (Supabase, Shopify, releases, testing)
-├── supabase/
-│   └── migrations/                   # Versioned SQL migrations
+├── docs/                             # Runbooks (Supabase, Shopify, releases, testing)
+│   └── internal-docs/                # Architecture notes (cart, Instagram, testing blueprint)
+├── tests/                            # Vitest unit/integration + Playwright e2e (see tests/README.md)
+├── scripts/
+│   └── release.sh
 ├── .github/                          # CI workflows, PR templates
+├── .env.example                      # Env var template (copy to .env.local)
 ├── proxy.ts                          # Next.js 16 proxy (session refresh via utils/supabase/middleware)
-├── mock-supabase.ts                  # Mock Supabase for local/dev testing
-├── seed.ts                           # Seed data script (pnpm generate-seed)
-├── screenshot.mjs                    # Puppeteer screenshots against localhost (dev workflow)
-├── next.config.ts
-├── tsconfig.json
-├── eslint.config.mjs
-├── postcss.config.mjs
-├── components.json                   # shadcn-style component metadata
-├── CLAUDE.md                         # Agent / frontend workflow notes for this repo
-├── package.json
-└── README.md                         # This file
 ```
+
+
 
 ### Testing folder structure (overview)
 
-Planned layout for Vitest, Playwright, and shared test utilities. Application code in this repo lives at the **repository root** (there is no `src/` directory); `public/`, `proxy.ts`, and other config files live alongside the folders below. See `docs/testing-strategy.md` and `docs/testing-strategy.md` for conventions.
+Application code lives at the **repository root** (there is no `src/` directory). Conventions: `[docs/testing-strategy.md](./docs/testing-strategy.md)` and `[tests/README.md](./tests/README.md)`.
 
 ```
-/
-├── app/
-├── ui-components/
-├── features/
-├── lib/
-├── store/
-├── utils/
-│
-├── tests/
-│   ├── unit/
-│   │   ├── cart/
-│   │   ├── store/
-│   │   ├── auth/
-│   │   └── utils/
-│   │
-│   ├── integration/
-│   │   ├── store/
-│   │   ├── cart/
-│   │   ├── auth/
-│   │   └── membership/
-│   │
-│   ├── e2e/
-│   │   ├── store.spec.ts
-│   │   ├── cart.spec.ts
-│   │   ├── auth.spec.ts
-│   │   └── membership.spec.ts
-│   │
-│   ├── fixtures/
-│   │   ├── products.ts
-│   │   ├── users.ts
-│   │   ├── memberships.ts
-│   │   └── sessions.ts
-│   │
-│   ├── mocks/
-│   │   ├── shopify/
-│   │   ├── supabase/
-│   │   └── handlers.ts
-│   │
-│   ├── utils/
-│   │   ├── render.tsx
-│   │   ├── test-env.ts
-│   │   ├── factories.ts
-│   │   └── playwright/
-│   │
-│   └── README.md
-│
-├── playwright.config.ts
-├── vitest.config.ts
-├── vitest.setup.ts
-└── .github/
-    └── workflows/
+tests/
+├── unit/                  # Pure logic — no DOM, no network
+├── integration/           # Component behavior — DOM, mocked network (MSW)
+├── e2e/                   # Playwright against the running app
+├── fixtures/              # Typed reusable data (products, users, cart, compositions)
+├── mocks/                 # MSW handlers + server
+├── utils/                 # Custom render + fixture factories
+└── README.md
 ```
+
+
 
 ## Tech Stack
 
@@ -264,17 +201,9 @@ Planned layout for Vitest, Playwright, and shared test utilities. Application co
 - **Icons & motion**: Lucide React, Framer Motion
 - **Bot protection**: `@hcaptcha/react-hcaptcha`
 
-**Visual effects (where used)**
-
-- **WebGL / shaders**: `ogl`, `@paper-design/shaders-react`
-
 **Data & auth**
 
 - **Supabase**: `@supabase/supabase-js`, `@supabase/ssr` (Auth, PostgreSQL, server/client helpers)
-
-**Commerce**
-
-- **Shopify**: Storefront GraphQL via `@shopify/storefront-api-client`
 
 **Forms & validation**
 
@@ -285,10 +214,6 @@ Planned layout for Vitest, Playwright, and shared test utilities. Application co
 - **Client state**: Zustand
 - **HTTP**: Axios
 
-**Payments**
-
-- **Stripe**: Documented in environment variables for billing or future server flows; storefront purchases are Shopify-led
-
 **Development & quality**
 
 - **Lint / format**: ESLint 9, `eslint-config-next`, Prettier
@@ -296,13 +221,16 @@ Planned layout for Vitest, Playwright, and shared test utilities. Application co
 - **E2E**: Cypress
 - **Screenshots / automation**: Puppeteer (`screenshot.mjs`)
 
+
+
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Stripe Documentation](https://stripe.com/docs)
 - [Shopify Storefront API (GraphQL)](https://shopify.dev/docs/api/storefront/2026-01)
 - [Shopify Storefront API Client for JavaScript](https://www.npmjs.com/package/@shopify/storefront-api-client)
+
+
 
 ## Deploy on Vercel
 
