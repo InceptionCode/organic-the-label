@@ -96,7 +96,7 @@ export function InquiryForm() {
           name: parsed.data.name,
           email: parsed.data.email,
           category: "work_with_me",
-          subject: `Work With Me — ${parsed.data.projectType}`,
+          subject: `Work With Me: ${parsed.data.projectType}`,
           message: parsed.data.message,
           marketingOptIn: parsed.data.marketingOptIn,
         }),
@@ -126,7 +126,7 @@ export function InquiryForm() {
           <ul className="mt-8 flex flex-col gap-3">
             {[
               "Every message gets a personal reply, usually within 2 business days.",
-              "No brief is too rough — a reference track and a deadline is enough to start.",
+              "No brief is too rough. A reference track and a deadline is enough to start.",
               "Rates and timelines depend on scope; you'll get a clear quote before anything begins.",
             ].map((line) => (
               <li key={line} className="flex gap-3 text-body-s text-secondary">
@@ -278,7 +278,7 @@ export function InquiryForm() {
                     </span>
                   </span>
                   <span className="text-caption" style={{ color: "var(--text-muted)", lineHeight: "1.5" }}>
-                    Add me to the Organic Sonics newsletter — new drops, free resources, and occasional updates.
+                    Add me to the Organic Sonics newsletter for new drops, free resources, and occasional updates.
                   </span>
                 </label>
 
