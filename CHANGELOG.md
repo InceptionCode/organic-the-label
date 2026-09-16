@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.7.1] - 2026-09-16
+
+### 🚀 Features
+
+- Use screenshot and link-out card for Muso.ai ([`b64314d`](https://github.com/InceptionCode/organic-the-label/commit/b64314d615bf2446574a25d79a83103d205dad99))
+
+### 🧹 Chores
+
+- Small updates to match v1.7.0 ([`d18fc10`](https://github.com/InceptionCode/organic-the-label/commit/d18fc10a2945cee970e07b94fc53888eadc68c4c))
+- Small updates to match v1.7.0 (#22) ([`7c37d11`](https://github.com/InceptionCode/organic-the-label/commit/7c37d111da57ac7055d79a39d9e91fff4b144201)) in [#22](https://github.com/InceptionCode/organic-the-label/pull/22)
 ## [1.7.0] - 2026-09-10
 
 ### 🚀 Features

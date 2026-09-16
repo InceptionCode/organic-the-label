@@ -218,7 +218,7 @@ tests/
 
 - **Lint / format**: ESLint 9, `eslint-config-next`, Prettier
 - **Unit / component testing**: Vitest, Testing Library, jsdom (see planned `tests/` layout in this README and `docs/testing-strategy.md`)
-- **E2E**: Cypress
+- **E2E**: Playwright
 - **Screenshots / automation**: Puppeteer (`screenshot.mjs`)
 
 
