@@ -35,7 +35,7 @@ export default function AudioPreviewList({
           className="eyebrow"
           style={{ color: "var(--accent-secondary)", letterSpacing: "0.12em" }}
         >
-          {title} — Previews
+          {title} previews
         </p>
       )}
       <div className="flex flex-col gap-2">

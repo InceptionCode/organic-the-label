@@ -35,7 +35,7 @@ export default async function CompositionContent({
         description={
           hasFilters
             ? 'Try a wider date range or clearing a tag.'
-            : 'Check back soon — new previews land here regularly.'
+            : 'Check back soon. New previews land here regularly.'
         }
         action={
           hasFilters ? (
@@ -53,7 +53,7 @@ export default async function CompositionContent({
       <CompositionGrid compositions={compositions} />
       <div className="mt-12 border-t border-subtle pt-8 text-center text-body-s text-muted">
         Showing {compositions.length} {compositions.length === 1 ? 'loop' : 'loops'}
-        {compositions.length === COMPOSITION_PAGE_COUNT ? ' — filter to narrow further' : ''}
+        {compositions.length === COMPOSITION_PAGE_COUNT ? '. Filter to narrow further.' : ''}
       </div>
     </>
   );

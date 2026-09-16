@@ -135,7 +135,7 @@ export function EmailSignupSection() {
                 className="text-body-m mb-10 max-w-sm"
                 style={{ color: "#3D3730" }}
               >
-                Early access to new drops, free samples, and exclusive deals —
+                Early access to new drops, free samples, and exclusive deals,
                 straight to your inbox. No spam, ever.
               </p>
 
