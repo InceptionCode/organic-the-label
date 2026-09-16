@@ -4,7 +4,7 @@ import NewsletterSignupForm from './newsletter-signup-form';
 export const metadata: Metadata = {
   title: 'Newsletter – Organic Sonics',
   description:
-    'Join the Organic Sonics newsletter for early access to new drops, free samples, and exclusive deals — straight to your inbox.',
+    'Join the Organic Sonics newsletter for early access to new drops, free samples, and exclusive deals, straight to your inbox.',
 };
 
 const BENEFITS = [

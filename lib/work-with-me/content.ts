@@ -41,7 +41,7 @@ export const HERO = {
   eyebrow: "Producer services & placements",
   titleLines: ["Crafting the", "future of sound"],
   subcopy:
-    "Collaborate directly with JUICEMAN to elevate your sound — from custom production and beats to mixing and mastering for Hip-Hop, Trap, and R&B.",
+    "Collaborate directly with JUICEMAN to elevate your sound, from custom production and beats to mixing and mastering for Hip-Hop, Trap, and R&B.",
   ctaLabel: "Start a project",
   imageUrl: "https://placehold.co/900x1100/171717/9A8E7E?text=JUICEMAN",
   imageAlt: "JUICEMAN in the studio",
@@ -50,32 +50,32 @@ export const HERO = {
 export const BIO = {
   heading: "Who is JUICEMAN?",
   paragraphs: [
-    "JUICEMAN makes atmospheric instrumentals where emotion, texture, and rhythm move as one — melodic trap, ambient soundscapes, soulful harmony, and vintage-inspired production. Rooted in Atlanta and built on an artist-first approach, he treats every beat as its own world: expressive melodies, spacious arrangements, detailed sound design, and drums that carry real weight and movement.",
-    "The sound sits between modern hip-hop and immersive, film-like composition — pulling from analog warmth, R&B, and soul, and shaped by everyone from Pharrell, Kanye, and Prince to Wheezy, Future, and Travis Scott. Across instrumental projects, producer collaborations, and visual storytelling, it's a body of work centered on feeling and music that lasts beyond the moment.",
+    "JUICEMAN makes atmospheric instrumentals where emotion, texture, and rhythm move as one: melodic trap, ambient soundscapes, soulful harmony, and vintage-inspired production. Rooted in Atlanta and built on an artist-first approach, he treats every beat as its own world with expressive melodies, spacious arrangements, detailed sound design, and drums that carry real weight and movement.",
+    "The sound sits between modern hip-hop and immersive, film-like composition pulling from analog warmth, R&B, and soul, and shaped by everyone from Pharrell, Kanye, and Prince to Wheezy, Future, and Travis Scott. Across instrumental projects, producer collaborations, and visual storytelling, it's a body of work centered on feeling and music that lasts beyond the moment.",
   ],
   platformNote:
-    "Organic Sonics is the platform being built around that work — part catalog, part studio, part storefront. It's where artists and producers stream the instrumentals, book production and mix sessions, and pull from the same sounds and sessions that shape the releases.",
+    "Organic Sonics is the platform being built around that work: part catalog, part studio, part storefront. It's where artists and producers stream the instrumentals, book production and mix sessions, and pull from the same sounds and sessions that shape the releases.",
   ctaLabel: "Work with me",
 };
 
 // ─────────────────────────────────────────────────────────────
-// Muso.ai credits embed
+// Muso.ai credits
 // ─────────────────────────────────────────────────────────────
 
-export const MUSO_PROFILE_URL = "";
+export const MUSO_PROFILE_URL = "https://muso.ai/profile/5883477a-6ef7-4a70-ba34-a2f17530bcb1";
 
-/** External link shown on the placeholder card and as the embed fallback. */
-export const MUSO_FALLBACK_URL = "";
+/** Static screenshot of the verified Muso.ai profile, served from /public. */
+export const MUSO_SCREENSHOT_URL = "/muso-screenshot.png";
 
 // ─────────────────────────────────────────────────────────────
 // Artist link pills — Spotify / Apple Music / YouTube
 // ─────────────────────────────────────────────────────────────
 
 export const ARTIST_LINKS: ArtistLink[] = [
-  { platform: "spotify", label: "Spotify — Artist Page", url: "https://open.spotify.com/artist/1rfSEaVxpWG8WXtL6Wj0SH?si=P6d4tYw-RRSx0GMjrtZV7g" },
-  { platform: "appleMusic", label: "Apple Music — Artist Page", url: "https://music.apple.com/us/artist/juiceman/6788973192" },
-  { platform: "youtube", label: "YouTube — Main Channel", url: "https://www.youtube.com/@juiceman-theprod" },
-  { platform: "youtube", label: "YouTube — Shorts Channel", url: "https://www.youtube.com/@juiceman-theprod" },
+  { platform: "spotify", label: "Spotify Artist Page", url: "https://open.spotify.com/artist/1rfSEaVxpWG8WXtL6Wj0SH?si=P6d4tYw-RRSx0GMjrtZV7g" },
+  { platform: "appleMusic", label: "Apple Music Artist Page", url: "https://music.apple.com/us/artist/juiceman/6788973192" },
+  { platform: "youtube", label: "YouTube Main Channel", url: "https://www.youtube.com/@juiceman-theprod" },
+  { platform: "youtube", label: "YouTube Shorts Channel", url: "https://www.youtube.com/@juiceman-theprod" },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ export const SERVICES_HEADING =
 export const SERVICES: Service[] = [
   {
     title: "Mixing & Mastering",
-    blurb: "Industry-standard sonic quality — clean, loud, and DSP-ready.",
+    blurb: "Industry-standard sonic quality: clean, loud, and DSP-ready.",
     icon: "mixing",
   },
   {

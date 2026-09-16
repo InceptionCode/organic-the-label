@@ -166,7 +166,7 @@ export default function ContactPage() {
             className="text-body-m mt-4 mx-auto"
             style={{ color: "var(--text-secondary)", maxWidth: "480px" }}
           >
-            Order issue, download trouble, or just want to talk shop — send a
+            Order issue, download trouble, or just want to talk shop? Send a
             message and we&apos;ll get back to you.
           </p>
         </div>
@@ -403,7 +403,7 @@ export default function ContactPage() {
                     className="text-caption"
                     style={{ color: "var(--text-muted)", lineHeight: "1.5" }}
                   >
-                    Add me to the Organic Sonics newsletter — new drops, free
+                    Add me to the Organic Sonics newsletter for new drops, free
                     resources, and occasional updates.
                   </span>
                 </label>

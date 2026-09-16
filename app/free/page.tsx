@@ -12,7 +12,7 @@ const INCLUDES = [
   "Drum one-shots (kicks, snares, hi-hats, percs)",
   "Melodic loops and one-shots",
   "Analog Lab bank and Minifreak V preset",
-  "Royalty-free — use in commercial projects",
+  "Royalty-free, cleared for commercial use",
 ];
 
 export default function FreePage() {
@@ -117,8 +117,8 @@ export default function FreePage() {
           className="text-body-l text-center mb-12 mx-auto"
           style={{ color: "var(--text-secondary)", maxWidth: "540px" }}
         >
-          A curated pack of drum hits, loops, and textures — zero cost, zero
-          strings. Drop your email and the link is yours.
+          A curated pack of drum hits, loops, and textures, at zero cost and
+          zero strings. Drop your email and the link is yours.
         </p>
 
         {/* ── Two-column card ─────────────────────────────────────────── */}
@@ -379,7 +379,7 @@ export default function FreePage() {
                       </span>
                     </span>
                     <span className="text-caption" style={{ color: "var(--text-muted)", lineHeight: "1.5" }}>
-                      Also add me to the Organic Sonics newsletter — new drops,
+                      Also add me to the Organic Sonics newsletter for new drops,
                       producer tips, and occasional free stuff.{" "}
                       <span style={{ color: "var(--text-disabled)" }}>Optional.</span>
                     </span>
