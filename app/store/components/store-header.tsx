@@ -18,7 +18,7 @@ export default function StoreHeader() {
         THE STORE
       </h1>
       <p className="text-body-m text-muted max-w-lg">
-        Beats, kits, packs, and merchandise — everything a modern producer needs.
+        Beats, kits, packs, and merchandise: everything a modern producer needs.
       </p>
     </div>
   );

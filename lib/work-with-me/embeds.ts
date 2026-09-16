@@ -75,22 +75,3 @@ export function spotifyEmbedSrc(raw: string): string | null {
     return null;
   }
 }
-
-/**
- * Accept a Muso.ai profile/embed URL and return an iframe `src`, or null.
- * The exact embed path shape is unknown until a real profile exists, so the
- * allowlist is deliberately narrow: https on a `muso.ai` host only. Callers
- * always render a fallback link when this returns null.
- */
-export function musoEmbedSrc(raw: string): string | null {
-  const value = raw.trim();
-  if (!value) return null;
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "https:") return null;
-    if (!/(^|\.)muso\.ai$/.test(url.hostname)) return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
-}

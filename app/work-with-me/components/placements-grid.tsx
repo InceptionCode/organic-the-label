@@ -239,7 +239,7 @@ export function PlacementsGrid({ placements }: PlacementsGridProps) {
         title="Placements & credits"
         description={
           shown.length > 0
-            ? "Tap a record to open it up — then the full verified discography."
+            ? "Tap a record to open it up then view the full verified discography."
             : "The full verified discography, straight from Muso.ai."
         }
       />

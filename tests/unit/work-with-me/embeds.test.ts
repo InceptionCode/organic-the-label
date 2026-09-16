@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { spotifyEmbedSrc, musoEmbedSrc } from "@/lib/work-with-me/embeds"
+import { spotifyEmbedSrc } from "@/lib/work-with-me/embeds"
 
 // Pure URL parsing for the Work With Me page embeds. An empty or malformed
 // string must return null so the component renders its placeholder card
@@ -37,22 +37,5 @@ describe("spotifyEmbedSrc", () => {
     expect(spotifyEmbedSrc("http://open.spotify.com/artist/1abc")).toBeNull()
     expect(spotifyEmbedSrc("javascript:alert(1)")).toBeNull()
     expect(spotifyEmbedSrc("")).toBeNull()
-  })
-})
-
-describe("musoEmbedSrc", () => {
-  it("accepts an https muso.ai URL", () => {
-    expect(musoEmbedSrc("https://credits.muso.ai/profile/abc-123")).toBe(
-      "https://credits.muso.ai/profile/abc-123",
-    )
-  })
-
-  it("rejects a look-alike host", () => {
-    expect(musoEmbedSrc("https://muso.ai.evil.com/profile/abc")).toBeNull()
-  })
-
-  it("rejects non-https and empty input", () => {
-    expect(musoEmbedSrc("http://muso.ai/profile/abc")).toBeNull()
-    expect(musoEmbedSrc("")).toBeNull()
   })
 })

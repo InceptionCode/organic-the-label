@@ -13,7 +13,7 @@ export default function CompositionHeader() {
     <header className="mb-10 flex flex-col gap-10 border-b border-subtle pb-10 md:mb-12 md:flex-row md:items-start md:justify-between md:gap-12">
       <div className="max-w-xl">
         <p className="eyebrow mb-4" style={{ color: 'var(--accent-secondary)' }}>
-          Organic Sonics — Free loops
+          Free loops
         </p>
         <h1
           className="mb-5 text-primary"
@@ -28,7 +28,7 @@ export default function CompositionHeader() {
         </h1>
         <p className="text-body-m text-muted">
           Original sample and loop previews straight from Instagram and YouTube. Hear the idea in
-          context, then download the full loop with its terms of use as one zip — no account, no
+          context, then download the full loop with its terms of use as one zip. No account, no
           redirect.
         </p>
       </div>

@@ -154,7 +154,7 @@ export default function HomeClient({
             transition={{ duration: 0.6, ease: EASE_SPRING, delay: 0.62 }}
           >
             Curated beats, kits, packs, sound banks, and resources built for serious creators.
-            Elevate your sound. Express what&apos;s real —{' '}
+            Elevate your sound. Express what&apos;s real:{' '}
             <strong>Organic Sonics</strong>.
           </motion.p>
 
@@ -346,7 +346,7 @@ export default function HomeClient({
                     (e.currentTarget as HTMLElement).style.boxShadow = '';
                   }}
                 >
-                  <Link href="/signup">Start free — no card needed</Link>
+                  <Link href="/signup">Start free, no card needed</Link>
                 </Button>
               </div>
 
