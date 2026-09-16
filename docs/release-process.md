@@ -196,8 +196,5 @@ Skips `dev`:
 ## First release / baseline
 
 `cliff.toml` has `initial_tag = "v1.6.0"`, but the effective baseline is **`v1.6.1`**
-(v1.6.0 was skipped). It currently exists locally only — publish it once:
-
-```bash
-git push origin v1.6.1
-```
+(v1.6.0 was skipped). `v1.6.1` is published (`git ls-remote --tags origin` shows it),
+so this is historical context only — nothing left to do here.
