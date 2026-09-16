@@ -87,7 +87,7 @@ export function RecentPosts({ data }: RecentPostsProps) {
         id="wwm-posts-title"
         eyebrow="Lately"
         title="Recent posts"
-        description="New sessions, breakdowns, and drops — pulled straight from YouTube and Instagram. Tap the center card to watch."
+        description="New sessions, breakdowns, and drops pulled straight from YouTube and Instagram. Tap the center card to watch."
       />
 
       <div className="mt-6">

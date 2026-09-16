@@ -16,6 +16,22 @@ Related app documentation: [`docs/supabase-auth-flow.md`](./supabase-auth-flow.m
 2. `20260313203554_user_anon_system_update.sql`
    - Extends `anonymous_visitors` with `claimed_by_user_id` (FK to `public.profiles`)
 
+> Later migrations (`20260402000000_fix_entitlements_unique_constraint.sql`,
+> `20260828000000_email_system.sql`, `20260828220104_remote_schema.sql`,
+> `20260904000000_support_resolution_note.sql`, `20260905000000_compositions.sql`)
+> aren't summarized below yet — this doc predates them. `oauth_tokens` (v1.7.0,
+> the Work With Me release) is documented here since it's the newest.
+
+3. `20260908000000_oauth_tokens.sql` — added in **v1.7.0** (Work With Me release)
+   - Creates `public.oauth_tokens(provider text primary key, access_token, expires_at, updated_at)` —
+     server-held, refreshable third-party API tokens. First (only) user: the
+     Instagram Graph API long-lived token, refreshed weekly by
+     `/api/cron/instagram-refresh`. `process.env.INSTAGRAM_ACCESS_TOKEN` is the
+     bootstrap/fallback only; once a row exists it's the source of truth.
+   - RLS enabled, **no policies** — service-role access only (server code uses
+     `createSupabaseAdminClient()`; anon/authenticated clients get nothing).
+   - Full detail: [internal-docs/instagram-api-integration.md](internal-docs/instagram-api-integration.md).
+
 ## Data model (high level)
 
 ### Identity and preferences

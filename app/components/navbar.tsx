@@ -32,7 +32,7 @@ export function Navbar() {
             <Link
               href="/"
               className="shrink-0 flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] rounded"
-              aria-label="Organic Sonics — home"
+              aria-label="Organic Sonics home"
             >
               <Image
                 src="/brand-assets/organic-sonics-logo.png"

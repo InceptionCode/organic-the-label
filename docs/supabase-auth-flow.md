@@ -169,10 +169,35 @@ The `AuthStoreProvider` creates a browser Supabase client and subscribes to `onA
 ## 8) Session Refresh (Middleware)
 
 **File:** `proxy.ts` (root) → calls `updateSession` from `utils/supabase/middleware.ts`
+**Also involved:** `lib/supabase/auth-header.ts` (`AUTH_USER_HEADER`), `lib/supabase/map-user.ts` (`mapSupabaseUser`)
 
-This project uses Next.js 16's `proxy.ts` as the middleware entrypoint. Runs on every non-static request. Uses `createServerClient` with the **anon key** (not service role). Calls `supabase.auth.getUser()` to validate and refresh the session token, writing updated cookies to the response.
+This project uses Next.js 16's `proxy.ts` as the middleware entrypoint. Its `matcher` runs it on every request except `_next/static`, `_next/image`, `favicon.ico`, and static image extensions — i.e. every page and API route. `proxy()` unconditionally calls `updateSession(request)` (the `privateRoutes` gate below is currently a no-op — see step 3).
 
-**Must use anon key.** Using service role in middleware is a security vulnerability — it bypasses RLS on every request.
+### What `updateSession` does, per request
+
+1. **Creates a request-scoped Supabase client** with `createServerClient` using the **anon key** (never service role — that would bypass RLS on every request) and a custom cookie adapter: `getAll()` reads cookies off the incoming `request`; `setAll()` writes any cookies Supabase wants to set back onto `request.cookies` (so they're visible to the rest of this same request) and also stashes them in a local `cookiesToApply` array for step 4.
+
+2. **Validates (and silently refreshes) the session:** `const { data: { user} } = await supabase.auth.getUser()`. This is a real round-trip to Supabase Auth, not a local JWT decode — it's the one call in this file that must never be preceded by other code (per the inline warning), because interleaving anything between `createServerClient` and `getUser()` risks corrupting the cookie-capture timing and can randomly log users out. If the access token is expired, this call transparently exchanges the refresh token for a new one; the rotated cookies come back through the `setAll` adapter from step 1 and land in `cookiesToApply`.
+
+3. **Private-route gate (currently unused):** if `request.nextUrl.pathname` is in the exported `privateRoutes` array *and* `user?.is_anonymous` is true, redirects to `/login`. `privateRoutes` is `[]` today — no route is middleware-gated yet; this is scaffolding for when membership-gated routes exist. Note this checks `is_anonymous` (a Supabase anonymous-auth session), not "no user at all."
+
+4. **Sets the forwarded-user request header:** clones the incoming request headers and sets `x-supabase-user` (the `AUTH_USER_HEADER` constant) to `JSON.stringify(mapSupabaseUser(user))` when a user is present, or `''` when there isn't one. `mapSupabaseUser` is the same normalizer used by the browser `AuthStoreProvider` and `getUserAction` (step below), so all three agree on the app's `User` shape. This header is what lets downstream Server Components/Route Handlers know who's signed in **without re-verifying the session themselves** — see the read side below.
+
+5. **Builds the response and reapplies cookies:** `NextResponse.next({ request: { headers: requestHeaders } })` — passing the *mutated* headers (including `x-supabase-user`) back into `request` is what actually forwards them to the rest of the request pipeline (Server Components, Route Handlers). Then every cookie captured in `cookiesToApply` (step 2's refreshed session, if any) is written onto that same response object with `supabaseResponse.cookies.set(...)`, so the browser's stored session cookies stay in sync with whatever Supabase just rotated server-side.
+
+6. **Returns `supabaseResponse` unmodified.** The inline comment is explicit about why: constructing a *different* `NextResponse` and copying cookies over is easy to get subtly wrong, and doing so can desync the browser's and server's view of the session — terminating it prematurely. If this file is ever touched, that constraint is the one to preserve.
+
+### Read side — how a Server Component gets the user without a second round-trip
+
+`getUserAction` (`app/api/auth/get-user.ts`) is the canonical way server code reads "who's signed in":
+
+1. Reads the `x-supabase-user` header via `next/headers`' `headers()`.
+2. If the header is present (even as `''`, meaning "middleware ran and found no user"), it trusts that value — `''` ⇒ `{ user: null }`, otherwise `JSON.parse`s it into the mapped `User`. **No Supabase call is made in this path.**
+3. Only if the header is missing entirely (e.g. a code path that isn't behind `proxy.ts`'s matcher, or a malformed value) does it fall back to a real `createSupabaseServerClient()` + `supabase.auth.getUser()` check.
+
+The point of steps 2–4 in `updateSession` is exactly this: the middleware already paid the cost of validating (and possibly refreshing) the session once for the request, so `getUserAction` — and anything that calls it — doesn't need to pay for a second `auth.getUser()` network call to Supabase for the same request.
+
+**Must use anon key in `updateSession`.** Using service role in middleware bypasses RLS on every request — a security vulnerability, not just a style preference.
 
 ---
 
