@@ -47,6 +47,9 @@ commit body.
   `git commit --no-verify` when you really need to.
 - **CI:** `.github/workflows/commitlint.yml` lints the PR title on every pull request to
   `main` / `dev`.
+- **PR templates:** `.github/workflows/enforce-pr-template.yml` requires the matching template
+  from `.github/PULL_REQUEST_TEMPLATE/` (`feature` into `dev`, `dev-to-main` from `dev`,
+  `hotfix-to-main` for any other branch into `main`, including `release/*`).
 
 ## Changelog & versioning
 

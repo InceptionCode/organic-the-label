@@ -7,7 +7,7 @@ Versions and the changelog are **derived from Conventional Commit messages**.
 
 - `main` = production
 - `dev` = development/staging (`dev.organicsonics.com`)
-- `feat/*`, `fix/*` = work branches
+- `feat/*`, `fix/*` = work branches (older branches also use `feature/*`, `features/*`, `hotfix/*`)
 - `release/x.y.z` = short-lived release-staging branch, cut from `main`
 
 Merge style:
@@ -58,6 +58,21 @@ minor bump, never a patch.
 | `.github/workflows/commitlint.yml` | lints PR titles on PRs to `main` / `dev` |
 | `.github/workflows/changelog.yml` | on push to `main`, regenerates `CHANGELOG.md` and commits it back |
 | `.github/workflows/release.yml` | on `v*` tag push, creates the GitHub Release |
+| `.github/workflows/enforce-pr-template.yml` | fails PRs that don't use the right PR template (see below) |
+| `.github/workflows/ci-pr.yml` / `ci-main.yml` / `ci.yml` | lint, type-check, tests (see `docs/testing-strategy.md`) |
+
+### PR templates
+
+Templates live in `.github/PULL_REQUEST_TEMPLATE/`. Each carries a hidden marker comment
+that `enforce-pr-template.yml` checks, and a PR body must contain exactly one:
+
+| PR | Template | Marker |
+| --- | --- | --- |
+| anything → `dev` | `feature.md` | `<!-- pr-template: feature -->` |
+| `dev` → `main` | `dev-to-main.md` | `<!-- pr-template: dev-to-main -->` |
+| any other branch → `main` (**including `release/x.y.z`** and hotfixes) | `hotfix-to-main.md` | `<!-- pr-template: hotfix-main -->` |
+
+Pick one with `?template=<file>.md` on the compare URL, or paste the file's contents.
 
 Handy commands: `pnpm changelog` (regenerate the file), `pnpm exec git-cliff --unreleased`
 (preview without writing), `pnpm exec git-cliff --bumped-version` (preview the next version).
@@ -114,7 +129,9 @@ Preconditions: `dev` CI green and verified on staging; local `main`/`dev` up to 
 6. **Run the pre-release checklist** — `docs/release-checklist.md`, against staging or a
    local `pnpm serve` build.
 
-7. **PR `release/1.7.0` → `main`.** PR title: `chore(release): v1.7.0`. CI must pass.
+7. **PR `release/1.7.0` → `main`.** PR title: `chore(release): v1.7.0`. Body: the
+   `hotfix-to-main.md` template (the enforce-pr-template check treats every non-`dev` head as
+   a hotfix). CI must pass.
    Merge with a **merge commit** (not squash). Local-only alternative:
    ```bash
    git checkout main && git pull && git merge --no-ff release/1.7.0
@@ -158,7 +175,7 @@ git tag -a "v${VERSION}" -m "Release v${VERSION}"
 Skips `dev`:
 
 1. Branch from `main` as `fix/*`
-2. Commit as `fix: <description>`; push; open PR into `main`
+2. Commit as `fix: <description>`; push; open PR into `main` with the `hotfix-to-main.md` template
 3. CI must pass; merge (`--no-ff`)
 4. `git checkout main && git pull && pnpm release` (patch bump, e.g. `v1.7.1`)
 5. `git push --follow-tags`
