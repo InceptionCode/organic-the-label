@@ -14,8 +14,10 @@ The V1 test suite exists to protect the parts of the site that matter most: the 
 1. Store browsing and product display
 2. Cart behavior (add, update, remove, total)
 3. Checkout handoff to Shopify
-4. Auth (sign in, sign out, session state)
+4. Auth (sign up, sign in, sign out, session state)
 5. Gated/member-specific content behavior
+6. Lead capture and support forms (`/free`, `/contact`, `/work-with-me`) and the email sync behind them
+7. Compositions browsing and zip downloads
 
 **What we are not chasing right now:**
 
@@ -48,7 +50,9 @@ For pure logic with no DOM and no network.
 **Write unit tests for:**
 - Cart subtotal calculations and quantity rules
 - Product filter tag building (`lib/product/build-filter-tag.ts`)
-- Search param normalization (`lib/product/normalize-search-params.ts`)
+- Search param normalization (`lib/product/normalize-search-params.ts`, `lib/composition/normalize-search-params.ts`)
+- Embed URL parsing (`lib/composition/embed-url.ts`, `lib/work-with-me` embeds)
+- Email clients and contact sync (`lib/email/*`, mocked Resend / MailerLite)
 - Auth user mapping (`store/auth-context.tsx` — `mapSupabaseUser`)
 - Zod schema validation (`lib/schemas.ts` — `SigninFormSchema`, `SignupFormSchema`)
 - Membership/entitlement helper logic
@@ -67,6 +71,9 @@ For component behavior with mocked network.
 - Cart drawer opens, shows items, and handles interactions
 - Auth-aware navbar and account UI
 - Membership CTA visibility by user state
+- Composition cards and filters
+- First-visit splash / scroll-scrub hero
+- Webhook route handlers called directly (compositions revalidate, support-status)
 
 **Rules:**
 - Use MSW to mock API routes — do not hit real Shopify or Supabase
@@ -77,15 +84,18 @@ For component behavior with mocked network.
 
 For critical flows that require a real browser and real server.
 
-**Keep to 5-8 tests. Current scope:**
-1. Store page loads and shows products
-2. User can browse to a product detail page
-3. User can add to cart and see the cart badge update
-4. User can open cart drawer, update quantity, and remove items
-5. Checkout button handoff to Shopify (verify URL, don't complete payment)
-6. User can sign in and sees the authenticated state
-7. User can sign out and sees the unauthenticated state
-8. Member vs non-member gated content renders correctly
+**Keep each spec focused on critical flows. Current specs:**
+
+| Spec | Covers |
+|------|--------|
+| `store.spec.ts` | Store loads, product list, PDP navigation, category filter, search |
+| `cart.spec.ts` | Add to cart, drawer, quantity update, remove, per-card loading state, checkout handoff URL |
+| `auth.spec.ts` | Sign up confirmation dialog, password mismatch, sign in, account UI, sign out, auth-gated content |
+| `compositions.spec.ts` | Page loads, loop cards, newsletter CTA, search filter, zip download response, filter/URL sync |
+| `email.spec.ts` | `/free` starter kit form and `/contact` support form (success, validation, category select) |
+| `work-with-me.spec.ts` | Page loads, nav link, CTA scrolls to inquiry form, message validation |
+
+Tests tagged `@smoke` run with `pnpm test:e2e:smoke`. `tests/e2e/global-setup.ts` warms every route once before the suite so cold `next dev` compiles don't land inside a test.
 
 ---
 
@@ -121,7 +131,7 @@ Use `tests/utils/factories.ts` to generate variations without duplicating fixtur
 | CI (PR) | Unit + Integration | Mocked |
 | CI (main) | Full suite including E2E | Real server, mocked third parties |
 
-E2E tests need a running server. Playwright's `webServer` config auto-starts `pnpm dev` on CI.
+E2E tests need a running server. Playwright's `webServer` config runs `pnpm dev`: it reuses an already-running server locally and always starts a fresh one on CI. `pnpm test:e2e:cold` reproduces the CI setup locally (frees port 3000, clears `.next`, sets `CI=1`). Test credentials (`PLAYWRIGHT_TEST_EMAIL`, `PLAYWRIGHT_TEST_PASSWORD`) load from `.env.test`.
 
 ---
 
@@ -134,9 +144,14 @@ E2E tests need a running server. Playwright's `webServer` config auto-starts `pn
 - Designed to give immediate feedback before review
 
 ### Main branch (`ci-main.yml`)
-- Runs on every push to `main` or `dev`
-- Full suite: lint → typecheck → build → unit/integration → E2E
+- Runs on every push to `main`, `dev`, or `release/**`
+- Full suite: lint → typecheck → build → unit/integration → E2E (Chromium)
 - Playwright report uploaded on failure
+
+### Legacy validate (`ci.yml`)
+- Runs on PRs and pushes to `main` / `dev`
+- Env presence check → build → lint → typecheck → `pnpm test`
+- Overlaps with the two workflows above; candidate for removal once `ci-pr` / `ci-main` are the required checks
 
 ### Branch protection
 After the first passing PR, add `CI — PR` as a required check in GitHub repo settings.
@@ -150,8 +165,8 @@ These are good ideas for later. Don't build them now.
 
 - Visual regression testing
 - Coverage gating (collect but don't fail on %)
-- Webhook processing tests
-- Email flow tests
+- End-to-end webhook delivery (handlers are integration-tested directly; real Shopify/Supabase/MailerLite delivery is not)
+- Real email delivery (Resend / MailerLite are mocked)
 - Analytics event validation
 - Contract tests for Shopify/Supabase APIs
 - Smoke E2E against Vercel preview deployments

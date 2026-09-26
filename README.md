@@ -8,21 +8,23 @@ Organic Sonics is a community-driven platform that connects music producers and 
 
 **Key Features:**
 
-- **Personalized Explore/Home Page**: Dynamic homepage showing recent producer and artist news, forum/discord discussions, and the latest kits, packs, and resources
-- **Free Subscription Incentives**: Exclusive advice, tips, educational videos, free resources, and reminders for future events and deals
-- **Producer & Artist Discovery**: Tools to find and connect with producers and artists
-- **YouTube Integration**: Dedicated pages for deeper discussions and details behind YouTube posts
-- **Storefront powered by Shopify**:
-  - `/store` page backed by Shopify Storefront API
-  - Filters for category, tags, exclusivity, and sort (price, title, created_at)
+- **Home (`/`)**: Aurora-wave hero, featured kits, latest drop, stats bar, and email signup (first visits get the scroll-scrub splash)
+- **Storefront powered by Shopify (`/store`, `/store/[handle]`)**:
+  - Backed by the Shopify Storefront API
+  - Filters for category, tags, exclusivity, and sort (price, title, created_at), plus search
   - Pagination using Shopify cursors (`hasNextPage` / `endCursor`)
   - Products normalized and validated via Zod before rendering
-- **Personalized Store Experience**:
-  - Membership-aware upsell and messaging (`MembershipContent`)
-  - Future recommendations and deals based on user preferences (`Recommendations`)
-- **Future Premium Membership**: Access to premium content and exclusive features
-
-
+  - Cart drawer with quantity controls and handoff to Shopify checkout
+  - Audio previews from the `custom.audio_preview_urls` metafield
+  - Purchases grant entitlements through the `orders/paid` webhook
+- **Compositions (`/compositions`)**: Free loop library with Instagram / YouTube embeds, URL-synced filters, and instant zip downloads
+- **Free resources & newsletter (`/free`, `/newsletter`)**: Starter kit request and newsletter signup, synced to MailerLite with Resend delivery emails
+- **Work With Me (`/work-with-me`)**: Spotify catalog, recent Instagram / YouTube posts, Muso.ai credits, and an inquiry form
+- **Contact & support (`/contact`)**: Support form stored in Supabase, with status-change emails
+- **Accounts (`/signup`, `/login`, `/account`)**: Supabase Auth (password, magic link, password reset) with hCaptcha; anonymous activity is merged into the account on sign-in
+- **Explore (`/explore`)**: Personalized discovery page (news, community, discovery, resources, membership upsell) behind `NEXT_PUBLIC_EXPLORE_*` feature flags; shows a coming-soon state while disabled
+- **Personalized Store Experience**: Membership-aware upsell and messaging (`MembershipContent`) and recommendations (`Recommendations`)
+- **Planned**: Premium membership tier, producer & artist discovery, and deeper YouTube post pages
 
 ## Shopify Storefront Integration
 
@@ -42,10 +44,11 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- pnpm (recommended) or npm/yarn
-- Supabase account and project
-- Shopify Storefront SDK
+- Node.js 20.9 or higher (Next.js 16 minimum; CI runs Node 23)
+- pnpm 10 (CI uses pnpm 10; the lockfile is `pnpm-lock.yaml`)
+- Supabase project (schema lives in `supabase/migrations`)
+- Shopify store with Storefront API access tokens
+- Resend and MailerLite accounts for email flows (optional for basic browsing)
 
 
 
@@ -59,11 +62,9 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 2. **Install dependencies**
   ```bash
    pnpm install
-   # or
-   npm install
   ```
 3. **Set up environment variables**
-  Copy `[.env.example](./.env.example)` to `.env.local` in the project root, then replace the placeholders with keys from your own Supabase, Shopify, and email dashboards. Never commit real secrets.
+  Copy [`.env.example`](./.env.example) to `.env.local` in the project root, then replace the placeholders with keys from your own Supabase, Shopify, and email dashboards. Never commit real secrets.
   ```bash
   cp .env.example .env.local
   ```
@@ -71,31 +72,48 @@ The store experience is backed by the **Shopify Storefront API**, with a thin in
 
 ```bash
  pnpm dev
- # or
- npm run dev
 ```
 
- The dev server will:
+ This starts Next.js with Turbopack on [http://localhost:3000](http://localhost:3000). It does **not** seed data; use `pnpm generate-dev` to load sample product data into Supabase first (it also starts the dev server with the Node inspector attached).
 
-- Generate seed data automatically
-- Start the Next.js development server with Turbopack
-- Run on [http://localhost:3000](http://localhost:3000)
-
-1. **Open your browser**
+5. **Open your browser**
 
 Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
 ### Available Scripts
 
-- `pnpm dev` - Start development server
+**App**
+
+- `pnpm dev` - Start the Next.js dev server (Turbopack)
 - `pnpm build` - Build the application for production
 - `pnpm start` - Start the production server
-- `pnpm serve` - Build and start production server
-- `pnpm lint` - Run ESLint
-- `pnpm generate-dev` - Start development server with seed data generation
-- `pnpm generate-seed` - Generate seed data for development
+- `pnpm serve` - Build and start the production server
+- `pnpm generate-dev` - Seed sample product data, then start the dev server with `--inspect`
+- `pnpm generate-seed` - Seed sample product data (`seed.ts`) into Supabase
 
+**Seeding** (copy the matching `*.example.ts` file first; the real seed files are gitignored)
 
+- `pnpm seed:free-resources:dev` / `pnpm seed:free-resources:prod`
+- `pnpm seed:compositions:dev` / `pnpm seed:compositions:prod`
+
+**Quality**
+
+- `pnpm lint` / `pnpm lint:fix` - ESLint (zero warnings allowed)
+- `pnpm type-check` / `pnpm type-check:watch` - TypeScript with `--noEmit`
+
+**Tests** (see [tests/README.md](./tests/README.md))
+
+- `pnpm test` - All Vitest tests
+- `pnpm test:unit` / `pnpm test:integration` / `pnpm test:watch` / `pnpm test:coverage`
+- `pnpm test:ci` - Unit then integration (what PR CI runs)
+- `pnpm test:e2e` / `pnpm test:e2e:smoke` - Playwright (starts or reuses `pnpm dev`)
+- `pnpm test:e2e:cold` - Kill port 3000, clear `.next`, run Playwright as CI does
+- `pnpm test:all` - `test:ci` + `test:e2e:cold`
+
+**Release** (see [docs/release-process.md](./docs/release-process.md))
+
+- `pnpm release` - Bump version, regenerate `CHANGELOG.md`, commit, and tag
+- `pnpm changelog` - Regenerate `CHANGELOG.md` with git-cliff
 
 ### Project Structure
 
@@ -107,18 +125,28 @@ Navigate to [http://localhost:3000](http://localhost:3000) to see the applicatio
 │   │   ├── components/               # Filters, grid, cart widget, layout pieces
 │   │   ├── page.tsx                  # Collection / store listing
 │   │   └── store-layout.tsx
+│   ├── account/                      # Account page (unverified-email banner)
+│   ├── compositions/                 # Free loop library
+│   ├── contact/                      # Support form
+│   ├── explore/                      # Feature-flagged personalized page
+│   ├── free/                         # Starter kit request
+│   ├── login/                        # Sign in, magic link, reset password
+│   ├── newsletter/
+│   ├── search/                       # Search dialog
+│   ├── signup/
+│   ├── work-with-me/                 # Services, credits, inquiry form
 │   ├── global-error-test/            # Dev-only error UI experiments
 │   ├── api/                          # Route handlers + colocated server modules
 │   │   ├── activity/track/           # Activity event ingestion
-│   │   ├── auth/                     # Bootstrap, confirm, init; magic link & user helpers
+│   │   │   ├── auth/                     # Bootstrap, confirm, init; sign-in/up, magic link, reset actions
 │   │   ├── composition/download/     # Zip + stream composition files
-│   │   ├── cron/                     # Instagram token refresh
+│   │   ├── cron/                     # Instagram token refresh (weekly, see vercel.json)
 │   │   ├── email/                    # Newsletter subscribe
 │   │   ├── instagram/                # Media proxy
 │   │   ├── membership-cta/dismiss/
 │   │   ├── resources/                # Free resource requests
-│   │   ├── store/                    # Products, cart CRUD, entitlements, revalidation, orders
-│   │   ├── support/
+│   │   ├── store/                    # Products, cart CRUD, entitlements, revalidation, orders/paid
+│   │   ├── support/                  # Support request intake
 │   │   └── webhooks/                 # MailerLite, compositions, support status
 │   ├── components/                   # App chrome & marketing sections (navbar, cart, hero, etc.)
 │   │   └── auth/                     # hCaptcha, magic link, reset-password UI
@@ -129,7 +157,7 @@ Navigate to [http://localhost:3000](http://localhost:3000) to see the applicatio
 │   ├── global-error.tsx
 │   └── not-found.tsx
 ├── features/                         # Feature slices (co-located UI + config) / feature flags, mock data, types
-│   └── explore/                      # Explore sections
+│   └── explore/                      # Explore sections + NEXT_PUBLIC_EXPLORE_* flags
 ├── lib/                              # Domain logic & integrations
 │   ├── Shopify/                      # Storefront client, GraphQL queries/mutations, caches
 │   ├── composition/                  # Composition cache + embed URL helpers
@@ -148,29 +176,33 @@ Navigate to [http://localhost:3000](http://localhost:3000) to see the applicatio
 │   ├── constants.ts
 │   ├── font-tags.ts
 │   └── utils.ts
-├── store/                            # Client providers & hydration
+├── store/                            # Auth/cart providers, InitAuthStore, ActivityHydrator
 ├── ui-components/                    # Shared primitives (Radix-based), audio/hero helpers, icons/
-├── utils/
+├── utils/                            # helpers/, hooks/, supabase/ (browser, server, admin clients + session middleware)
+├── supabase/                         # config.toml + SQL migrations
 ├── public/                           # Static assets
 │   ├── brand-assets/                 # Logos & brand reference (preferred over placeholders)
 │   ├── organic-sonics-hero/          # Scroll-scrub hero frames
 │   ├── *.svg
 │   └── sample-data.json
-├── docs/                             # Runbooks (Supabase, Shopify, releases, testing)
-│   └── internal-docs/                # Architecture notes (cart, Instagram, testing blueprint)
+├── docs/                             # Release process, release checklist, testing strategy
+│   └── internal-docs/                # Gitignored: Supabase, Shopify ops, auth flow, cart, Instagram, testing blueprint
 ├── tests/                            # Vitest unit/integration + Playwright e2e (see tests/README.md)
 ├── scripts/
-│   └── release.sh
+│   └── release.sh                    # Used by `pnpm release`
+├── seed.ts, seed-*.example.ts        # Seed scripts (copy examples to seed-*.ts, gitignored)
+├── vercel.json                       # Cron schedule
 ├── .github/                          # CI workflows, PR templates
 ├── .env.example                      # Env var template (copy to .env.local)
 ├── proxy.ts                          # Next.js 16 proxy (session refresh via utils/supabase/middleware)
+├── playwright.config.ts / vitest.config.ts
 ```
 
 
 
 ### Testing folder structure (overview)
 
-Application code lives at the **repository root** (there is no `src/` directory). Conventions: `[docs/testing-strategy.md](./docs/testing-strategy.md)` and `[tests/README.md](./tests/README.md)`.
+Application code lives at the **repository root** (there is no `src/` directory). Conventions: [docs/testing-strategy.md](./docs/testing-strategy.md) and [tests/README.md](./tests/README.md).
 
 ```
 tests/
@@ -198,27 +230,32 @@ tests/
 - **CSS**: Tailwind CSS 4 (`@tailwindcss/postcss`), PostCSS, Autoprefixer; `tailwind-merge`, `tailwind-variants`, `tw-animate-css`, `clsx`
 - **Primitives**: Radix UI, **class-variance-authority** (CVA)
 - **Theming**: `next-themes`
-- **Icons & motion**: Lucide React, Framer Motion
+- **Icons & motion**: Lucide React, Heroicons, Framer Motion
+- **Shaders**: `@paper-design/shaders-react` (grain gradient hero)
 - **Bot protection**: `@hcaptcha/react-hcaptcha`
 
-**Data & auth**
+**Data, auth & integrations**
 
 - **Supabase**: `@supabase/supabase-js`, `@supabase/ssr` (Auth, PostgreSQL, server/client helpers)
+- **Commerce**: `@shopify/storefront-api-client` (Storefront API `2026-01`)
+- **Email**: Resend (transactional) + MailerLite (contacts, groups, webhooks)
+- **Social**: Spotify Web API, YouTube Data API, Instagram Graph API (token refreshed by a Vercel cron)
+- **Zips**: `fflate` for composition downloads
 
 **Forms & validation**
 
 - **Conform**: `@conform-to/react`, `@conform-to/zod` with **Zod** 4
 
-**State & HTTP**
+**State**
 
 - **Client state**: Zustand
-- **HTTP**: Axios
 
 **Development & quality**
 
 - **Lint / format**: ESLint 9, `eslint-config-next`, Prettier
-- **Unit / component testing**: Vitest, Testing Library, jsdom (see planned `tests/` layout in this README and `docs/testing-strategy.md`)
+- **Unit / component testing**: Vitest, Testing Library, jsdom, MSW (see `tests/README.md` and `docs/testing-strategy.md`)
 - **E2E**: Playwright
+- **Commits & releases**: husky + commitlint (Conventional Commits), git-cliff (see `CONTRIBUTING.md`)
 - **Screenshots / automation**: Puppeteer (`screenshot.mjs`)
 
 

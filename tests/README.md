@@ -19,7 +19,7 @@ pnpm test:unit
 # Integration tests only
 pnpm test:integration
 
-# E2E tests (requires local dev server)
+# E2E tests (starts `pnpm dev`, or reuses one already on :3000)
 pnpm test:e2e
 
 # E2E smoke tests only
@@ -28,7 +28,10 @@ pnpm test:e2e:smoke
 # Everything
 pnpm test:all
 
-# Coverage report (opens in browser after run)
+# E2E exactly as CI runs it (fresh server, cleared .next)
+pnpm test:e2e:cold
+
+# Coverage report (text summary + HTML in coverage/)
 pnpm test:coverage
 ```
 
@@ -39,26 +42,37 @@ pnpm test:coverage
 ```
 tests/
 ├── unit/             Pure logic tests — no DOM, no network
-│   ├── cart/         Cart state math and business logic
-│   ├── store/        Filter, sort, pagination, search param helpers
-│   ├── auth/         Session mapping, schema validation
-│   └── utils/        Any shared helper logic
+│   ├── auth/         Auth store, init, state-change resolution, helpers
+│   ├── cart/         Cart store math and business logic
+│   ├── composition/  Embed URLs, search param normalization
+│   ├── email/        Resend, MailerLite, contact sync, validation
+│   ├── store/        Filters, store data parsing, activity tracker store
+│   ├── utils/        Shared helper logic
+│   └── work-with-me/ Embed helpers
 │
 ├── integration/      Component behavior tests — DOM, mocked network
-│   ├── store/        Store page and product card rendering
-│   ├── cart/         Cart drawer interactions
-│   ├── auth/         Auth-aware UI (navbar, membership CTA)
-│   └── membership/   Gated content rendering
+│   ├── auth/         Auth-aware UI
+│   ├── cart/         Add-to-cart button, cart drawer
+│   ├── composition/  Cards, filters, revalidate webhook handler
+│   ├── email/        Support-status webhook handler
+│   ├── membership/   Membership CTA visibility
+│   ├── splash/       Session splash, scroll-scrub hero
+│   └── store/        Store page rendering
 │
 ├── e2e/              Full browser tests against the running app
-│   ├── store.spec.ts  Browse store, filter, sort
-│   ├── cart.spec.ts   Add to cart, update quantity, remove, checkout handoff
-│   └── auth.spec.ts   Sign in, sign out, gated content
+│   ├── global-setup.ts         Warms every route before the suite
+│   ├── store.spec.ts           Browse, PDP, filter, search
+│   ├── cart.spec.ts            Add, quantity, remove, checkout handoff
+│   ├── auth.spec.ts            Sign up, sign in/out, gated content
+│   ├── compositions.spec.ts    Browse, filter/URL sync, zip download
+│   ├── email.spec.ts           /free and /contact forms
+│   └── work-with-me.spec.ts    Page, nav link, inquiry form
 │
 ├── fixtures/         Typed, reusable test data
 │   ├── products.ts
 │   ├── users.ts
-│   └── cart.ts
+│   ├── cart.ts
+│   └── compositions.ts
 │
 ├── mocks/            MSW request handlers
 │   ├── handlers.ts   Route handlers for Shopify + Supabase API calls
@@ -111,10 +125,11 @@ Do NOT complete real Shopify checkout — verify the handoff URL only.
 Fixtures live in `tests/fixtures/` and are typed against `lib/schemas.ts`.
 
 - **products.ts** — `mockProduct`, `mockExclusiveProduct`, `mockFreeProduct`
-- **users.ts** — `anonUser`, `signedInUser`, `memberUser`
-- **cart.ts** — `mockCart`, `emptyCart`, `mockCartLine`
+- **users.ts** — `anonUser`, `signedInUser`, `memberUser`, `supabaseAnonUser`, `supabaseSignedInUser`
+- **cart.ts** — `mockCart`, `emptyCart`, `mockCartLine`, `mockCartLineTwo`, `multiItemCart`
+- **compositions.ts** — `mockComposition`, `mockYouTubeComposition`, `mockCompositionListItem`
 
-Use factories in `tests/utils/factories.ts` to generate variations:
+Use factories in `tests/utils/factories.ts` (`makeProduct`, `makeCart`, `makeUser`) to generate variations:
 
 ```ts
 import { makeProduct } from '../utils/factories'
@@ -142,8 +157,8 @@ const beatProduct = makeProduct({ category: 'beat', price: 19.99 })
 
 ## CI
 
-- **PRs**: lint + typecheck + `pnpm test:ci` (unit + integration only)
-- **Main branch**: full suite including E2E + build validation
-- Workflows live in `.github/workflows/ci-pr.yml` and `.github/workflows/ci-main.yml`
+- **PRs** (`ci-pr.yml`): lint + typecheck + `pnpm test:ci` (unit + integration only)
+- **Pushes to `main`, `dev`, `release/**`** (`ci-main.yml`): lint + typecheck + build + unit/integration + E2E
+- `ci.yml` is an older combined workflow that still runs on PRs and pushes to `main` / `dev`
 
 See [`/docs/testing-strategy.md`](/docs/testing-strategy.md) for the full philosophy and scope decisions.
