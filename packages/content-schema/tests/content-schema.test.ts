@@ -45,7 +45,8 @@ describe("file naming", () => {
       zipEntryNames.compositionAudio({ slug: "midnight-rhodes", title: "Midnight Rhodes", bpm: 82, musicalKey: "F# minor" }),
     ).toBe("midnight-rhodes/Midnight Rhodes - 82 BPM F# minor.mp3")
     expect(zipEntryNames.compositionAudio({ slug: "x", title: "Plain" })).toBe("x/Plain.mp3")
-    expect(zipEntryNames.terms("midnight-rhodes")).toBe("midnight-rhodes/Terms of Use.txt")
+    expect(zipEntryNames.terms("midnight-rhodes")).toBe("midnight-rhodes/Terms of Use.pdf")
+    expect(zipEntryNames.terms("midnight-rhodes", ".txt")).toBe("midnight-rhodes/Terms of Use.txt")
   })
 
   it("suggests Digital Downloads filenames and bundle versions", () => {
@@ -202,7 +203,7 @@ describe("CompositionBundleManifestSchema", () => {
         bitrate_kbps: 320,
         duration_seconds: 98.2,
       },
-      { role: "terms", name: "midnight-rhodes/Terms of Use.txt", bytes: 2048, sha256: SHA },
+      { role: "terms", name: "midnight-rhodes/Terms of Use.pdf", bytes: 2048, sha256: SHA },
     ],
     terms_source_url: `${CDN}/organic-sonics-terms-of-use.txt`,
     bundle_file_name: "os-comp-midnight-rhodes-v1.zip",

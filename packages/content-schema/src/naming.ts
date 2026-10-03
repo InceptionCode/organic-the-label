@@ -60,9 +60,9 @@ export const zipEntryNames = {
     const name = safeDisplayName(suffix ? `${title} - ${suffix}` : title)
     return `${slugify(slug)}/${name}.mp3`
   },
-  /** "{slug}/Terms of Use.txt" */
-  terms(slug: string): string {
-    return `${slugify(slug)}/Terms of Use.txt`
+  /** "{slug}/Terms of Use.pdf". The canonical terms file is bundled unchanged. */
+  terms(slug: string, extension = "pdf"): string {
+    return `${slugify(slug)}/Terms of Use.${extension.replace(/^\./, "")}`
   },
 }
 

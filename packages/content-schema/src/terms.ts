@@ -14,8 +14,9 @@ export type TermsInput = {
 }
 
 /**
- * Renders the "Terms of Use.txt" bundled with a free composition download:
- * a short header identifying the composition, followed by the canonical terms.
+ * Renders a plain-text terms file: a short header identifying the composition,
+ * followed by the canonical terms. Only for a text terms source; the admin app
+ * bundles the canonical PDF unchanged (`zipEntryNames.terms`).
  */
 export function renderCompositionTerms({
   slug,
