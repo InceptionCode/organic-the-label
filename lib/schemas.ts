@@ -1,46 +1,49 @@
 import { z } from "zod/v4"
+import {
+  unionCategories,
+  unionTags,
+  ProductPreviewUrlsSchema,
+  ProductWhatsIncludedSchema,
+} from "@organic/content-schema"
 
 // --------------------
 // ZOD SCHEMAS (Shared Types)
 // --------------------
 
-// ✅ Product Schema for Beats, Kits, and Merch
-const categoryKit = z.literal("kit")
-const categoryBeat = z.literal("beat")
-const categoryPack = z.literal("pack")
-const categoryMerch = z.literal("merch")
-const categoryBank = z.literal("bank")
-const categoryPlugin = z.literal("plugin")
-const categorySuite = z.literal("suite")
-const categoryFree = z.literal("free")
-
-// Tags
-const tagFree = z.literal('free');
-const tagAmbient = z.literal('ambient');
-const tagMelodic = z.literal('melodic');
-const tagVintage = z.literal('vintage');
-const tagRnB = z.literal('r&b');
-const tagHipHop = z.literal('hiphop');
-const tagRap = z.literal('rap');
-const tagTrap = z.literal('trap');
-const tagDark = z.literal('dark');
-const tagOST = z.literal('ost');
-const tagOpium = z.literal('opium');
-const tagRage = z.literal('rage');
-const tagDigital = z.literal('digital');
+// Product taxonomy, product metafield shapes and composition schemas live in
+// the shared `@organic/content-schema` package (also used by the admin app).
+// They are re-exported here so existing `@/lib/schemas` imports keep working.
+export {
+  PRODUCT_CATEGORIES,
+  PRODUCT_TAGS,
+  unionCategories,
+  unionTags,
+  ProductPreviewUrlsSchema,
+  ProductWhatsIncludedSchema,
+  COMPOSITION_PAGE_COUNT,
+  unionCompositionPlatform,
+  CompositionSchema,
+  CompositionBundleManifestSchema,
+  FreeResourceSchema,
+} from "@organic/content-schema"
+export type {
+  ProductCategories,
+  ProductTags,
+  ProductPreviewUrls,
+  ProductWhatsIncluded,
+  CompositionPlatform,
+  Composition,
+  CompositionListItem,
+  CompositionBundleManifest,
+  FreeResource,
+  FreeResourcePublic,
+} from "@organic/content-schema"
 
 // Order
 const orderSource = z.literal("order")
 const membershipSource = z.literal("membership")
 const manualSource = z.literal("manual")
 const promoSource = z.literal("promo")
-
-// Create a union type for category options
-export const unionCategories = z.union([categoryBank, categoryBeat, categoryFree, categoryKit, categoryMerch, categoryPack, categoryPlugin, categorySuite]);
-export type ProductCategories = z.infer<typeof unionCategories>
-
-export const unionTags = z.union([tagFree, tagAmbient, tagMelodic, tagVintage, tagRnB, tagHipHop, tagTrap, tagRap, tagDark, tagOST, tagOpium, tagRage, tagDigital])
-export type ProductTags = z.infer<typeof unionTags>
 
 export const unionOrderSources = z.union([orderSource, membershipSource, manualSource, promoSource])
 export type OrderSources = z.infer<typeof unionOrderSources>
@@ -50,12 +53,6 @@ export const ProductMetafieldSchema = z.object({
 })
 
 export type ProductMetafield = z.infer<typeof ProductMetafieldSchema>
-
-export const ProductPreviewUrlsSchema = z.array(z.object({ preview_title: z.string(), preview_url: z.string() }))
-export type ProductPreviewUrls = z.infer<typeof ProductPreviewUrlsSchema>
-
-export const ProductWhatsIncludedSchema = z.array(z.object({ icon: z.string().optional(), label: z.string(), description: z.string().optional() }))
-export type ProductWhatsIncluded = z.infer<typeof ProductWhatsIncludedSchema>
 
 export const ProductSchema = z.object({
   created_at: z.iso.datetime(),
@@ -287,44 +284,9 @@ export type ShopifyOrderPaidPayload = {
 };
 
 // --------------------
-// COMPOSITIONS (free loop previews — /compositions)
+// COMPOSITIONS (free loop previews, /compositions)
 // --------------------
-
-export const COMPOSITION_PAGE_COUNT = 24
-
-const compositionPlatformInstagram = z.literal("instagram")
-const compositionPlatformYoutube = z.literal("youtube")
-
-export const unionCompositionPlatform = z.union([compositionPlatformInstagram, compositionPlatformYoutube])
-export type CompositionPlatform = z.infer<typeof unionCompositionPlatform>
-
-// Full row (server-only — includes the Shopify Files URLs used to build the zip).
-export const CompositionSchema = z.object({
-  id: z.string(),
-  slug: z.string(),
-  title: z.string(),
-  description: z.string().nullable().optional(),
-  bpm: z.number().nullable().optional(),
-  musical_key: z.string().nullable().optional(),
-  tags: z.array(z.string()).default([]),
-  platform: unionCompositionPlatform,
-  embed_url: z.string(),
-  posted_at: z.string(),
-  audio_file_url: z.string(),
-  terms_file_url: z.string(),
-  audio_file_name: z.string().nullable().optional(),
-  active: z.boolean().default(true),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
-})
-
-export type Composition = z.infer<typeof CompositionSchema>
-
-
-export type CompositionListItem = Omit<
-  Composition,
-  "terms_file_url" | "audio_file_name" | "active" | "created_at" | "updated_at"
->
+// Defined in `@organic/content-schema` and re-exported at the top of this file.
 
 // --------------------
 // SUPABASE TABLES (SQL)
