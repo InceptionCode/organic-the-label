@@ -20,6 +20,9 @@ importers:
       '@libsql/client':
         specifier: ^0.15.3
         version: 0.15.3
+      '@organic/content-schema':
+        specifier: workspace:*
+        version: link:packages/content-schema
       '@paper-design/shaders-react':
         specifier: ^0.0.72
         version: 0.0.72(@types/react@19.2.2)(react@19.2.0)
@@ -243,6 +246,12 @@ importers:
       vitest:
         specifier: ^3.1.1
         version: 3.1.1(@types/node@20.17.30)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.14(@types/node@20.17.30)(typescript@5.8.3))(tsx@4.23.13)
+
+  packages/content-schema:
+    dependencies:
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
 
 packages:
 
