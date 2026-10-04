@@ -1,6 +1,6 @@
 {
   "name": "@organic/content-schema",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Shared Zod schemas, naming rules and metadata builders for Organic Sonics content (web app + admin app).",
   "type": "module",
