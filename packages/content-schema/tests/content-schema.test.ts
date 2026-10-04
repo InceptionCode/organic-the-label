@@ -8,6 +8,7 @@ import {
   fitsShopifyFiles,
   lintProduct,
   nextBundleVersion,
+  formatTrackTitle,
   parseFilenameHints,
   previewFilterChain,
   PreviewSpecSchema,
@@ -73,6 +74,60 @@ describe("parseFilenameHints", () => {
 
   it("treats a bare trailing note as a key", () => {
     expect(parseFilenameHints("Sunset Keys 120bpm G.wav")).toEqual({ title: "Sunset Keys", bpm: 120, key: "G" })
+  })
+  it.each([
+    ["Sweet Nothings [147bpm, Cmaj] @juiceman.mp3", { title: "Sweet Nothings", bpm: 147, key: "C major", credits: ["@juiceman"] }],
+    ["title [125bpm,  Cmin] @juiceman.wav", { title: "title", bpm: 125, key: "C minor", credits: ["@juiceman"] }],
+    ["Won't Do (138bpm, Dmin) @juice.mp3", { title: "Won't Do", bpm: 138, key: "D minor", credits: ["@juice"] }],
+    ["ALL WORK (159bpm,D#min) @juice x @keyon.mp3", { title: "ALL WORK", bpm: 159, key: "D# minor", credits: ["@juice", "@keyon"] }],
+    ["Alive (120bpm, Bmin) @juice x @keyon.mp3", { title: "Alive", bpm: 120, key: "B minor", credits: ["@juice", "@keyon"] }],
+    [
+      "For Nothing 164bpm, @juice x @macshooter, @gizmo7k.mp3",
+      { title: "For Nothing", bpm: 164, credits: ["@juice", "@macshooter", "@gizmo7k"] },
+    ],
+    [
+      "Dramatic @juice x @macshooter x @stevenshaeffer 134bpm, Emin.mp3",
+      { title: "Dramatic", bpm: 134, key: "E minor", credits: ["@juice", "@macshooter", "@stevenshaeffer"] },
+    ],
+    ["Crystalized 150, @juice.mp3", { title: "Crystalized", bpm: 150, credits: ["@juice"] }],
+    ["Radio 161bpm @juice.mp3", { title: "Radio", bpm: 161, credits: ["@juice"] }],
+    ["What You Want Tonight (140bpm, C#min)@juice.mp3", { title: "What You Want Tonight", bpm: 140, key: "C# minor", credits: ["@juice"] }],
+    ["Prelude in Bb Major 90 BPM.wav", { title: "Prelude in", bpm: 90, key: "Bb major" }],
+    ["Beat BPM 140 Key Gm prod. by @juice.wav", { title: "Beat", bpm: 140, key: "G minor", credits: ["@juice"] }],
+    ["dark-trap-140bpm-Am.wav", { title: "dark trap", bpm: 140, key: "A minor" }],
+    ["Song (Remix) 120bpm.wav", { title: "Song (Remix)", bpm: 120 }],
+    ["Track (95).wav", { title: "Track", bpm: 95 }],
+  ])("parses %s", (filename, expected) => {
+    expect(parseFilenameHints(filename)).toEqual(expected)
+  })
+
+  it("keeps title words that only look like keys or numbers", () => {
+    expect(parseFilenameHints("Who Am I 120bpm.wav")).toEqual({ title: "Who Am I", bpm: 120 })
+    expect(parseFilenameHints("I Am 120bpm.wav")).toEqual({ title: "I Am", bpm: 120 })
+    expect(parseFilenameHints("X Gon Give It 95bpm.wav")).toEqual({ title: "X Gon Give It", bpm: 95 })
+    expect(parseFilenameHints("Hip-Hop Essentials 90bpm.wav")).toEqual({ title: "Hip-Hop Essentials", bpm: 90 })
+    expect(parseFilenameHints("Track 2.wav")).toEqual({ title: "Track 2" })
+    expect(parseFilenameHints("Summer 2024.wav")).toEqual({ title: "Summer 2024" })
+  })
+
+  it("falls back to the file name when nothing is left for a title", () => {
+    expect(parseFilenameHints("140bpm.wav")).toEqual({ title: "140bpm", bpm: 140 })
+  })
+})
+
+describe("formatTrackTitle", () => {
+  it("builds the bracketed display name", () => {
+    expect(formatTrackTitle({ title: "Won't Do", bpm: 138, key: "D minor", credits: ["@juice"] })).toBe("Won't Do (138 BPM, D minor) @juice")
+    expect(formatTrackTitle({ title: "Alive", bpm: 120, key: "B minor", credits: ["@juice", "@keyon"] })).toBe(
+      "Alive (120 BPM, B minor) @juice x @keyon",
+    )
+    expect(formatTrackTitle({ title: "Cinema", bpm: 124, credits: ["@juice"] })).toBe("Cinema (124 BPM) @juice")
+    expect(formatTrackTitle({ title: "Cinema", key: "A minor" })).toBe("Cinema (A minor)")
+    expect(formatTrackTitle({ title: "Cinema", credits: [] })).toBe("Cinema")
+  })
+
+  it("round-trips a parsed filename", () => {
+    expect(formatTrackTitle(parseFilenameHints("title [125bpm,  Cmin] @juiceman.wav"))).toBe("title (125 BPM, C minor) @juiceman")
   })
 })
 
