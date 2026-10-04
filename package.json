@@ -28,7 +28,7 @@
     "test:ci": "vitest run tests/unit packages && vitest run tests/integration",
     "test:all": "pnpm test:ci && pnpm test:e2e:cold",
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql",
-    "changelog": "git-cliff -o CHANGELOG.md",
+    "changelog": "git-cliff --unreleased",
     "release": "bash scripts/release.sh",
     "prepare": "husky"
   },
