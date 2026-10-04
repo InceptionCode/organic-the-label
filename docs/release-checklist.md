@@ -18,9 +18,17 @@ Run against staging (`dev.organicsonics.com`) or a local `pnpm serve` build. See
 - [ ] Audio previews work
 - [ ] `/compositions` lists loops and a download returns a zip
 - [ ] `/free`, `/contact`, and `/work-with-me` forms submit
+- [ ] `/free` and every live `/free/[slug]` page load; the emailed download link records the download and redirects
+- [ ] `/compositions` download works for a rebuilt composition (redirect to the Shopify Files ZIP) and a legacy one (zipped on the fly)
+- [ ] All new Supabase migrations are applied to **prod** (`npx supabase migration list --linked` against prod shows no pending rows)
+- [ ] If `packages/content-schema` changed: version bumped, `content-schema-vX.Y.Z` tag pushed, and `pnpm exec git-cliff --bumped-version` still prints a `vX.Y.Z` storefront version
 - [ ] Sign up, sign in, and sign out work
 - [ ] Feature flags are correct for production
 - [ ] Webhooks are healthy (Shopify `products/update` + `orders/paid`, Supabase compositions / support-status, MailerLite)
 - [ ] Instagram cron (`/api/cron/instagram-refresh`) last run succeeded
 - [ ] No test/dev console errors in critical routes
 - [ ] No obvious console/runtime errors in critical flows
+
+## After the release is live
+
+- [ ] If `packages/content-schema` changed, bump its tag in the private admin repo, run `pnpm install` + `pnpm check`, and deploy the admin app (see **Shared package releases** in [release-process.md](./release-process.md))

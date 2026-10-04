@@ -10,7 +10,8 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   exit 1
 fi
 
-if ! git describe --tags --abbrev=0 >/dev/null 2>&1; then
+# Only storefront release tags count; package tags (content-schema-v*) are ignored.
+if ! git describe --tags --abbrev=0 --match 'v[0-9]*' >/dev/null 2>&1; then
   baseline="v$(node -p "require('./package.json').version")"
   echo "No git tags yet. Create the baseline first:" >&2
   echo "  git tag ${baseline} && git push --tags" >&2

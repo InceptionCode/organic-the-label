@@ -19,6 +19,20 @@ Merge style:
 
 Squashing `dev → release` collapses the whole release into one changelog line — don't.
 
+## Tags
+
+This repo carries two independent tag series:
+
+| Tag | What it versions | Created by |
+| --- | --- | --- |
+| `vX.Y.Z` | The storefront release (`package.json` version, `CHANGELOG.md`, GitHub Release) | `pnpm release` |
+| `content-schema-vX.Y.Z` | The shared `@organic/content-schema` package, installed by the private admin app | By hand (see **Shared package releases**) |
+
+git-cliff, `pnpm release` and `release.yml` only look at `vX.Y.Z` tags (`tag_pattern` in
+`cliff.toml` is anchored, `release.sh` uses `git describe --match 'v[0-9]*'`, and
+`release.yml` triggers on `v*`). Package tags never bump the storefront version or open a
+GitHub Release.
+
 ## Commit & PR title format
 
 ```
@@ -54,7 +68,8 @@ minor bump, never a patch.
 | `commitlint.config.mjs` | Conventional Commits rules |
 | `.husky/commit-msg` | local hook running commitlint |
 | `cliff.toml` | git-cliff config (sections, bump rules, links) |
-| `scripts/release.sh` → `pnpm release` | bump + changelog + commit + tag |
+| `scripts/release.sh` → `pnpm release` | bump + changelog + commit + tag (storefront `vX.Y.Z` only) |
+| `packages/content-schema/package.json` | shared package version, tagged `content-schema-vX.Y.Z` |
 | `.github/workflows/commitlint.yml` | lints PR titles on PRs to `main` / `dev` |
 | `.github/workflows/changelog.yml` | on push to `main`, regenerates `CHANGELOG.md` and commits it back |
 | `.github/workflows/release.yml` | on `v*` tag push, creates the GitHub Release |
@@ -181,6 +196,70 @@ Skips `dev`:
 5. `git push --follow-tags`
 6. Back-merge into `dev`: `git checkout dev && git merge --no-ff main && git push`
 
+## Shared package releases (`@organic/content-schema`)
+
+`packages/content-schema` holds the Zod schemas, product taxonomy (allowed product types and
+tags), metafield shapes and file naming rules shared by the storefront and the **private**
+admin app (`organic-sonics-admin`).
+
+- **The storefront** uses it through the pnpm workspace (`workspace:*`). Every storefront
+  commit always uses the current code; nothing to release.
+- **The admin app** installs it from this public repo, pinned to a tag:
+  `github:InceptionCode/organic-the-label#content-schema-vX.Y.Z&path:/packages/content-schema`.
+  It only sees a change after you tag it **and** bump the tag in the admin repo.
+
+### Choosing the version
+
+| Change | Bump | Example |
+| --- | --- | --- |
+| Breaking: removes or renames an export, field or enum value; tightens validation so existing data fails | **major** | removing the `rage` tag, renaming `bundle_url` |
+| Additive: new export, new optional field, new allowed tag or product type | **minor** | adding a `lofi` tag, a new schema |
+| Fix with the same shape: bug fix, message wording, docs, tests | **patch** | correcting a filename regex |
+
+### Steps
+
+1. **Change the package on a normal branch.** Use the scope in the commit, e.g.
+   `feat(content-schema): add lofi tag`. Keep the storefront green: `pnpm test:ci`,
+   `pnpm type-check`, `pnpm build`.
+2. **Bump the package version** in `packages/content-schema/package.json` (same commit or a
+   `chore(content-schema): v0.2.0` commit). Don't use `pnpm version` here: it would also
+   create a `v0.2.0` tag that git-cliff treats as a storefront release.
+3. **Merge as usual** (squash into `dev`). Tag the **merged commit on `dev`**, so the tag lives
+   on shared history rather than on a deleted feature branch:
+   ```bash
+   git checkout dev && git pull
+   git log --oneline -3                     # find the squash-merge commit
+   git tag -a content-schema-v0.2.0 -m "content-schema v0.2.0" <sha>
+   git push origin content-schema-v0.2.0    # git push never sends tags on its own
+   ```
+4. **Ship the storefront side first** when it matters. If the change affects what Shopify
+   data the storefront accepts (new or removed tags/types), release the storefront
+   (**Production release workflow**) before the admin app starts using it, so the admin app
+   never produces values production can't parse. Apply any related Supabase migration to
+   prod before either deploy.
+5. **Bump the admin app** (private repo): change the tag in its `package.json`, then
+   ```bash
+   pnpm install          # resolves the new tag, updates pnpm-lock.yaml
+   pnpm check            # lint, types, tests, build
+   ```
+   Commit `package.json` + `pnpm-lock.yaml` there and deploy it.
+6. **Verify** the storefront release tooling still ignores the package tag:
+   ```bash
+   pnpm exec git-cliff --bumped-version   # must print vX.Y.Z, never content-schema-…
+   ```
+
+Tags are immutable in practice: never move or delete a pushed `content-schema-*` tag (the
+admin lockfile pins its commit). Ship a new patch version instead.
+
+The changelog has no separate section for the package; its commits appear in the storefront
+`CHANGELOG.md` under their normal type (e.g. 🚀 Features) in the next storefront release.
+
+### History
+
+- `content-schema-v0.1.0`: first release (package extracted from `lib/schemas.ts`, plus
+  composition bundle, free resource and media asset schemas). Tagged on the
+  `feat/content-admin` commit `9899be9` before merge; later versions follow the steps above.
+
 ## Automation notes
 
 - **`changelog.yml`** regenerates `CHANGELOG.md` on every push to `main` (skips its own
@@ -207,6 +286,12 @@ Skips `dev`:
   Emergency local bypass: `git commit --no-verify`.
 - **`pnpm release` → "Working tree is dirty" / "No git tags yet".** Commit/stash first; or
   create the baseline tag (below).
+- **`git-cliff --bumped-version` prints `content-schema-v…`.** `cliff.toml`'s `tag_pattern`
+  was unanchored and matched package tags. It is now `^v[0-9]+\.[0-9]+\.[0-9]+$`; keep it
+  anchored.
+- **Admin app `pnpm install` can't resolve `@organic/content-schema`.** The tag isn't on
+  GitHub yet (`git ls-remote --tags origin | grep content-schema`), or the `path:` in the
+  admin `package.json` is wrong (`&path:/packages/content-schema`).
 - **Wrong bump direction.** `features_always_bump_minor = true` — any `feat` = minor. Use a
   manual/override release to force a different number.
 

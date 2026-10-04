@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const { data: resource, error: resourceError } = await supabase
       .from("free_resources")
-      .select("id, name, download_url")
+      .select("id, name, download_url, mailerlite_group_id")
       .eq("slug", resourceSlug)
       .eq("active", true)
       .single()
@@ -49,10 +49,12 @@ export async function POST(req: Request) {
       tags,
     })
 
-    const groupIds = [
-      process.env.MAILERLITE_GROUP_FREE_RESOURCE_LEADS_ID!,
-      process.env.MAILERLITE_GROUP_DOWNLOADED_STARTER_KIT_ID!,
-    ]
+    const resourceGroupId =
+      resource.mailerlite_group_id ??
+      (resourceSlug === "starter-kit" ? process.env.MAILERLITE_GROUP_DOWNLOADED_STARTER_KIT_ID : undefined)
+
+    const groupIds = [process.env.MAILERLITE_GROUP_FREE_RESOURCE_LEADS_ID!]
+    if (resourceGroupId) groupIds.push(resourceGroupId)
     if (marketingOptIn) groupIds.push(process.env.MAILERLITE_GROUP_NEWSLETTER_ID!)
 
     await syncContactToMailerLite({
@@ -77,12 +79,19 @@ export async function POST(req: Request) {
       .select("id")
       .single()
 
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "")
+    const downloadUrl =
+      downloadRecord?.id && siteUrl
+        ? `${siteUrl}/api/resources/download/${downloadRecord.id}`
+        : resource.download_url
+
     const [emailResult] = await Promise.allSettled([
       sendFreeResourceEmail({
         to: email,
         firstName,
         resourceName: resource.name,
-        downloadUrl: resource.download_url,
+        downloadUrl,
       }),
     ])
 

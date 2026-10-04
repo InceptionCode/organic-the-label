@@ -23,6 +23,8 @@ export function CompositionCard({ composition }: { composition: CompositionListI
     .filter(Boolean)
     .join('  ·  ');
 
+  const playerSrc = composition.preview_url ?? composition.audio_file_url;
+
   return (
     <article data-testid="composition-card" className="card-base overflow-hidden rounded-lg">
       <div className="grid md:grid-cols-[380px_minmax(0,1fr)]">
@@ -55,7 +57,7 @@ export function CompositionCard({ composition }: { composition: CompositionListI
           ) : null}
 
           <div className="mt-auto space-y-3 pt-6">
-            <WaveformPlayer src={composition.audio_file_url} title={meta || 'Preview'} />
+            {playerSrc && <WaveformPlayer src={playerSrc} title={meta || 'Preview'} />}
             <CompositionActions
               slug={composition.slug}
               title={composition.title}

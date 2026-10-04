@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   poweredByHeader: false,
+  transpilePackages: ['@organic/content-schema'],
   turbopack: {
     root: path.join(__dirname, '..'),
   },
