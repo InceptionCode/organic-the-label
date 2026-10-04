@@ -71,7 +71,6 @@ minor bump, never a patch.
 | `scripts/release.sh` → `pnpm release` | bump + changelog + commit + tag (storefront `vX.Y.Z` only) |
 | `packages/content-schema/package.json` | shared package version, tagged `content-schema-vX.Y.Z` |
 | `.github/workflows/commitlint.yml` | lints PR titles on PRs to `main` / `dev` |
-| `.github/workflows/changelog.yml` | on push to `main`, regenerates `CHANGELOG.md` and commits it back |
 | `.github/workflows/release.yml` | on `v*` tag push, creates the GitHub Release |
 | `.github/workflows/enforce-pr-template.yml` | fails PRs that don't use the right PR template (see below) |
 | `.github/workflows/ci-pr.yml` / `ci-main.yml` / `ci.yml` | lint, type-check, tests (see `docs/testing-strategy.md`) |
@@ -89,7 +88,7 @@ that `enforce-pr-template.yml` checks, and a PR body must contain exactly one:
 
 Pick one with `?template=<file>.md` on the compare URL, or paste the file's contents.
 
-Handy commands: `pnpm changelog` (regenerate the file), `pnpm exec git-cliff --unreleased`
+Handy commands: `pnpm changelog` (print the unreleased section), `pnpm exec git-cliff --unreleased`
 (preview without writing), `pnpm exec git-cliff --bumped-version` (preview the next version).
 
 ## Feature workflow
@@ -130,7 +129,7 @@ Preconditions: `dev` CI green and verified on staging; local `main`/`dev` up to 
    pnpm release
    ```
    `scripts/release.sh`: aborts on a dirty tree / no tag → `next = git-cliff --bumped-version`
-   → `git-cliff --bump -o CHANGELOG.md` → `pnpm version <next> --no-git-tag-version` →
+   → `git-cliff --unreleased --bump --prepend CHANGELOG.md` → `pnpm version <next> --no-git-tag-version` →
    `git commit -m "chore(release): v<next>"` → `git tag -a v<next>`. It does **not** push.
    To pick a different number, see **Manual / override release**.
 
@@ -158,12 +157,11 @@ Preconditions: `dev` CI green and verified on staging; local `main`/`dev` up to 
    ```
    `--follow-tags` pushes the annotated tag `pnpm release` created. A hand-made
    `git tag` (lightweight) is skipped — use `git push origin v1.7.0` for those.
-   This triggers `changelog.yml` on `main` (no-op once the tag is on `main`'s history) and
-   `release.yml` on the tag (creates the GitHub Release).
+   This triggers `release.yml` on the tag (creates the GitHub Release).
 
 9. **Verify:** GitHub Release `v1.7.0` exists with correct notes;
-   `git ls-remote --tags origin` shows the tag; production deploy healthy; no stray
-   `chore(changelog)` churn on `main`.
+   `git ls-remote --tags origin` shows the tag; production deploy healthy (Vercel promotes
+   the `main` build only after the "Full Validation" check passes).
 
 10. **Back-merge `main` into `dev`** so `dev` carries the release commit + tag ancestry:
     ```bash
@@ -177,7 +175,7 @@ When `pnpm release` would pick the wrong number (e.g. forcing a patch despite a 
 
 ```bash
 VERSION=1.6.1        # on the release branch, clean tree
-pnpm exec git-cliff --tag "v${VERSION}" -o CHANGELOG.md
+pnpm exec git-cliff --unreleased --tag "v${VERSION}" --prepend CHANGELOG.md
 pnpm version "${VERSION}" --no-git-tag-version
 git add CHANGELOG.md package.json
 git commit -m "chore(release): v${VERSION}"
@@ -262,11 +260,11 @@ The changelog has no separate section for the package; its commits appear in the
 
 ## Automation notes
 
-- **`changelog.yml`** regenerates `CHANGELOG.md` on every push to `main` (skips its own
-  `[skip ci]` commits and `paths-ignore: CHANGELOG.md`). It's idempotent only when the
-  release tag is on `main`'s history — always `git push --follow-tags`. It needs write
-  access to `main`; if branch protection requires a PR, add `github-actions[bot]` to the
-  bypass list (Settings → Branches) or use a PAT in the push step.
+- **No changelog bot.** `CHANGELOG.md` only changes in the release commit:
+  `scripts/release.sh` runs `git-cliff --unreleased --bump --prepend CHANGELOG.md`, which adds
+  the new section and leaves older ones untouched. (A full regeneration re-sorts older
+  sections, because not every past release tag is on `main`'s history. The old
+  `changelog.yml` bot did that and was also blocked by the `main` ruleset.)
 - **`commitlint.yml`** lints PR titles for PRs into `main`/`dev` only. `dev → release/*`
   PRs are not linted; `release/* → main` PRs are.
 - **`release.yml`** runs on any `v*` tag push and builds notes from
@@ -280,8 +278,9 @@ The changelog has no separate section for the package; its commits appear in the
   lightweight; `pnpm release` / `git tag -a` are annotated. Push explicitly, or re-tag
   annotated **before it's pushed anywhere**:
   `git tag -d vX.Y.Z && git tag -a vX.Y.Z -m "Release vX.Y.Z" <sha> && git push origin vX.Y.Z`.
-- **CHANGELOG on `main` rewrote the new version back to `[Unreleased]`.** The tag isn't on
-  `main`'s remote history — push it; the next `changelog.yml` run corrects the file.
+- **Older CHANGELOG sections got reshuffled.** Something regenerated the whole file
+  (`git-cliff -o CHANGELOG.md`). Restore the previous file and prepend instead:
+  `pnpm exec git-cliff --unreleased --tag vX.Y.Z --prepend CHANGELOG.md`.
 - **commitlint blocked a commit / PR-title check is red.** Fix to `type(scope): description`.
   Emergency local bypass: `git commit --no-verify`.
 - **`pnpm release` → "Working tree is dirty" / "No git tags yet".** Commit/stash first; or
