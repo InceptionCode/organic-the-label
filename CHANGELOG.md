@@ -4,6 +4,23 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.8.0] - 2026-10-04
+
+### 🚀 Features
+
+- Show 5 audio previews and scroll the rest (#27) ([`be99d6c`](https://github.com/InceptionCode/organic-the-label/commit/be99d6c9853b64404acd3d45316e41f4fb319d44))
+- Read BPM, key and credits from any filename (#26) ([`1098669`](https://github.com/InceptionCode/organic-the-label/commit/1098669849d81a1a23ec77fc643f058ac6dfb3c7))
+- Bundle the terms of use as a PDF (#25) ([`a732f3f`](https://github.com/InceptionCode/organic-the-label/commit/a732f3fa9c03aeaba5efc2e1f08af0014cffed7e))
+- New shared package and resource management changes (#24) ([`25fea84`](https://github.com/InceptionCode/organic-the-label/commit/25fea84b6459049fd67d7024553f5d57b67347ee))
+
+### 📚 Documentation
+
+- Documentation on update release strategy ([`72016ff`](https://github.com/InceptionCode/organic-the-label/commit/72016ff2a12b91e81331285176a5e93fab9f7d41))
+- Move internal docs out of git and sync docs with the app ([`715bbe3`](https://github.com/InceptionCode/organic-the-label/commit/715bbe3ac396eadc8431e371bacef825e3347e49))
+
+### 🧪 Testing
+
+- Allow the bundle redirect on composition downloads (#28) ([`f4933d8`](https://github.com/InceptionCode/organic-the-label/commit/f4933d8a008ff8d6ac7cac0ec885de98fd7b472e))
 ## [1.7.1] - 2026-09-16
 
 ### 🚀 Features
