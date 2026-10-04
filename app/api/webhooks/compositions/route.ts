@@ -5,6 +5,11 @@ import { timingSafeEqual } from 'crypto';
 const TAG = '[/api/webhooks/compositions]';
 const CACHE_TAG = 'compositions';
 
+const TABLE_CACHE_TAGS: Record<string, string> = {
+  compositions: CACHE_TAG,
+  free_resources: 'free-resources',
+};
+
 type CompositionWebhookPayload = {
   type?: 'INSERT' | 'UPDATE' | 'DELETE';
   table?: string;
@@ -44,8 +49,9 @@ export async function POST(req: Request) {
   const slug = payload.record?.slug ?? payload.old_record?.slug ?? null;
   console.info(`${TAG} authorized`, { event: payload.type ?? 'unknown', slug });
 
-  revalidateTag(CACHE_TAG, 'max');
-  console.info(`${TAG} revalidated tag`, { tag: CACHE_TAG });
+  const cacheTag = (payload.table && TABLE_CACHE_TAGS[payload.table]) || CACHE_TAG;
+  revalidateTag(cacheTag, 'max');
+  console.info(`${TAG} revalidated tag`, { tag: cacheTag });
 
   return NextResponse.json({ ok: true, revalidated: true });
 }

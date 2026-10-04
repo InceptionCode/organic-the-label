@@ -47,7 +47,7 @@ test.describe('compositions browsing', () => {
     await expect(page.getByRole('button', { name: /clear all/i })).toBeVisible()
   })
 
-  test('the download endpoint returns a zip attachment (no external redirect)', async ({
+  test('the download endpoint returns a zip, or redirects to its pre-built Shopify ZIP', async ({
     page,
     request,
   }) => {
@@ -59,8 +59,17 @@ test.describe('compositions browsing', () => {
     test.skip(!slug, 'no seeded composition to exercise the download endpoint')
 
     const res = await request.get(`/api/composition/download/${slug}`, { maxRedirects: 0 })
-    // 200 with a real zip when the Shopify Files URLs resolve; 502 if the
-    // seeded asset URLs are placeholders. Either way it must NOT redirect off-site.
+    // Compositions built in the admin app have a pre-built bundle: the route logs
+    // the download and 302s to that ZIP in Shopify Files, and nowhere else.
+    if (res.status() === 302) {
+      const location = new URL(res.headers()['location'])
+      expect(location.protocol).toBe('https:')
+      expect(location.hostname).toBe('cdn.shopify.com')
+      expect(location.pathname).toMatch(/\.zip$/)
+      return
+    }
+    // Legacy compositions are zipped on the fly: 200 with a real zip when the
+    // Shopify Files URLs resolve; 502 if the seeded asset URLs are placeholders.
     expect([200, 502]).toContain(res.status())
     if (res.status() === 200) {
       expect(res.headers()['content-type']).toContain('application/zip')

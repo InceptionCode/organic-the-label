@@ -41,7 +41,9 @@ require_conventional = false
 split_commits = false
 protect_breaking_commits = true
 filter_commits = false
-tag_pattern = "v[0-9].*"
+# Anchored: only storefront release tags (vX.Y.Z). Package tags such as
+# content-schema-v0.1.0 must not count as releases (see docs/release-process.md).
+tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 topo_order = false
 sort_commits = "newest"
 commit_parsers = [

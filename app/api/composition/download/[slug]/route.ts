@@ -33,6 +33,28 @@ async function fetchBytes(url: string, label: string): Promise<Uint8Array> {
   return bytes;
 }
 
+async function logDownload(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  compositionId: string,
+  req: Request,
+): Promise<void> {
+  try {
+    const jar = await cookies();
+    const anonToken = jar.get(ANON_COOKIE_NAME)?.value ?? null;
+    await supabase.from('composition_downloads').insert({
+      composition_id: compositionId,
+      anon_token: anonToken,
+      referrer: req.headers.get('referer'),
+    });
+    console.info(`${TAG} logged download`, {
+      compositionId,
+      hasAnonToken: Boolean(anonToken),
+    });
+  } catch (err) {
+    console.error(`${TAG} download-log insert failed (non-fatal)`, err);
+  }
+}
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ slug: string }> },
@@ -45,7 +67,7 @@ export async function GET(
   console.info(`${TAG} looking up composition`, { slug });
   const { data: composition, error } = await supabase
     .from('compositions')
-    .select('id, slug, title, audio_file_url, terms_file_url, audio_file_name')
+    .select('id, slug, title, bundle_url, audio_file_url, terms_file_url, audio_file_name')
     .eq('slug', slug)
     .eq('active', true)
     .single();
@@ -55,6 +77,21 @@ export async function GET(
     return NextResponse.json({ ok: false, error: 'Loop not found.' }, { status: 404 });
   }
   console.info(`${TAG} composition found`, { id: composition.id, title: composition.title });
+
+  if (composition.bundle_url) {
+    await logDownload(supabase, composition.id, req);
+    console.info(`${TAG} redirecting to bundle`, { bundleUrl: composition.bundle_url });
+    return NextResponse.redirect(composition.bundle_url, {
+      status: 302,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  }
+
+  // Legacy rows: fetch audio + terms and zip on the fly.
+  if (!composition.audio_file_url || !composition.terms_file_url) {
+    console.error(`${TAG} composition has no deliverable`, { id: composition.id });
+    return NextResponse.json({ ok: false, error: 'Loop not found.' }, { status: 404 });
+  }
 
   let audioBytes: Uint8Array;
   let termsBytes: Uint8Array;
@@ -97,21 +134,7 @@ export async function GET(
   );
   console.info(`${TAG} zip ready`, { zipBytes: zipped.byteLength });
 
-  try {
-    const jar = await cookies();
-    const anonToken = jar.get(ANON_COOKIE_NAME)?.value ?? null;
-    await supabase.from('composition_downloads').insert({
-      composition_id: composition.id,
-      anon_token: anonToken,
-      referrer: req.headers.get('referer'),
-    });
-    console.info(`${TAG} logged download`, {
-      compositionId: composition.id,
-      hasAnonToken: Boolean(anonToken),
-    });
-  } catch (err) {
-    console.error(`${TAG} download-log insert failed (non-fatal)`, err);
-  }
+  await logDownload(supabase, composition.id, req);
 
   console.info(`${TAG} responding with zip`, { filename: `${folder}.zip` });
   return new NextResponse(zipped, {
