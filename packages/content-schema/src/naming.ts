@@ -1,3 +1,5 @@
+import { formatTrackTitle } from "./audio"
+
 // Naming rules for every file the admin app produces.
 // Shopify Files names are flat and global, so every name carries a kind
 // prefix and the owner's slug/handle. Shopify silently suffixes duplicate
@@ -51,13 +53,18 @@ export const shopifyFileNames = {
   },
 }
 
-export type ZipEntryNameInput = { slug: string; title: string; bpm?: number | null; musicalKey?: string | null }
+export type ZipEntryNameInput = {
+  slug: string
+  title: string
+  bpm?: number | null
+  musicalKey?: string | null
+  credits?: string[] | null
+}
 
 export const zipEntryNames = {
-  /** "{slug}/{Title} - {BPM} BPM {Key}.mp3" */
-  compositionAudio({ slug, title, bpm, musicalKey }: ZipEntryNameInput): string {
-    const suffix = [bpm ? `${bpm} BPM` : null, musicalKey || null].filter(Boolean).join(" ")
-    const name = safeDisplayName(suffix ? `${title} - ${suffix}` : title)
+  /** "{slug}/{Title} ({BPM} BPM, {Key}) {credits}.mp3", the bracketed track name (formatTrackTitle). */
+  compositionAudio({ slug, title, bpm, musicalKey, credits }: ZipEntryNameInput): string {
+    const name = safeDisplayName(formatTrackTitle({ title, bpm, key: musicalKey, credits }))
     return `${slugify(slug)}/${name}.mp3`
   },
   /** "{slug}/Terms of Use.pdf". The canonical terms file is bundled unchanged. */
