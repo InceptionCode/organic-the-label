@@ -21,7 +21,9 @@ fi
 next="$(pnpm exec git-cliff --bumped-version | sed 's/^v//')"
 echo "Next version: v${next}"
 
-pnpm exec git-cliff --bump -o CHANGELOG.md
+# Prepend only the new release: regenerating the whole file re-sorts older
+# sections, because not every past release tag is on main's history.
+pnpm exec git-cliff --unreleased --bump --prepend CHANGELOG.md
 pnpm version "${next}" --no-git-tag-version >/dev/null
 
 git add CHANGELOG.md package.json
