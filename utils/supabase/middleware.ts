@@ -11,7 +11,6 @@ export const privateRoutes: string[] = []
 export async function updateSession(request: NextRequest) {
   let cookiesToApply: { name: string; value: string; options?: Record<string, unknown> }[] = []
 
-  // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

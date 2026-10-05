@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from 'bun:test'
 import { spotifyEmbedSrc } from "@/lib/work-with-me/embeds"
 
 // Pure URL parsing for the Work With Me page embeds. An empty or malformed

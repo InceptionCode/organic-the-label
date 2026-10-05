@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi } from 'bun:test'
 import { render, screen } from '../../utils/render'
 import { ProductCard } from '@/app/store/components/product-card'
 import { mockProduct, mockExclusiveProduct, mockFreeProduct } from '../../fixtures/products'

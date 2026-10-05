@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'bun:test'
 import { render, screen, fireEvent } from '../../utils/render'
 import CartDrawer from '@/app/components/cart-drawer'
 import { mockCart, mockCartLine, emptyCart } from '../../fixtures/cart'

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { useActivityTrackerStore } from '@/lib/store/activity-tracker-store'
 
 // The activity tracker store manages the lifecycle of anonymous visitor

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'bun:test'
 import { render, screen, waitFor, fireEvent } from '../../utils/render'
 import { ScrollScrubHero } from '@/ui-components/scroll-scrub-hero'
 

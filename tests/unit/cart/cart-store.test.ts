@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/mocks/server'
 import { createCartStore } from '@/lib/store/cart-store'

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'bun:test'
 
 // ─── Hoist mocks so factories can reference them ──────────────────────────────
 // vi.mock factories are hoisted above const declarations, so we use vi.hoisted()

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { truncateWords } from '@/utils/helpers/truncate'
 import { parseMultiValueParam, serializeMultiValueParam } from '@/utils/helpers/filter-query'
 import { formatCategory, formatPrice, formatMoney } from '@/utils/helpers/product-helpers'

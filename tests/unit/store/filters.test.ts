@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { buildFilterKey } from '@/lib/product/build-filter-tag'
 import {
   getNormalizedSearchParams,

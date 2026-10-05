@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'bun:test'
 import { mapSupabaseUser, useUser } from '@/store/auth-context'
 import { User as SupabaseUser } from '@supabase/supabase-js'
 import { supabaseAnonUser, supabaseSignedInUser } from '@/tests/fixtures/users'

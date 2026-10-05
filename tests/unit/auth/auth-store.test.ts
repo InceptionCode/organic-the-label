@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { createAuthStore, defaultUserState } from '@/lib/store/auth-store'
 
 // auth-store.ts is the vanilla Zustand store for auth state.
