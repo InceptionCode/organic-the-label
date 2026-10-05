@@ -295,6 +295,19 @@ export function parseFilenameHints(filename: string): FilenameHints {
   }
 }
 
+/**
+ * Splits a credits field into handles: "@juice x @keyon, @mac" → ["@juice", "@keyon", "@mac"].
+ * Joiners: commas, "x", "&", "+", "and", "feat.", "ft.", "with". Names may have spaces ("Juice Man").
+ */
+export function parseCredits(input: string | null | undefined): string[] {
+  if (!input) return []
+  const parts = input
+    .split(/\s*[,;]\s*|\s+(?:x|&|\+|and|feat\.?|ft\.?|with)\s+/i)
+    .map((part) => part.trim())
+    .filter(Boolean)
+  return [...new Set(parts)]
+}
+
 export type TrackTitleInput = { title: string; bpm?: number | null; key?: string | null; credits?: string[] | null }
 
 /**

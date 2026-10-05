@@ -19,6 +19,8 @@ export const CompositionBundleManifestSchema = z.object({
   title: z.string().min(1),
   bpm: z.number().int().positive().nullable(),
   musical_key: z.string().min(1).nullable(),
+  /** Credited handles, e.g. ["@juice", "@keyon"]. Part of the MP3 name in the ZIP. */
+  credits: z.array(z.string().trim().min(1)).max(12).optional(),
   files: z
     .array(
       z.discriminatedUnion("role", [

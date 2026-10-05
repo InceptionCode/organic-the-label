@@ -9,6 +9,7 @@ import {
   lintProduct,
   nextBundleVersion,
   formatTrackTitle,
+  parseCredits,
   parseFilenameHints,
   previewFilterChain,
   PreviewSpecSchema,
@@ -41,11 +42,18 @@ describe("file naming", () => {
     expect(shopifyFileNames.freeResourceBundle("starter-kit", 1)).toBe("os-free-starter-kit-v1.zip")
   })
 
-  it("builds zip entry names with BPM and key", () => {
+  it("builds zip entry names with title, BPM, key and credits", () => {
     expect(
       zipEntryNames.compositionAudio({ slug: "midnight-rhodes", title: "Midnight Rhodes", bpm: 82, musicalKey: "F# minor" }),
-    ).toBe("midnight-rhodes/Midnight Rhodes - 82 BPM F# minor.mp3")
+    ).toBe("midnight-rhodes/Midnight Rhodes (82 BPM, F# minor).mp3")
+    expect(
+      zipEntryNames.compositionAudio({ slug: "late-night", title: "Late Night", bpm: 161, musicalKey: "Bb major", credits: ["@juice"] }),
+    ).toBe("late-night/Late Night (161 BPM, Bb major) @juice.mp3")
+    expect(
+      zipEntryNames.compositionAudio({ slug: "what-we-doing", title: "What We Doing?", bpm: 124, musicalKey: "B minor", credits: ["@juice", "@keyon"] }),
+    ).toBe("what-we-doing/What We Doing (124 BPM, B minor) @juice x @keyon.mp3")
     expect(zipEntryNames.compositionAudio({ slug: "x", title: "Plain" })).toBe("x/Plain.mp3")
+    expect(zipEntryNames.compositionAudio({ slug: "x", title: "Plain", credits: [] })).toBe("x/Plain.mp3")
     expect(zipEntryNames.terms("midnight-rhodes")).toBe("midnight-rhodes/Terms of Use.pdf")
     expect(zipEntryNames.terms("midnight-rhodes", ".txt")).toBe("midnight-rhodes/Terms of Use.txt")
   })
@@ -112,6 +120,26 @@ describe("parseFilenameHints", () => {
 
   it("falls back to the file name when nothing is left for a title", () => {
     expect(parseFilenameHints("140bpm.wav")).toEqual({ title: "140bpm", bpm: 140 })
+  })
+})
+
+describe("parseCredits", () => {
+  it("splits handles on the usual joiners", () => {
+    expect(parseCredits("@juice x @keyon, @mac")).toEqual(["@juice", "@keyon", "@mac"])
+    expect(parseCredits("@juice & @keyon feat. @mac")).toEqual(["@juice", "@keyon", "@mac"])
+    expect(parseCredits("Juice Man, Keyon")).toEqual(["Juice Man", "Keyon"])
+    expect(parseCredits("@juice x @juice")).toEqual(["@juice"])
+  })
+
+  it("returns nothing for an empty field", () => {
+    expect(parseCredits("")).toEqual([])
+    expect(parseCredits("  ")).toEqual([])
+    expect(parseCredits(null)).toEqual([])
+  })
+
+  it("round-trips the parser's credits through the field format", () => {
+    const { credits } = parseFilenameHints("Alive (120bpm, Bmin) @juice x @keyon.mp3")
+    expect(parseCredits(credits?.join(" x "))).toEqual(["@juice", "@keyon"])
   })
 })
 
@@ -269,6 +297,12 @@ describe("CompositionBundleManifestSchema", () => {
 
   it("accepts a valid manifest", () => {
     expect(CompositionBundleManifestSchema.safeParse(manifest).success).toBe(true)
+  })
+
+  it("accepts optional credits and keeps them", () => {
+    const parsed = CompositionBundleManifestSchema.parse({ ...manifest, credits: ["@juice", "@keyon"] })
+    expect(parsed.credits).toEqual(["@juice", "@keyon"])
+    expect(CompositionBundleManifestSchema.safeParse({ ...manifest, credits: [""] }).success).toBe(false)
   })
 
   it("requires exactly one audio and one terms file", () => {
