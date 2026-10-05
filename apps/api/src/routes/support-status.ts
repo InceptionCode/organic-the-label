@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import { timingSafeEqual } from "crypto";
 import { createSupabaseAdminClient } from "../lib/supabase.ts";
 import { sendSupportStatusEmail } from "../lib/email/resend.ts";
+import { verifySharedSecret } from "../middleware/auth.ts";
 
 const EMAILABLE_STATUSES = new Set(["pending", "closed"]);
 
@@ -21,21 +21,10 @@ type WebhookPayload = {
   old_record: SupportRequestRecord;
 };
 
-function verifySecret(header: string | null): boolean {
-  const secret = process.env.SUPABASE_SUPPORT_WEBHOOK_SECRET;
-  if (!secret) return true;
-  if (!header) return false;
-  try {
-    return timingSafeEqual(Buffer.from(secret), Buffer.from(header));
-  } catch {
-    return false;
-  }
-}
-
 const app = new Hono();
 
 app.post("/support-status", async (c) => {
-  if (!verifySecret(c.req.header("x-webhook-secret") ?? null)) {
+  if (!verifySharedSecret(c.req.header("x-webhook-secret") ?? null, "SUPABASE_SUPPORT_WEBHOOK_SECRET")) {
     return c.json({ ok: false, error: "Unauthorized" }, 401);
   }
 

@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { timingSafeEqual } from "crypto";
 import { bustCompositionsCache, bustFreeResourcesCache } from "../lib/cache.ts";
+import { verifySharedSecret } from "../middleware/auth.ts";
 
 const TAG = "[/webhooks/compositions]";
 
@@ -17,23 +17,12 @@ type CompositionWebhookPayload = {
   old_record?: { slug?: string } | null;
 };
 
-function verifySecret(header: string | null): boolean {
-  const secret = process.env.INTERNAL_SUPABASE_WEBHOOK_SECRET;
-  if (!secret) return true;
-  if (!header) return false;
-  try {
-    return timingSafeEqual(Buffer.from(secret), Buffer.from(header));
-  } catch {
-    return false;
-  }
-}
-
 const app = new Hono();
 
 app.post("/compositions", async (c) => {
   console.info(`${TAG} received`);
 
-  if (!verifySecret(c.req.header("x-webhook-secret") ?? null)) {
+  if (!verifySharedSecret(c.req.header("x-webhook-secret") ?? null, "INTERNAL_SUPABASE_WEBHOOK_SECRET")) {
     console.error(`${TAG} unauthorized`);
     return c.json({ ok: false, error: "Unauthorized" }, 401);
   }

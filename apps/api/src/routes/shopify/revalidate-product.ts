@@ -24,7 +24,12 @@ app.post("/revalidate-product", async (c) => {
     return c.json({ ok: false, error: "Invalid HMAC" }, 401);
   }
 
-  const payload = JSON.parse(rawBody) as { handle?: string; id?: number };
+  let payload: { handle?: string; id?: number };
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return c.json({ ok: false, error: "Invalid JSON" }, 400);
+  }
 
   if (payload.handle) {
     console.log(`Busting product cache: ${payload.handle}`);
