@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "vite.config.timestamp_*.js": true,
+    "app.config.timestamp_*.js": true
+  }
+}
