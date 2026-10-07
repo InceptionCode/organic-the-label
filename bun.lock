@@ -100,6 +100,8 @@
       "name": "@organic/v2",
       "version": "0.1.0",
       "dependencies": {
+        "@supabase/ssr": "^0.6.1",
+        "@supabase/supabase-js": "^2.49.4",
         "@tanstack/react-router": "^1.121.0",
         "@tanstack/react-start": "^1.121.0",
         "react": "^19.1.0",

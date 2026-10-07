@@ -12,7 +12,8 @@
     "noEmit": true,
     "types": ["bun-types"],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "~/*": ["./app/*"]
     }
   },
   "include": [

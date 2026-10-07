@@ -1,25 +1,34 @@
 import type { ReactNode } from 'react'
-import { createRootRoute, Outlet, HeadContent, Scripts } from '@tanstack/react-router'
+import { createRootRouteWithContext, Outlet, HeadContent, Scripts } from '@tanstack/react-router'
+import { getSessionFn } from '~/lib/supabase/get-session'
+import { AuthProvider } from '~/lib/auth-context'
+import type { RouterContext } from '../router'
 import '../../styles/globals.css'
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { title: 'Organic Sonics' },
     ],
-    links: [
-      { rel: 'icon', href: '/favicon.ico' },
-    ],
+    links: [{ rel: 'icon', href: '/favicon.ico' }],
   }),
+  beforeLoad: async () => {
+    const user = await getSessionFn()
+    return { user }
+  },
   component: RootComponent,
 })
 
 function RootComponent() {
+  const { user } = Route.useRouteContext()
+
   return (
     <RootDocument>
-      <Outlet />
+      <AuthProvider initialUser={user}>
+        <Outlet />
+      </AuthProvider>
     </RootDocument>
   )
 }
