@@ -14,8 +14,9 @@ function authorized(req: Request): boolean {
     console.warn(`${TAG} CRON_SECRET not set — allowing through (non-production only)`);
     return true;
   }
-  const bearer = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const provided = bearer || req.headers.get("x-cron-secret") || "";
+  const h = req.headers as unknown as Headers
+  const bearer = h.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const provided = bearer || h.get("x-cron-secret") || "";
   if (!provided) return false;
 
   const a = createHash("sha256").update(secret).digest();
