@@ -126,3 +126,48 @@ export const updatePasswordFn = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
+
+// Signs in with email + password.
+// Migrates any anonymous activity to the now-authenticated user after sign in.
+export const signInWithPasswordFn = createServerFn({ method: 'POST' })
+  .validator(z.object({ email: z.string().email(), password: z.string().min(1) }))
+  .handler(async ({ data }): Promise<User> => {
+    const supabase = createSupabaseServerClient()
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    })
+    if (error) throw new Error(error.message)
+
+    const user = authData.user
+    try {
+      await mergeAnonymousVisitorIntoUser({
+        userId: user.id,
+        email: user.email,
+        emailVerified: !!user.email_confirmed_at,
+      })
+    } catch (e) {
+      console.error('[signInWithPasswordFn] mergeAnonymousVisitorIntoUser failed:', e)
+    }
+
+    const mapped = mapSupabaseUser(user)
+    if (!mapped) throw new Error('Failed to map authenticated user')
+    return mapped
+  })
+
+// Creates a new account with email + password.
+// Supabase sends a confirmation email; the user is not fully authenticated
+// until they confirm. After confirmation, confirmOtpFn handles the migration.
+export const signUpWithPasswordFn = createServerFn({ method: 'POST' })
+  .validator(z.object({ email: z.string().email(), password: z.string().min(8) }))
+  .handler(async ({ data }) => {
+    const supabase = createSupabaseServerClient()
+    const siteUrl = process.env.SITE_URL ?? 'http://localhost:3001'
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: { emailRedirectTo: `${siteUrl}/auth/confirm` },
+    })
+    if (error) throw new Error(error.message)
+    return { ok: true }
+  })
