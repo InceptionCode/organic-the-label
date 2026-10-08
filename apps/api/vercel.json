@@ -1,4 +1,7 @@
 {
+  "framework": "hono",
+  "buildCommand": "cd ../.. && bun install --frozen-lockfile && cd apps/api && bun run build",
+  "installCommand": "echo 'dependencies installed in buildCommand'",
   "crons": [
     {
       "path": "/cron/instagram-refresh",

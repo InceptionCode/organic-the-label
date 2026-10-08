@@ -4,13 +4,23 @@ import { z } from 'zod'
 import { createSupabaseServerClient } from '~/lib/supabase/server'
 import { mapSupabaseUser } from '~/lib/supabase/map-user'
 import { ensureAnonymousVisitor } from '~/lib/supabase/ensure-anon-visitor'
-import { mergeAnonymousVisitorIntoUser } from '~/lib/supabase/migrate-anon-user'
+import { bootstrapAuthenticatedUser } from '~/lib/supabase/bootstrap-user'
 import type { User } from '~/lib/supabase/map-user'
 
 const ANON_COOKIE_NAME = 'anon_token'
 const ANON_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
-// Returns the current authenticated user (not anon) or null.
+// Password must be at least 8 chars, contain an uppercase letter and a number.
+// Matches v1 SigninFormSchema / SignupFormSchema validation rules.
+const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters long.')
+  .refine(
+    (pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw),
+    'Password must contain a capital letter and a number.',
+  )
+
+// Returns the current authenticated (non-anon) user, or null.
 export const getUserFn = createServerFn({ method: 'GET' }).handler(async (): Promise<User | null> => {
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -30,7 +40,6 @@ export const ensureAnonVisitorFn = createServerFn({ method: 'GET' }).handler(asy
     if (error || !data.user) return null
   }
 
-  // Track in anonymous_visitors table for activity attribution
   let anonToken = getCookie(ANON_COOKIE_NAME)
   if (!anonToken) {
     anonToken = crypto.randomUUID().replace(/-/g, '')
@@ -54,22 +63,27 @@ export const ensureAnonVisitorFn = createServerFn({ method: 'GET' }).handler(asy
   return mapSupabaseUser(finalUser)
 })
 
-// Sends a magic link to the given email address.
+// Sends a magic link OTP email.
+// Accepts an optional captchaToken (hCaptcha) for abuse protection on the form.
 export const sendMagicLinkFn = createServerFn({ method: 'POST' })
-  .validator(z.object({ email: z.string().email() }))
+  .validator(z.object({ email: z.string().email(), captchaToken: z.string().optional() }))
   .handler(async ({ data }) => {
     const supabase = createSupabaseServerClient()
     const siteUrl = process.env.SITE_URL ?? 'http://localhost:3001'
     const { error } = await supabase.auth.signInWithOtp({
       email: data.email,
-      options: { emailRedirectTo: `${siteUrl}/auth/confirm` },
+      options: {
+        captchaToken: data.captchaToken,
+        emailRedirectTo: `${siteUrl}/auth/confirm?next=/explore`,
+      },
     })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
 
-// Confirms an OTP token hash (from magic link email).
-// After confirmation, migrates any anonymous activity to the newly authenticated user.
+// Verifies an OTP token hash (magic link or email confirmation).
+// Bootstraps profiles/user_preferences and merges anon activity.
+// Redirect to `next` is handled by the calling route, not this function.
 export const confirmOtpFn = createServerFn({ method: 'POST' })
   .validator(z.object({ token_hash: z.string(), type: z.string() }))
   .handler(async ({ data }) => {
@@ -82,17 +96,101 @@ export const confirmOtpFn = createServerFn({ method: 'POST' })
 
     const user = authData.user
     if (user) {
+      const displayName =
+        (user.user_metadata?.username as string | undefined) ??
+        (user.user_metadata?.display_name as string | undefined) ??
+        null
       try {
-        await mergeAnonymousVisitorIntoUser({
+        await bootstrapAuthenticatedUser({
           userId: user.id,
           email: user.email,
-          emailVerified: !!user.email_confirmed_at,
+          emailVerified: !!(user.email_confirmed_at ?? user.confirmed_at),
+          displayName,
         })
       } catch (e) {
-        console.error('[confirmOtpFn] mergeAnonymousVisitorIntoUser failed:', e)
+        console.error('[confirmOtpFn] bootstrapAuthenticatedUser failed:', e)
       }
     }
 
+    return { ok: true }
+  })
+
+// Signs in with email + password.
+// Bootstraps profiles/user_preferences and merges anon activity after sign-in.
+export const signInWithPasswordFn = createServerFn({ method: 'POST' })
+  .validator(z.object({ email: z.string().email(), password: passwordSchema }))
+  .handler(async ({ data }): Promise<User> => {
+    const supabase = createSupabaseServerClient()
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    })
+    if (error) throw new Error(error.message)
+
+    const user = authData.user
+    const displayName =
+      (user.user_metadata?.username as string | undefined) ??
+      (user.user_metadata?.display_name as string | undefined) ??
+      null
+
+    try {
+      await bootstrapAuthenticatedUser({
+        userId: user.id,
+        email: user.email,
+        emailVerified: !!(user.email_confirmed_at ?? user.confirmed_at),
+        displayName,
+      })
+    } catch (e) {
+      console.error('[signInWithPasswordFn] bootstrapAuthenticatedUser failed:', e)
+    }
+
+    const mapped = mapSupabaseUser(user)
+    if (!mapped) throw new Error('Failed to map authenticated user')
+    return mapped
+  })
+
+// Creates a new account with email, username, and password.
+// Supabase sends a confirmation email; bootstrapAuthenticatedUser fires
+// via confirmOtpFn after the user clicks the link.
+export const signUpWithPasswordFn = createServerFn({ method: 'POST' })
+  .validator(
+    z
+      .object({
+        email: z.string().email(),
+        username: z
+          .string()
+          .trim()
+          .refine(
+            (u) => /^[a-zA-Z0-9._-]+$/.test(u),
+            'Username must not contain special characters.',
+          ),
+        password: passwordSchema,
+        confirmPassword: passwordSchema,
+        captchaToken: z.string().min(1, 'Please complete the CAPTCHA'),
+      })
+      .superRefine(({ password, confirmPassword }, ctx) => {
+        if (password !== confirmPassword) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Passwords do not match.',
+            path: ['confirmPassword'],
+          })
+        }
+      }),
+  )
+  .handler(async ({ data }) => {
+    const supabase = createSupabaseServerClient()
+    const siteUrl = process.env.SITE_URL ?? 'http://localhost:3001'
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: { username: data.username, type: 'email' },
+        emailRedirectTo: `${siteUrl}/auth/confirm?next=/account`,
+        captchaToken: data.captchaToken,
+      },
+    })
+    if (error) throw new Error(error.message)
     return { ok: true }
   })
 
@@ -117,57 +215,18 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
-// Updates the authenticated user's password (called after clicking reset link).
+// Updates the authenticated user's password (called after clicking a reset link).
 export const updatePasswordFn = createServerFn({ method: 'POST' })
-  .validator(z.object({ password: z.string().min(8) }))
+  .validator(z.object({ password: passwordSchema, confirmPassword: passwordSchema }).superRefine(
+    ({ password, confirmPassword }, ctx) => {
+      if (password !== confirmPassword) {
+        ctx.addIssue({ code: 'custom', message: 'Passwords do not match.', path: ['confirmPassword'] })
+      }
+    },
+  ))
   .handler(async ({ data }) => {
     const supabase = createSupabaseServerClient()
     const { error } = await supabase.auth.updateUser({ password: data.password })
-    if (error) throw new Error(error.message)
-    return { ok: true }
-  })
-
-// Signs in with email + password.
-// Migrates any anonymous activity to the now-authenticated user after sign in.
-export const signInWithPasswordFn = createServerFn({ method: 'POST' })
-  .validator(z.object({ email: z.string().email(), password: z.string().min(1) }))
-  .handler(async ({ data }): Promise<User> => {
-    const supabase = createSupabaseServerClient()
-    const { data: authData, error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    })
-    if (error) throw new Error(error.message)
-
-    const user = authData.user
-    try {
-      await mergeAnonymousVisitorIntoUser({
-        userId: user.id,
-        email: user.email,
-        emailVerified: !!user.email_confirmed_at,
-      })
-    } catch (e) {
-      console.error('[signInWithPasswordFn] mergeAnonymousVisitorIntoUser failed:', e)
-    }
-
-    const mapped = mapSupabaseUser(user)
-    if (!mapped) throw new Error('Failed to map authenticated user')
-    return mapped
-  })
-
-// Creates a new account with email + password.
-// Supabase sends a confirmation email; the user is not fully authenticated
-// until they confirm. After confirmation, confirmOtpFn handles the migration.
-export const signUpWithPasswordFn = createServerFn({ method: 'POST' })
-  .validator(z.object({ email: z.string().email(), password: z.string().min(8) }))
-  .handler(async ({ data }) => {
-    const supabase = createSupabaseServerClient()
-    const siteUrl = process.env.SITE_URL ?? 'http://localhost:3001'
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: { emailRedirectTo: `${siteUrl}/auth/confirm` },
-    })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
