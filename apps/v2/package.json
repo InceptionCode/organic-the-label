@@ -23,7 +23,6 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
     "@vitejs/plugin-react": "^4.5.0",
-    "bun-types": "^1.4.2",
     "tailwindcss": "^4.1.4",
     "tw-animate-css": "^1.2.8",
     "typescript": "^5.8.3",
