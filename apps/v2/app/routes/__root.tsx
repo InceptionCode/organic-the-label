@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { createRootRouteWithContext, Outlet, HeadContent, Scripts } from '@tanstack/react-router'
-import { getSessionFn } from '~/lib/supabase/get-session'
+import { QueryClientProvider, HydrationBoundary, dehydrate } from '@tanstack/react-query'
+import { ensureAnonVisitorFn } from '~/lib/auth/actions'
 import { AuthProvider } from '~/lib/auth-context'
 import type { RouterContext } from '../router'
 import '../../styles/globals.css'
@@ -15,20 +16,31 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     links: [{ rel: 'icon', href: '/favicon.ico' }],
   }),
   beforeLoad: async () => {
-    const user = await getSessionFn()
+    const user = await ensureAnonVisitorFn()
     return { user }
   },
   component: RootComponent,
 })
 
 function RootComponent() {
-  const { user } = Route.useRouteContext()
+  const { user, queryClient } = Route.useRouteContext()
+
+  // dehydrate() is called here — after all child route loaders have run
+  // and prefetched into queryClient.  The dehydrated state serialises the
+  // server-populated cache; HydrationBoundary rehydrates it on the client
+  // so components that call useQuery() with matching keys never see a
+  // loading spinner on first render.
+  const dehydratedState = dehydrate(queryClient)
 
   return (
     <RootDocument>
-      <AuthProvider initialUser={user}>
-        <Outlet />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <HydrationBoundary state={dehydratedState}>
+          <AuthProvider initialUser={user}>
+            <Outlet />
+          </AuthProvider>
+        </HydrationBoundary>
+      </QueryClientProvider>
     </RootDocument>
   )
 }
