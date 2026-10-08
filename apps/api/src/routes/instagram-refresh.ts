@@ -4,7 +4,7 @@ import { refreshInstagramToken, seedInstagramTokenFromEnv } from "../lib/instagr
 
 const TAG = "[/cron/instagram-refresh]";
 
-function authorized(req: Request): boolean {
+function authorized(getHeader: (name: string) => string | undefined): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     if (process.env.NODE_ENV === "production") {
@@ -14,9 +14,8 @@ function authorized(req: Request): boolean {
     console.warn(`${TAG} CRON_SECRET not set — allowing through (non-production only)`);
     return true;
   }
-  const h = req.headers as unknown as { get(name: string): string | null | undefined }
-  const bearer = h.get("authorization")?.replace(/^Bearer\s+/i, "");
-  const provided = bearer || h.get("x-cron-secret") || "";
+  const bearer = getHeader("authorization")?.replace(/^Bearer\s+/i, "");
+  const provided = bearer || getHeader("x-cron-secret") || "";
   if (!provided) return false;
 
   const a = createHash("sha256").update(secret).digest();
@@ -27,7 +26,7 @@ function authorized(req: Request): boolean {
 const app = new Hono();
 
 app.get("/instagram-refresh", async (c) => {
-  if (!authorized(c.req.raw)) {
+  if (!authorized((name) => c.req.header(name))) {
     return c.json({ ok: false, error: "Unauthorized" }, 401);
   }
 
