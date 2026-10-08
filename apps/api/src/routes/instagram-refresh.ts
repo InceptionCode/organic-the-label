@@ -14,7 +14,7 @@ function authorized(req: Request): boolean {
     console.warn(`${TAG} CRON_SECRET not set — allowing through (non-production only)`);
     return true;
   }
-  const h = req.headers as { get(name: string): string | null | undefined }
+  const h = req.headers as unknown as { get(name: string): string | null | undefined }
   const bearer = h.get("authorization")?.replace(/^Bearer\s+/i, "");
   const provided = bearer || h.get("x-cron-secret") || "";
   if (!provided) return false;
