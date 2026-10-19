@@ -179,7 +179,7 @@ export const SigninFormSchema = z.object({
 
 export type SigninForm = z.infer<typeof SigninFormSchema>
 
-export const SignupFormSchema = z.object({
+const SignupFormSchemaBase = z.object({
   email: z.email("Please enter a valid email").trim(),
   username: z.string()
     .trim()
@@ -193,7 +193,9 @@ export const SignupFormSchema = z.object({
     .trim()
     .refine((pw) => /^(?=.*[A-Z])(?=.*[0-9]).+$/.test(pw), "Password must contain capital letter and a number."),
   captchaToken: z.string().min(1, 'Please complete the CAPTCHA')
-}).superRefine(({ confirmPassword, password }, ctx) => {
+})
+
+export const SignupFormSchema = SignupFormSchemaBase.superRefine(({ confirmPassword, password }, ctx) => {
   if (confirmPassword !== password) {
     ctx.addIssue({
       code: 'custom',
@@ -205,12 +207,11 @@ export const SignupFormSchema = z.object({
 
 export type SignupForm = z.infer<typeof SignupFormSchema>
 
-const mergeSignUpForm = SignupFormSchema.pick({ confirmPassword: true })
 export const UpdateUserFormSchema = SigninFormSchema.extend({
   username: z.string().optional(),
   email: z.email().optional(),
   avatar_url: z.string().optional()
-}).extend(mergeSignUpForm.shape)
+}).extend({ confirmPassword: SignupFormSchemaBase.shape.confirmPassword })
   .superRefine(({ confirmPassword, password }, ctx) => {
     if (confirmPassword !== password) {
       ctx.addIssue({

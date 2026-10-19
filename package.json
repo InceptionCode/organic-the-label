@@ -40,7 +40,7 @@
     "db:setup": "psql $SUPABASE_DB_URL -f supabase/schema.sql",
     "changelog": "git-cliff --unreleased",
     "release": "bash scripts/release.sh",
-    "prepare": "husky && bash scripts/fix-vite-dedup.sh"
+    "prepare": "husky"
   },
   "dependencies": {
     "@conform-to/react": "^1.13.3",
@@ -80,7 +80,7 @@
     "zustand": "^5.0.3"
   },
   "overrides": {
-    "vite": "7.3.6"
+    "vite": "8.3.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",

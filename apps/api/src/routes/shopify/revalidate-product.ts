@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { verifyShopifyHmac } from "@organic/hmac";
 import { bustProductCache } from "../../lib/cache.ts";
+import { revalidateProductSchema, type RevalidateProductPayload } from "../../schemas/index.ts";
 
 const app = new Hono();
 
@@ -24,9 +25,9 @@ app.post("/revalidate-product", async (c) => {
     return c.json({ ok: false, error: "Invalid HMAC" }, 401);
   }
 
-  let payload: { handle?: string; id?: number };
+  let payload: RevalidateProductPayload;
   try {
-    payload = JSON.parse(rawBody);
+    payload = revalidateProductSchema.parse(JSON.parse(rawBody));
   } catch {
     return c.json({ ok: false, error: "Invalid JSON" }, 400);
   }
@@ -34,7 +35,13 @@ app.post("/revalidate-product", async (c) => {
   if (payload.handle) {
     console.log(`Busting product cache: ${payload.handle}`);
   }
-  await bustProductCache(payload.handle);
+
+  try {
+    await bustProductCache(payload.handle);
+  } catch (err) {
+    console.error("revalidate-product cache bust failed", { handle: payload.handle, err });
+    return c.json({ ok: false, error: "Cache bust failed" }, 500);
+  }
 
   return c.json({ ok: true });
 });

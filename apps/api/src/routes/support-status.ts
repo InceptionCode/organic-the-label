@@ -2,24 +2,9 @@ import { Hono } from "hono";
 import { createSupabaseAdminClient } from "../lib/supabase.ts";
 import { sendSupportStatusEmail } from "../lib/email/resend.ts";
 import { verifySharedSecret } from "../middleware/auth.ts";
+import { supportWebhookSchema, type SupportWebhookPayload } from "../schemas/index.ts";
 
 const EMAILABLE_STATUSES = new Set(["pending", "closed"]);
-
-type SupportRequestRecord = {
-  id: string;
-  name: string | null;
-  email: string;
-  status: string;
-  resolution_note: string | null;
-};
-
-type WebhookPayload = {
-  type: "UPDATE";
-  table: string;
-  schema: string;
-  record: SupportRequestRecord;
-  old_record: SupportRequestRecord;
-};
 
 const app = new Hono();
 
@@ -28,9 +13,9 @@ app.post("/support-status", async (c) => {
     return c.json({ ok: false, error: "Unauthorized" }, 401);
   }
 
-  let payload: WebhookPayload;
+  let payload: SupportWebhookPayload;
   try {
-    payload = await c.req.json();
+    payload = supportWebhookSchema.parse(await c.req.json());
   } catch {
     return c.json({ ok: false, error: "Invalid JSON" }, 400);
   }
@@ -47,13 +32,22 @@ app.post("/support-status", async (c) => {
 
   const status = record.status as "pending" | "closed";
 
-  await sendSupportStatusEmail({
-    to: record.email,
-    name: record.name ?? "there",
-    status,
-    resolutionNote: record.resolution_note,
-    supportRequestId: record.id,
-  });
+  try {
+    await sendSupportStatusEmail({
+      to: record.email,
+      name: record.name ?? "there",
+      status,
+      resolutionNote: record.resolution_note,
+      supportRequestId: record.id,
+    });
+  } catch (err) {
+    console.error("[/webhooks/support-status] email send failed", {
+      supportRequestId: record.id,
+      status,
+      err,
+    });
+    return c.json({ ok: false, error: "Email send failed" }, 500);
+  }
 
   try {
     const supabase = createSupabaseAdminClient();

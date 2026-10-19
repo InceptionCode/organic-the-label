@@ -1,13 +1,7 @@
 import { Hono } from "hono";
 import { verifyShopifyHmac } from "@organic/hmac";
 import { createSupabaseAdminClient } from "../../lib/supabase.ts";
-
-type ShopifyOrderPaidPayload = {
-  id: number;
-  email?: string | null;
-  customer?: { id?: number | null; email?: string | null } | null;
-  line_items?: Array<{ product_id?: number | null }>;
-};
+import { shopifyOrderPaidSchema, type ShopifyOrderPaidPayload } from "../../schemas/index.ts";
 
 const toOrderGid = (id: number) => `gid://shopify/Order/${id}`;
 const toCustomerGid = (id: number) => `gid://shopify/Customer/${id}`;
@@ -37,7 +31,12 @@ app.post("/orders-paid", async (c) => {
       return c.json({ ok: false, error: "Invalid HMAC" }, 401);
     }
 
-    const payload = JSON.parse(rawBody) as ShopifyOrderPaidPayload;
+    const parsed = shopifyOrderPaidSchema.safeParse(JSON.parse(rawBody));
+    if (!parsed.success) {
+      console.error("Invalid orders/paid payload", parsed.error.issues);
+      return c.json({ ok: false, error: "Invalid payload" }, 400);
+    }
+    const payload: ShopifyOrderPaidPayload = parsed.data;
 
     const purchaserEmail =
       payload.email?.toLowerCase().trim() ||

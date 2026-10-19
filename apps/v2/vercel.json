@@ -1,5 +1,0 @@
-{
-  "framework": "tanstack-start",
-  "buildCommand": "cd ../.. && bun install --frozen-lockfile && cd apps/v2 && NITRO_PRESET=vercel bun run build",
-  "installCommand": "echo 'dependencies installed in buildCommand'"
-}

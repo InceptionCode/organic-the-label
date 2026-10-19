@@ -55,11 +55,11 @@ next-env.d.ts
 /.cursor
 /.claude
 /CLAUDE.md
-/temporary screenshots
-/temporary-references
+**/temporary screenshots
+**/temporary-references
 /screenshot.mjs
 /public/brand-assets/organic-sonics-brand-guidelines.png
-/docs/internal-docs
+**/docs/internal-docs
 # macOS Spotlight exclusion marker (per-machine)
 .metadata_never_index
 .eslintcache
