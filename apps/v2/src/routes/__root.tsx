@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import type { RouterContext } from '~/router'
+import { AuthSync } from '~/components/shell/auth-sync'
+import { sessionQueryOptions } from '~/queries/session'
 import appCss from '~/styles/app.css?url'
 import interLatinWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
 import bebasLatinWoff2 from '@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url'
@@ -20,6 +22,10 @@ const fontPreload = (href: string) => ({
 })
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  beforeLoad: async ({ context }) => {
+    const session = await context.queryClient.query(sessionQueryOptions())
+    return { session }
+  },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -57,8 +63,11 @@ function RootDocument({ children }: { children: ReactNode }) {
 
 function RootLayout() {
   return (
-    <main id="main" tabIndex={-1} className="outline-none">
-      <Outlet />
-    </main>
+    <>
+      <main id="main" tabIndex={-1} className="outline-none">
+        <Outlet />
+      </main>
+      <AuthSync />
+    </>
   )
 }

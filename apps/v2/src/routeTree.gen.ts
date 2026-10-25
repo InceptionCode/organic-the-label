@@ -10,12 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as DevDataRouteImport } from './routes/dev-data'
 import { Route as DevTokensRouteImport } from './routes/dev-tokens'
+import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
+import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as LoginResetPasswordRouteImport } from './routes/login/reset-password'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevDataRoute = DevDataRouteImport.update({
@@ -28,35 +39,119 @@ const DevTokensRoute = DevTokensRouteImport.update({
   path: '/dev-tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedAccountRoute = AuthedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm',
+  path: '/auth/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
+  id: '/login/reset-password',
+  path: '/login/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dev-data': typeof DevDataRoute
   '/dev-tokens': typeof DevTokensRoute
+  '/explore': typeof ExploreRoute
+  '/signup': typeof SignupRoute
+  '/account': typeof AuthedAccountRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login/': typeof LoginIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dev-data': typeof DevDataRoute
   '/dev-tokens': typeof DevTokensRoute
+  '/explore': typeof ExploreRoute
+  '/signup': typeof SignupRoute
+  '/account': typeof AuthedAccountRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login': typeof LoginIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteWithChildren
   '/dev-data': typeof DevDataRoute
   '/dev-tokens': typeof DevTokensRoute
+  '/explore': typeof ExploreRoute
+  '/signup': typeof SignupRoute
+  '/_authed/account': typeof AuthedAccountRoute
+  '/auth/confirm': typeof AuthConfirmRoute
+  '/login/reset-password': typeof LoginResetPasswordRoute
+  '/login/': typeof LoginIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dev-data' | '/dev-tokens'
+  fullPaths:
+    | '/'
+    | '/dev-data'
+    | '/dev-tokens'
+    | '/explore'
+    | '/signup'
+    | '/account'
+    | '/auth/confirm'
+    | '/login/reset-password'
+    | '/login/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dev-data' | '/dev-tokens'
-  id: '__root__' | '/' | '/dev-data' | '/dev-tokens'
+  to:
+    | '/'
+    | '/dev-data'
+    | '/dev-tokens'
+    | '/explore'
+    | '/signup'
+    | '/account'
+    | '/auth/confirm'
+    | '/login/reset-password'
+    | '/login'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/dev-data'
+    | '/dev-tokens'
+    | '/explore'
+    | '/signup'
+    | '/_authed/account'
+    | '/auth/confirm'
+    | '/login/reset-password'
+    | '/login/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
   DevDataRoute: typeof DevDataRoute
   DevTokensRoute: typeof DevTokensRoute
+  ExploreRoute: typeof ExploreRoute
+  SignupRoute: typeof SignupRoute
+  AuthConfirmRoute: typeof AuthConfirmRoute
+  LoginResetPasswordRoute: typeof LoginResetPasswordRoute
+  LoginIndexRoute: typeof LoginIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dev-data': {
@@ -82,13 +184,72 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/account': {
+      id: '/_authed/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthedAccountRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/auth/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/reset-password': {
+      id: '/login/reset-password'
+      path: '/login/reset-password'
+      fullPath: '/login/reset-password'
+      preLoaderRoute: typeof LoginResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedAccountRoute: typeof AuthedAccountRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAccountRoute: AuthedAccountRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRouteWithChildren,
   DevDataRoute: DevDataRoute,
   DevTokensRoute: DevTokensRoute,
+  ExploreRoute: ExploreRoute,
+  SignupRoute: SignupRoute,
+  AuthConfirmRoute: AuthConfirmRoute,
+  LoginResetPasswordRoute: LoginResetPasswordRoute,
+  LoginIndexRoute: LoginIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { env } from '~/server/env'
 
 export type { CookieOptions }
@@ -19,5 +20,13 @@ export function createSupabaseServerClient(cookies: CookieAdapter) {
       getAll: () => cookies.getAll(),
       setAll: (list, headers) => cookies.setAll(list, headers),
     },
+  })
+}
+
+// Cookie-less client for calls that only send email (signUp, OTP, password reset). Using the
+// cookie client here would write a PKCE verifier cookie that the session middleware would then read.
+export function createSupabasePublicClient() {
+  return createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, flowType: 'implicit' },
   })
 }
