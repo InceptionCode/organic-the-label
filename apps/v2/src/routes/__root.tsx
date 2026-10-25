@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import type { RouterContext } from '~/router'
 import appCss from '~/styles/app.css?url'
 import interLatinWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
 import bebasLatinWoff2 from '@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url'
@@ -18,8 +19,7 @@ const fontPreload = (href: string) => ({
   crossOrigin: 'anonymous' as const,
 })
 
-// QueryClient router context is added in phase 01 (createRootRouteWithContext).
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
