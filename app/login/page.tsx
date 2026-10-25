@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { signinAction } from '@/app/api/auth/auth-actions';
 import { SigninFormSchema } from '@/lib/schemas';
 import {
@@ -37,6 +38,30 @@ export default function Login() {
   });
 
   const disabled = loginForm.valid === false;
+
+  // Supabase Attack Protection requires a captcha token on password sign-in. Invisible hCaptcha
+  // fetches one at submit, so most users never see a challenge.
+  const captchaRef = useRef<HCaptcha>(null);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+
+  const handleSignin = async (event: FormEvent<HTMLFormElement>) => {
+    loginForm.onSubmit(event);
+    if (event.defaultPrevented) return; // Conform blocked submission: validation errors are shown.
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    setCaptchaError(null);
+    try {
+      captchaRef.current?.resetCaptcha();
+      const result = await captchaRef.current?.execute({ async: true });
+      if (!result?.response) throw new Error('missing-token');
+      formData.set('captchaToken', result.response);
+    } catch (e) {
+      console.error('[hcaptcha] execute failed:', e);
+      setCaptchaError('We could not verify you are human. Please try again.');
+      return;
+    }
+    startTransition(() => signinSubmitAction(formData));
+  };
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [openMagicLinkDialog, setOpenMagicLinkDialog] = useState<boolean>(false);
@@ -75,8 +100,7 @@ export default function Login() {
 
         <form
           id={loginForm.id}
-          action={signinSubmitAction}
-          onSubmit={loginForm.onSubmit}
+          onSubmit={handleSignin}
           noValidate
           className="flex flex-col gap-4"
         >
@@ -114,9 +138,23 @@ export default function Login() {
             )}
           </div>
 
+          <HCaptcha ref={captchaRef} sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY ?? ''} size="invisible" />
+
+          {captchaError && (
+            <p className="text-body-s" style={{ color: 'var(--danger)' }} role="alert">
+              {captchaError}
+            </p>
+          )}
+
           <Button disabled={disabled || signinPending} type="submit" className="w-full mt-2">
             Sign In
           </Button>
+
+          <p className="text-caption text-muted">
+            This site is protected by hCaptcha and its{' '}
+            <a href="https://www.hcaptcha.com/privacy" target="_blank" rel="noreferrer">Privacy Policy</a> and{' '}
+            <a href="https://www.hcaptcha.com/terms" target="_blank" rel="noreferrer">Terms of Service</a> apply.
+          </p>
         </form>
 
         <div className="flex items-center gap-3">

@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.9.0] - 2026-10-25
+
+### 🚀 Features
+
+- Put credits in composition file names (#32) ([`bccbe0f`](https://github.com/InceptionCode/organic-the-label/commit/bccbe0f8264557f54bdfb5e0f263b7ddc68de9a6)) in [#32](https://github.com/InceptionCode/organic-the-label/pull/32)
+
+### 🐛 Bug Fixes
+
+- V1 broken due to Supabase HCAPTCHA site protection rule ([`7c9c380`](https://github.com/InceptionCode/organic-the-label/commit/7c9c380adc5a5bef9df341f5e312c4ea011cfbbb))
+
+### ⚙️ CI & Build
+
+- Drop the changelog bot and prepend release notes instead ([`a5b231f`](https://github.com/InceptionCode/organic-the-label/commit/a5b231ff6396f61f503b7a810d09314abf54f351))
 ## [1.8.0] - 2026-10-04
 
 ### 🚀 Features
