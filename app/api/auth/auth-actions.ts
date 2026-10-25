@@ -35,10 +35,16 @@ export const signinAction = async (
         }
 
         const { email, password } = payload as SigninForm
+        // Supabase Attack Protection requires a captcha token on password sign-in too.
+        const captchaToken = formData.get('captchaToken')
 
         console.info('parsed user form data')
 
-        const { error, data: { user } } = await supabase.auth.signInWithPassword({ email, password })
+        const { error, data: { user } } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+            options: { captchaToken: typeof captchaToken === 'string' ? captchaToken : undefined },
+        })
 
         if (error || !user) {
             console.error(error ?? 'User not found')
