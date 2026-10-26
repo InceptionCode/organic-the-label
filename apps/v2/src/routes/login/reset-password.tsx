@@ -6,9 +6,17 @@ import { updatePasswordFn } from '~/fns/auth.fn'
 import { updatePasswordSchema } from '~/lib/auth-schemas'
 import { useSession } from '~/lib/use-session'
 import { SESSION_KEY } from '~/queries/session'
+import { seo } from '~/seo/head'
 
 export const Route = createFileRoute('/login/reset-password')({
-  head: () => ({ meta: [{ title: 'Choose a new password | Organic Sonics' }, { name: 'robots', content: 'noindex' }] }),
+  head: () =>
+    seo({
+      title: 'Set new password',
+      description:
+        'Choose a new password for your Organic Sonics account after following the password recovery link we sent to your email address.',
+      path: '/login/reset-password',
+      noindex: true,
+    }),
   component: ResetPassword,
 })
 

@@ -1,5 +1,6 @@
 import { createCsrfMiddleware, createServerOnlyFn, createStart } from '@tanstack/react-start'
 import { env } from '~/server/env'
+import { robotsHeader } from '~/fns/middleware/robots'
 import { supabaseSession } from '~/fns/middleware/session'
 
 // Importing env validates it when the server boots. The reference sits in a server-only fn so
@@ -13,7 +14,8 @@ const csrf = createCsrfMiddleware({
     handlerType === 'serverFn' || !['GET', 'HEAD', 'OPTIONS'].includes(request.method),
 })
 
-export const startInstance = createStart(() => ({ requestMiddleware: [csrf, supabaseSession] }))
+// robotsHeader runs first so even a CSRF rejection carries X-Robots-Tag on non-production hosts.
+export const startInstance = createStart(() => ({ requestMiddleware: [robotsHeader, csrf, supabaseSession] }))
 
 declare module '@tanstack/react-start' {
   interface Register {

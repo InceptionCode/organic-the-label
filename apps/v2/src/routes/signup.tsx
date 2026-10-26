@@ -4,12 +4,20 @@ import { useCheckboxCaptcha } from '~/components/auth/captcha'
 import { Field, FormMessage, SubmitButton, fieldErrors, type FieldErrors } from '~/components/auth/form-bits'
 import { signUpFn } from '~/fns/auth.fn'
 import { signUpFieldsSchema } from '~/lib/auth-schemas'
+import { seo } from '~/seo/head'
 
 export const Route = createFileRoute('/signup')({
   beforeLoad: ({ context }) => {
     if (context.session) throw redirect({ to: '/explore' })
   },
-  head: () => ({ meta: [{ title: 'Sign up | Organic Sonics' }] }),
+  head: () =>
+    seo({
+      title: 'Create account',
+      description:
+        'Create a free Organic Sonics account to keep your purchases in one place, save your preferences, and get a personalized Explore page.',
+      path: '/signup',
+      noindex: true,
+    }),
   component: Signup,
 })
 

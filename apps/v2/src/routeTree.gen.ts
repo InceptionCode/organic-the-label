@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
@@ -32,9 +34,19 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthedAccountRoute = AuthedAccountRouteImport.update({
@@ -61,7 +73,9 @@ const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -70,7 +84,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/explore': typeof ExploreRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -81,7 +97,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
   '/explore': typeof ExploreRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authed/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -92,7 +110,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/explore'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/account'
     | '/auth/confirm'
     | '/login/reset-password'
@@ -101,7 +121,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/explore'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/account'
     | '/auth/confirm'
     | '/login/reset-password'
@@ -111,7 +133,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authed'
     | '/explore'
+    | '/robots.txt'
     | '/signup'
+    | '/sitemap.xml'
     | '/_authed/account'
     | '/auth/confirm'
     | '/login/reset-password'
@@ -122,7 +146,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
   ExploreRoute: typeof ExploreRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
   LoginResetPasswordRoute: typeof LoginResetPasswordRoute
   LoginIndexRoute: typeof LoginIndexRoute
@@ -151,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authed/account': {
@@ -204,7 +244,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
   ExploreRoute: ExploreRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AuthConfirmRoute: AuthConfirmRoute,
   LoginResetPasswordRoute: LoginResetPasswordRoute,
   LoginIndexRoute: LoginIndexRoute,

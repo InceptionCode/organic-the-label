@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { confirmOtpFn } from '~/fns/auth.fn'
 import { confirmSearchSchema } from '~/lib/auth-schemas'
+import { seo } from '~/seo/head'
 
 export const Route = createFileRoute('/auth/confirm')({
   validateSearch: (search) => {
@@ -12,7 +13,14 @@ export const Route = createFileRoute('/auth/confirm')({
     const result = await confirmOtpFn({ data: search })
     return { confirmFailed: !result.ok }
   },
-  head: () => ({ meta: [{ title: 'Confirm | Organic Sonics' }, { name: 'robots', content: 'noindex' }] }),
+  head: () =>
+    seo({
+      title: 'Confirm',
+      description:
+        'Confirm your email address to finish signing in to your Organic Sonics account and reach your kits, packs, and personalized Explore page.',
+      path: '/auth/confirm',
+      noindex: true,
+    }),
   component: ConfirmError,
 })
 

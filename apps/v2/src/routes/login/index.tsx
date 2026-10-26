@@ -6,12 +6,20 @@ import { Field, FormMessage, SubmitButton, fieldErrors, type FieldErrors } from 
 import { requestPasswordResetFn, sendMagicLinkFn, signInWithPasswordFn } from '~/fns/auth.fn'
 import { emailFieldsSchema, signInFieldsSchema } from '~/lib/auth-schemas'
 import { SESSION_KEY } from '~/queries/session'
+import { seo } from '~/seo/head'
 
 export const Route = createFileRoute('/login/')({
   beforeLoad: ({ context }) => {
     if (context.session) throw redirect({ to: '/explore' })
   },
-  head: () => ({ meta: [{ title: 'Log in | Organic Sonics' }] }),
+  head: () =>
+    seo({
+      title: 'Sign in',
+      description:
+        'Sign in to your Organic Sonics account to reach your purchased kits and packs, your preferences, and your personalized Explore page.',
+      path: '/login',
+      noindex: true,
+    }),
   component: Login,
 })
 

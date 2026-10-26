@@ -1,9 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useSession } from '~/lib/use-session'
+import { seo } from '~/seo/head'
 
 // Placeholder until the account page is built in phase 05.
 export const Route = createFileRoute('/_authed/account')({
-  head: () => ({ meta: [{ name: 'robots', content: 'noindex' }] }),
+  head: () =>
+    seo({
+      title: 'Account',
+      description:
+        'Manage your Organic Sonics account, your purchased sound kits and packs, and your email and personalization preferences.',
+      path: '/account',
+      noindex: true,
+    }),
   component: Account,
 })
 

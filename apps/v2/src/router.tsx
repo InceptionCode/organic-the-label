@@ -2,9 +2,9 @@ import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { routeTree } from './routeTree.gen'
+import { NotFoundPage } from './components/errors/not-found-page'
 
 export type RouterContext = { queryClient: QueryClient }
-
 
 export function getRouter() {
   const queryClient = new QueryClient({
@@ -17,6 +17,7 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
+    defaultNotFoundComponent: NotFoundPage,
   })
 
   setupRouterSsrQueryIntegration({ router, queryClient })
