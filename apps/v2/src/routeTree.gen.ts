@@ -11,8 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
-import { Route as DevDataRouteImport } from './routes/dev-data'
-import { Route as DevTokensRouteImport } from './routes/dev-tokens'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
@@ -27,16 +25,6 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevDataRoute = DevDataRouteImport.update({
-  id: '/dev-data',
-  path: '/dev-data',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevTokensRoute = DevTokensRouteImport.update({
-  id: '/dev-tokens',
-  path: '/dev-tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -72,8 +60,6 @@ const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dev-data': typeof DevDataRoute
-  '/dev-tokens': typeof DevTokensRoute
   '/explore': typeof ExploreRoute
   '/signup': typeof SignupRoute
   '/account': typeof AuthedAccountRoute
@@ -83,8 +69,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dev-data': typeof DevDataRoute
-  '/dev-tokens': typeof DevTokensRoute
   '/explore': typeof ExploreRoute
   '/signup': typeof SignupRoute
   '/account': typeof AuthedAccountRoute
@@ -96,8 +80,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
-  '/dev-data': typeof DevDataRoute
-  '/dev-tokens': typeof DevTokensRoute
   '/explore': typeof ExploreRoute
   '/signup': typeof SignupRoute
   '/_authed/account': typeof AuthedAccountRoute
@@ -109,8 +91,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dev-data'
-    | '/dev-tokens'
     | '/explore'
     | '/signup'
     | '/account'
@@ -120,8 +100,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dev-data'
-    | '/dev-tokens'
     | '/explore'
     | '/signup'
     | '/account'
@@ -132,8 +110,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authed'
-    | '/dev-data'
-    | '/dev-tokens'
     | '/explore'
     | '/signup'
     | '/_authed/account'
@@ -145,8 +121,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
-  DevDataRoute: typeof DevDataRoute
-  DevTokensRoute: typeof DevTokensRoute
   ExploreRoute: typeof ExploreRoute
   SignupRoute: typeof SignupRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
@@ -168,20 +142,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dev-data': {
-      id: '/dev-data'
-      path: '/dev-data'
-      fullPath: '/dev-data'
-      preLoaderRoute: typeof DevDataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dev-tokens': {
-      id: '/dev-tokens'
-      path: '/dev-tokens'
-      fullPath: '/dev-tokens'
-      preLoaderRoute: typeof DevTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -243,8 +203,6 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
-  DevDataRoute: DevDataRoute,
-  DevTokensRoute: DevTokensRoute,
   ExploreRoute: ExploreRoute,
   SignupRoute: SignupRoute,
   AuthConfirmRoute: AuthConfirmRoute,

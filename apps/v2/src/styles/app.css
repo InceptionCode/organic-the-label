@@ -608,3 +608,100 @@
     }
   }
 }
+
+/* ─────────────────────────────────────────────────────────
+   Shell primitives (phase 03): scroll lock, native <dialog> motion
+───────────────────────────────────────────────────────── */
+@layer components {
+  html.scroll-locked {
+    overflow: hidden;
+  }
+  html.scroll-locked-gutter {
+    scrollbar-gutter: stable;
+  }
+
+  /* Native <dialog>: closed dialogs stay display:none; display and overlay transition
+     discretely so the exit animation can finish. Only transform and opacity animate. */
+  .os-dialog,
+  .os-drawer {
+    transition:
+      transform var(--motion-slow) var(--ease-soft),
+      opacity var(--motion-slow) var(--ease-soft),
+      overlay var(--motion-slow) allow-discrete,
+      display var(--motion-slow) allow-discrete;
+  }
+  .os-dialog::backdrop,
+  .os-drawer::backdrop {
+    /* v1 drawer overlay intent: bg-overlay-surface/80 */
+    background-color: color-mix(in srgb, var(--bg-overlay) 80%, transparent);
+    opacity: 0;
+    transition:
+      opacity var(--motion-slow) var(--ease-soft),
+      overlay var(--motion-slow) allow-discrete,
+      display var(--motion-slow) allow-discrete;
+  }
+  .os-dialog[open]::backdrop,
+  .os-drawer[open]::backdrop {
+    opacity: 1;
+  }
+
+  .os-dialog { opacity: 0; transform: translateY(8px) scale(0.98); }
+  .os-dialog[open] { opacity: 1; transform: none; }
+
+  .os-drawer { transform: translateX(100%); }
+  .os-drawer[open] { transform: translateX(0); }
+
+  @starting-style {
+    .os-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.98); }
+    .os-drawer[open] { transform: translateX(100%); }
+    .os-dialog[open]::backdrop,
+    .os-drawer[open]::backdrop { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-dialog,
+    .os-drawer,
+    .os-dialog::backdrop,
+    .os-drawer::backdrop {
+      transition: none;
+    }
+  }
+}
+
+@layer components {
+  /* Mobile menu: mounts on open, so @starting-style gives the entry slide. */
+  .os-menu-panel { transition: transform var(--motion-slow) var(--ease-soft); }
+  .os-menu-overlay { transition: opacity var(--motion-slow) var(--ease-soft); }
+  @starting-style {
+    .os-menu-panel { transform: translateX(100%); }
+    .os-menu-overlay { opacity: 0; }
+  }
+
+  /* Sticky product bar: v1's framer-motion enter/exit as CSS (opacity + transform only). */
+  .os-sticky-bar {
+    transition:
+      opacity 350ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 350ms allow-discrete;
+  }
+  .os-sticky-bar[data-visible='false'] {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    visibility: hidden;
+  }
+  .os-sticky-bar[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+  }
+
+  @keyframes os-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes os-slide-in { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
+  .os-fade-in { animation: os-fade-in 250ms var(--ease-soft); }
+  .os-slide-in { animation: os-slide-in 250ms var(--ease-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-menu-panel, .os-menu-overlay, .os-sticky-bar { transition: none; }
+    .os-fade-in, .os-slide-in { animation: none; }
+  }
+}
