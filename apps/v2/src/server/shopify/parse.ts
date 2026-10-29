@@ -4,8 +4,8 @@ import {
   type ProductPreviewUrls,
   type ProductWhatsIncluded,
 } from '@organic/content-schema'
-import type { RawCart, RawImage, RawProduct, RawProductSummary, ProductsListData } from './queries'
-import type { Cart, Product, ProductPage, ProductSummary, ShopifyImage } from './types'
+import type { RawCart, RawImage, RawProduct, RawProductSummary, RawVariant, ProductsListData } from './queries'
+import type { Cart, LicenseOption, Product, ProductPage, ProductSummary, ShopifyImage } from './types'
 
 function parseJsonMetafield<T>(value: string | null | undefined, schema: { safeParse(v: unknown): { success: true; data: T } | { success: false } }, fallback: T): T {
   if (!value) return fallback
@@ -54,6 +54,15 @@ export function parseProductSummary(raw: RawProductSummary): ProductSummary {
   }
 }
 
+export function parseLicenseOptions(variants: RawVariant[], productTitle: string): LicenseOption[] {
+  return variants.map((v) => ({
+    id: v.id,
+    title: v.title && v.title !== 'Default Title' ? v.title : productTitle,
+    price: { amount: v.price.amount, currencyCode: v.price.currencyCode },
+    availableForSale: v.availableForSale,
+  }))
+}
+
 export function parseProduct(raw: RawProduct): Product {
   const images = raw.images.edges.map((e) => parseImage(e.node)).filter((i): i is ShopifyImage => i !== null)
   return {
@@ -61,6 +70,7 @@ export function parseProduct(raw: RawProduct): Product {
     image: parseImage(raw.featuredImage) ?? images[0] ?? null,
     description: raw.description,
     descriptionHtml: raw.descriptionHtml,
+    licenseOptions: parseLicenseOptions((raw.licenseVariants?.edges ?? []).map((e) => e.node), raw.title),
     images,
     audioPreviews: parseAudioPreviews(raw.audioPreviewMetafield?.value),
     whatsIncluded: parseWhatsIncluded(raw.whatsIncludedMetafield?.value),

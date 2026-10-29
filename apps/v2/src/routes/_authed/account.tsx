@@ -1,9 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useSession } from '~/lib/use-session'
+import { AccountPage, AccountSkeleton } from '~/components/account/account-page'
+import { ErrorPage } from '~/components/errors/error-page'
+import { accountQueries } from '~/queries/account'
 import { seo } from '~/seo/head'
 
-// Placeholder until the account page is built in phase 05.
 export const Route = createFileRoute('/_authed/account')({
+  codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent']],
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.query(accountQueries.summary()),
+      context.queryClient.query(accountQueries.ownedProducts()),
+      context.queryClient.query(accountQueries.ownedResources()),
+    ])
+  },
+  // Private HTML: never cacheable by a CDN or shared cache (phase 07 caches anonymous HTML).
+  headers: () => ({ 'Cache-Control': 'private, no-store' }),
   head: () =>
     seo({
       title: 'Account',
@@ -12,15 +23,7 @@ export const Route = createFileRoute('/_authed/account')({
       path: '/account',
       noindex: true,
     }),
-  component: Account,
+  pendingComponent: AccountSkeleton,
+  errorComponent: ErrorPage,
+  component: AccountPage,
 })
-
-function Account() {
-  const session = useSession()
-  return (
-    <section className="content-container section-wrapper">
-      <h1 className="text-h2">Account</h1>
-      <p data-testid="account-email">{session?.email}</p>
-    </section>
-  )
-}

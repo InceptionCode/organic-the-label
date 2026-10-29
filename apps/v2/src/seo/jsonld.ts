@@ -55,22 +55,49 @@ function gidTail(gid: string | null): string | undefined {
 export type ProductJsonLdInput = Pick<
   Product,
   'handle' | 'title' | 'description' | 'category' | 'image' | 'images' | 'variantId' | 'price' | 'availableForSale'
->
+> &
+  Partial<Pick<Product, 'licenseOptions'>>
+
+const IN_STOCK = 'https://schema.org/InStock'
+const OUT_OF_STOCK = 'https://schema.org/OutOfStock'
+
+/**
+ * One variant: a single Offer. Several license variants: an AggregateOffer over every variant
+ * with a valid price (lowPrice, highPrice, offerCount), as Google's Product rich result expects.
+ */
+function productOffers(product: ProductJsonLdInput, url: string): LdObject | undefined {
+  const priced = (product.licenseOptions ?? []).filter((o) => Number.isFinite(Number(o.price.amount)))
+  if (priced.length > 1) {
+    const amounts = priced.map((o) => Number(o.price.amount))
+    const low = priced[amounts.indexOf(Math.min(...amounts))]!
+    const high = priced[amounts.indexOf(Math.max(...amounts))]!
+    return {
+      '@type': 'AggregateOffer',
+      url,
+      lowPrice: low.price.amount,
+      highPrice: high.price.amount,
+      offerCount: priced.length,
+      priceCurrency: low.price.currencyCode,
+      availability: priced.some((o) => o.availableForSale) ? IN_STOCK : OUT_OF_STOCK,
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: BRAND_ORG,
+    }
+  }
+  if (!product.price) return undefined
+  return {
+    '@type': 'Offer',
+    url,
+    price: product.price.amount,
+    priceCurrency: product.price.currencyCode,
+    availability: product.availableForSale ? IN_STOCK : OUT_OF_STOCK,
+    itemCondition: 'https://schema.org/NewCondition',
+    seller: BRAND_ORG,
+  }
+}
 
 export function productJsonLd(product: ProductJsonLdInput): JsonLdMeta {
   const url = `${SITE_ORIGIN}/store/${product.handle}`
   const images = [...new Set([product.image, ...product.images].filter((i) => i?.url).map((i) => i!.url))]
-  const offers = product.price
-    ? {
-        '@type': 'Offer',
-        url,
-        price: product.price.amount,
-        priceCurrency: product.price.currencyCode,
-        availability: product.availableForSale ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        itemCondition: 'https://schema.org/NewCondition',
-        seller: BRAND_ORG,
-      }
-    : undefined
 
   return ld({
     '@type': 'Product',
@@ -82,7 +109,22 @@ export function productJsonLd(product: ProductJsonLdInput): JsonLdMeta {
     brand: BRAND,
     category: product.category || undefined,
     url,
-    offers,
+    offers: productOffers(product, url),
+  })
+}
+
+/** ItemList of the products on one /store page (pages/store.md): position, url, name. */
+export function productItemListJsonLd(products: { handle: string; title: string }[]): JsonLdMeta {
+  return ld({
+    '@type': 'ItemList',
+    url: `${SITE_ORIGIN}/store`,
+    numberOfItems: products.length,
+    itemListElement: products.map((p, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `${SITE_ORIGIN}/store/${p.handle}`,
+      name: p.title,
+    })),
   })
 }
 
@@ -116,8 +158,26 @@ export type CompositionJsonLdInput = {
  * Loops live as #slug anchors on /compositions (no per-loop pages).
  */
 export function compositionJsonLd(c: CompositionJsonLdInput): JsonLdMeta {
-  const isMusic = Boolean(c.previewUrl || c.musicalKey)
+  return ld(compositionNode(c))
+}
+
+/** One ItemList of the loops shown on /compositions (pages/compositions.md: first page only). */
+export function compositionsItemListJsonLd(items: CompositionJsonLdInput[]): JsonLdMeta {
   return ld({
+    '@type': 'ItemList',
+    url: `${SITE_ORIGIN}/compositions`,
+    numberOfItems: items.length,
+    itemListElement: items.map((c, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: compositionNode(c),
+    })),
+  })
+}
+
+function compositionNode(c: CompositionJsonLdInput): LdObject {
+  const isMusic = Boolean(c.previewUrl || c.musicalKey)
+  return {
     '@type': isMusic ? 'MusicComposition' : 'CreativeWork',
     name: c.title,
     url: `${SITE_ORIGIN}/compositions#${c.slug}`,
@@ -130,5 +190,48 @@ export function compositionJsonLd(c: CompositionJsonLdInput): JsonLdMeta {
       ? { '@type': 'AudioObject', contentUrl: c.previewUrl, encodingFormat: 'audio/mpeg' }
       : undefined,
     isAccessibleForFree: true,
+  }
+}
+
+export type FreeResourceJsonLdInput = {
+  slug: string
+  name: string
+  description?: string | null
+  imageUrl?: string | null
+}
+
+/** CreativeWork for a free resource detail page (pages/free.md). */
+export function freeResourceJsonLd(r: FreeResourceJsonLdInput): JsonLdMeta {
+  return ld({
+    '@type': 'CreativeWork',
+    name: r.name,
+    description: r.description || undefined,
+    url: `${SITE_ORIGIN}/free/${r.slug}`,
+    image: r.imageUrl ? absoluteUrl(r.imageUrl) : undefined,
+    isAccessibleForFree: true,
+    publisher: BRAND_ORG,
+  })
+}
+
+export type PersonJsonLdInput = {
+  name: string
+  jobTitle?: string | null
+  path: string
+  imageUrl?: string | null
+  sameAs?: readonly string[]
+  knowsAbout?: readonly string[]
+}
+
+/** Person for the Work With Me page (pages/work-with-me.md), working for the root Organization. */
+export function personJsonLd(p: PersonJsonLdInput): JsonLdMeta {
+  return ld({
+    '@type': 'Person',
+    name: p.name,
+    jobTitle: p.jobTitle || undefined,
+    url: absoluteUrl(p.path),
+    image: p.imageUrl ? absoluteUrl(p.imageUrl) : undefined,
+    sameAs: p.sameAs && p.sameAs.length > 0 ? [...new Set(p.sameAs)] : undefined,
+    worksFor: { '@type': 'Organization', '@id': `${SITE_ORIGIN}/#organization`, name: SITE_NAME },
+    knowsAbout: p.knowsAbout && p.knowsAbout.length > 0 ? [...p.knowsAbout] : undefined,
   })
 }

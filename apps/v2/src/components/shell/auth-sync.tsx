@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { mapUser, type SessionUser } from '~/lib/map-user'
+import { ACCOUNT_KEY } from '~/queries/account'
 import { SESSION_KEY } from '~/queries/session'
 
 type IdleWindow = Window & {
@@ -19,6 +20,10 @@ export function AuthSync() {
     let unsubscribe: (() => void) | undefined
 
     const apply = (next: SessionUser | null) => {
+      // A different user (or none) must never see the previous user's account data: owned badges,
+      // library, profile. Covers sign-out in another tab and a new sign-in without the sign-out button.
+      const previousId = queryClient.getQueryData<SessionUser | null>(SESSION_KEY)?.id ?? null
+      if (previousId !== (next?.id ?? null)) queryClient.removeQueries({ queryKey: ACCOUNT_KEY })
       queryClient.setQueryData(SESSION_KEY, next)
       void router.invalidate()
     }

@@ -34,6 +34,10 @@ const schema = z.object({
   SPOTIFY_CLIENT_ID: optional,
   SPOTIFY_CLIENT_SECRET: optional,
   YOUTUBE_API_KEY: optional,
+  // Work With Me recent posts. The token is read from the Supabase oauth_tokens row first (apps/api
+  // refreshes it); this env value is only the fallback. The user id defaults to `me`.
+  INSTAGRAM_ACCESS_TOKEN: optional,
+  INSTAGRAM_USER_ID: optional,
 })
 
 export type ServerEnv = z.infer<typeof schema>

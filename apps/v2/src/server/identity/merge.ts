@@ -8,20 +8,30 @@ export type MergeVisitorInput = {
   anonToken: string | null | undefined
 }
 
+/**
+ * Links unclaimed purchases (apps/api stores orders by purchaser_email only) to the user. Runs at
+ * sign-in and again whenever the account library loads, so an order paid while already signed in
+ * shows up without signing out. A filtered update: running it again changes nothing.
+ */
+export async function claimGuestEntitlements(
+  { userId, email }: { userId: string; email: string },
+  client: SupabaseClient = createSupabaseAdminClient(),
+): Promise<void> {
+  const { error } = await client
+    .from('entitlements')
+    .update({ user_id: userId })
+    .eq('purchaser_email', email.trim().toLowerCase())
+    .is('user_id', null)
+    .is('revoked_at', null)
+  if (error) throw new Error(`Failed to claim guest entitlements: ${error.message}`)
+}
+
 // Every step is a filtered update, so running it again changes nothing.
 export async function mergeVisitor(
   { userId, email, emailVerified, anonToken }: MergeVisitorInput,
   client: SupabaseClient = createSupabaseAdminClient(),
 ): Promise<void> {
-  if (emailVerified && email) {
-    const { error } = await client
-      .from('entitlements')
-      .update({ user_id: userId })
-      .eq('purchaser_email', email)
-      .is('user_id', null)
-      .is('revoked_at', null)
-    if (error) throw new Error(`Failed to claim guest entitlements: ${error.message}`)
-  }
+  if (emailVerified && email) await claimGuestEntitlements({ userId, email }, client)
 
   if (!anonToken) return
 

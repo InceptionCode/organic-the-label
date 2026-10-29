@@ -44,6 +44,12 @@ describe('parse', () => {
       description: 'desc',
       descriptionHtml: '<p>desc</p>',
       images: { edges: [{ node: image }, { node: { ...image, url: 'https://cdn.shopify.com/b.png' } }] },
+      licenseVariants: {
+        edges: [
+          { node: { id: 'v1', title: 'Default Title', availableForSale: true, price: { amount: '29.99', currencyCode: 'USD' } } },
+          { node: { id: 'v2', title: 'WAV Lease', availableForSale: false, price: { amount: '49.99', currencyCode: 'USD' } } },
+        ],
+      },
       whatsIncludedMetafield: { value: JSON.stringify([{ label: 'WAV' }]) },
     }
     const p = parseProduct(raw)
@@ -51,6 +57,10 @@ describe('parse', () => {
     expect(p.image?.url).toBe(image.url)
     expect(p.whatsIncluded).toEqual([{ label: 'WAV' }])
     expect(p.audioPreviews).toHaveLength(1)
+    expect(p.licenseOptions).toEqual([
+      { id: 'v1', title: 'Night Drive', price: { amount: '29.99', currencyCode: 'USD' }, availableForSale: true },
+      { id: 'v2', title: 'WAV Lease', price: { amount: '49.99', currencyCode: 'USD' }, availableForSale: false },
+    ])
   })
 
   test('parses a product page', () => {

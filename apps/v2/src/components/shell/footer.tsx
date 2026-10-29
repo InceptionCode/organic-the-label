@@ -3,19 +3,17 @@ import { cn } from '~/ui/cn'
 import { accountLinks, companyLinks, storeCategoryLinks, type FooterLink } from './nav-links'
 
 const focusRing =
-  'outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--surface-1)]'
-
-const headingClasses = 'text-primary font-heading text-[0.85rem] tracking-[0.1em] uppercase'
+  'outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-text)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-canvas)]'
 
 const linkClasses = cn(
-  'text-body-s text-muted hover:text-primary active:opacity-70 transition-soft w-fit rounded-sm max-sm:min-h-11 max-sm:inline-flex max-sm:items-center',
+  'text-[0.9375rem] leading-6 text-secondary hover:text-primary active:opacity-70 transition-soft w-fit rounded-sm max-sm:min-h-11 max-sm:inline-flex max-sm:items-center',
   focusRing,
 )
 
 function FooterColumn({ title, label, links }: { title: string; label: string; links: FooterLink[] }) {
   return (
-    <div className="flex flex-col gap-2 sm:gap-4">
-      <p className={headingClasses}>{title}</p>
+    <div className="flex flex-col gap-3 sm:gap-5">
+      <p className="text-label">{title}</p>
       <nav className="flex flex-col sm:gap-2.5" aria-label={label}>
         {links.map((link) => (
           <Link key={link.label} to={link.to as never} search={link.search as never} className={linkClasses}>
@@ -31,41 +29,53 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer style={{ background: 'var(--surface-1)', borderTop: '1px solid var(--border-subtle)' }}>
+    <footer className="bg-canvas border-t border-subtle overflow-hidden">
       <div className="content-container">
-        <div className="py-16 grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12">
-          <div className="col-span-2 md:col-span-1 flex flex-col gap-5">
-            <Link to="/" className={cn('flex items-center gap-2.5 rounded w-fit max-sm:min-h-11 active:opacity-80', focusRing)} aria-label="Organic Sonics">
+        <div className="pt-16 pb-12 md:pt-24 md:pb-16 grid grid-cols-2 md:grid-cols-12 gap-x-6 gap-y-12">
+          <div className="col-span-2 md:col-span-4 lg:col-span-5 flex flex-col gap-5">
+            <Link
+              to="/"
+              className={cn('flex items-center gap-2.5 rounded-sm w-fit max-sm:min-h-11 active:opacity-80', focusRing)}
+              aria-label="Organic Sonics home"
+            >
               <img
                 src="/brand-assets/organic-sonics-logo.png"
                 alt=""
-                width={28}
-                height={28}
+                width={32}
+                height={32}
                 loading="lazy"
-                className="object-contain opacity-90 size-7"
+                className="object-contain size-8"
               />
-              <span className="text-primary font-heading text-[1.1rem] tracking-[0.05em]">ORGANIC SONICS</span>
+              <span className="text-primary font-heading text-[1.375rem] leading-none tracking-[0.05em] pt-0.5">ORGANIC SONICS</span>
             </Link>
-            <p className="text-body-s text-muted max-w-[220px] leading-relaxed">
+            <p className="text-body-m text-muted max-w-[34ch]">
               Premium tools for modern producers. Beats, kits, and sound design for late-night sessions.
             </p>
           </div>
 
-          <FooterColumn title="Store" label="Store categories" links={storeCategoryLinks} />
-          <FooterColumn title="Company" label="Company links" links={companyLinks} />
-          <FooterColumn title="Account" label="Account links" links={accountLinks} />
+          <div className="col-span-1 md:col-span-3 lg:col-span-3">
+            <FooterColumn title="Store" label="Store categories" links={storeCategoryLinks} />
+          </div>
+          <div className="col-span-1 md:col-span-3 lg:col-span-2">
+            <FooterColumn title="Company" label="Company links" links={companyLinks} />
+          </div>
+          <div className="col-span-2 md:col-span-2 lg:col-span-2">
+            <FooterColumn title="Account" label="Account links" links={accountLinks} />
+          </div>
         </div>
 
-        <div
-          className="py-5 flex flex-col sm:flex-row items-center justify-between gap-3"
-          style={{ borderTop: '1px solid var(--border-subtle)' }}
-        >
-          <p className="text-caption text-muted">© {year} Organic Sonics. All rights reserved.</p>
-          <p className="text-caption" style={{ color: 'var(--accent-secondary)' }}>
-            Made for producers, by producers.
-          </p>
+        <div className="py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-subtle">
+          <p className="text-label">© {year} Organic Sonics. All rights reserved.</p>
+          <p className="text-label">Made for producers, by producers.</p>
         </div>
       </div>
+
+      <p
+        aria-hidden
+        className="select-none pointer-events-none whitespace-nowrap text-center font-heading leading-[0.78] tracking-[0.01em] text-[19.8vw] translate-y-[0.1em] text-[color:color-mix(in_srgb,var(--text-primary)_7%,transparent)]"
+      >
+        ORGANIC SONICS
+      </p>
     </footer>
   )
 }

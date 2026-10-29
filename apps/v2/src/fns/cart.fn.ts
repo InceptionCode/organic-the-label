@@ -3,91 +3,64 @@ import { deleteCookie, getCookie, getRequestHeader, setCookie } from '@tanstack/
 import * as cartService from '~/server/shopify/cart'
 import {
   addToCartInputSchema,
+  CART_UNAVAILABLE_MESSAGE,
   removeCartLinesInputSchema,
-  updateCartLinesInputSchema,
+  updateCartLineInputSchema,
+  type CartOutcome,
   type CartResult,
 } from '~/server/shopify/types'
 import { toSafeError } from './errors'
 
+// Same name as v1 so carts started on v1 survive the cutover on the same domain.
 const CART_COOKIE = 'cartId'
-const EMPTY: CartResult = { cart: null, userErrors: [] }
-
-function writeCartCookie(cartId: string) {
-  setCookie(CART_COOKIE, cartId, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-  })
-}
+// Shopify carts expire after about 10 days of inactivity; a null cart clears the cookie either way.
+const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 14
 
 function buyerIp(): string | undefined {
   const forwarded = getRequestHeader('x-forwarded-for')?.split(',')[0]?.trim()
   return forwarded || getRequestHeader('x-real-ip') || undefined
 }
 
-async function run(scope: string, fn: () => Promise<CartResult>): Promise<CartResult> {
+async function run(scope: string, fn: (cartId: string | undefined) => Promise<CartOutcome>): Promise<CartResult> {
+  let outcome: CartOutcome
   try {
-    return await fn()
+    outcome = await fn(getCookie(CART_COOKIE))
   } catch (error) {
-    throw toSafeError(`cart.${scope}`, 'Your cart could not be updated. Please try again.', error)
+    throw toSafeError(`cart.${scope}`, CART_UNAVAILABLE_MESSAGE, error)
   }
+  const { cookie } = outcome
+  if (cookie === 'clear') {
+    deleteCookie(CART_COOKIE, { path: '/' })
+  } else if (cookie !== 'keep') {
+    setCookie(CART_COOKIE, cookie.set, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: CART_COOKIE_MAX_AGE,
+    })
+  }
+  return outcome.result
 }
 
 export const getCartFn = createServerFn({ method: 'GET' }).handler(() =>
-  run('get', async () => {
-    const cartId = getCookie(CART_COOKIE)
-    if (!cartId) return EMPTY
-    const result = await cartService.getCart(cartId, { buyerIp: buyerIp() })
-    // Completed or expired carts come back null; drop the stale cookie.
-    if (!result.cart) deleteCookie(CART_COOKIE, { path: '/' })
-    return result
-  }),
+  run('get', (cartId) => cartService.loadCart(cartId, { buyerIp: buyerIp() })),
 )
 
 export const addToCartFn = createServerFn({ method: 'POST' })
   .validator(addToCartInputSchema)
   .handler(({ data }) =>
-    run('add', async () => {
-      const opts = { buyerIp: buyerIp() }
-      const lines = [{ merchandiseId: data.variantId, quantity: data.quantity }]
-      const cartId = getCookie(CART_COOKIE)
-
-      if (cartId) {
-        const result = await cartService.addLines(cartId, lines, opts)
-        if (result.cart && result.cart.id !== cartId) {
-          // Shopify answers a stale cartId with a brand new cart plus a cartId userError.
-          writeCartCookie(result.cart.id)
-          return { cart: result.cart, userErrors: result.userErrors.filter((e) => e.field?.[0] !== 'cartId') }
-        }
-        if (result.cart) return result
-        // No cart back means either bad lines (cart still exists) or a converted/expired cart.
-        const existing = await cartService.getCart(cartId, opts)
-        if (existing.cart) return { cart: existing.cart, userErrors: result.userErrors }
-      }
-
-      const created = await cartService.createCart(lines, opts)
-      if (created.cart) writeCartCookie(created.cart.id)
-      return created
-    }),
+    run('add', (cartId) =>
+      cartService.addToCart(cartId, [{ merchandiseId: data.variantId, quantity: data.quantity }], { buyerIp: buyerIp() }),
+    ),
   )
 
-export const updateCartLinesFn = createServerFn({ method: 'POST' })
-  .validator(updateCartLinesInputSchema)
+export const updateCartLineFn = createServerFn({ method: 'POST' })
+  .validator(updateCartLineInputSchema)
   .handler(({ data }) =>
-    run('update', async () => {
-      const cartId = getCookie(CART_COOKIE)
-      if (!cartId) return EMPTY
-      return cartService.updateLines(cartId, data.lines, { buyerIp: buyerIp() })
-    }),
+    run('update', (cartId) => cartService.updateCartLine(cartId, data.lineId, data.quantity, { buyerIp: buyerIp() })),
   )
 
 export const removeCartLinesFn = createServerFn({ method: 'POST' })
   .validator(removeCartLinesInputSchema)
-  .handler(({ data }) =>
-    run('remove', async () => {
-      const cartId = getCookie(CART_COOKIE)
-      if (!cartId) return EMPTY
-      return cartService.removeLines(cartId, data.lineIds, { buyerIp: buyerIp() })
-    }),
-  )
+  .handler(({ data }) => run('remove', (cartId) => cartService.removeCartLines(cartId, data.lineIds, { buyerIp: buyerIp() })))

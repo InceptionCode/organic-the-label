@@ -15,18 +15,21 @@ import {
   type ProductsListVars,
 } from '~/server/shopify/queries'
 import type { Product, ProductPage, ProductSitemapEntry, ProductSummary } from '~/server/shopify/types'
+import {
+  buildShopifyProductQuery,
+  normalizeListParams,
+  stableListKey,
+  type ListProductsParams,
+  type StoreSort,
+} from '~/lib/product-list-params'
+import { sanitizeDescriptionHtml } from './sanitize-html'
 
+export type { ListProductsParams }
+
+/** v1 STORE_PAGE_COUNT. */
 export const PRODUCT_PAGE_SIZE = 24
 
-export type ProductSort = 'newest' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc'
-
-export type ListProductsParams = {
-  sort?: ProductSort
-  category?: string | null
-  tags?: string[]
-  exclusive?: boolean
-  after?: string | null
-}
+export type ProductSort = StoreSort
 
 const SORTS: Record<ProductSort, { sortKey: ProductSortKey; reverse: boolean }> = {
   newest: { sortKey: 'CREATED_AT', reverse: true },
@@ -36,50 +39,26 @@ const SORTS: Record<ProductSort, { sortKey: ProductSortKey; reverse: boolean }> 
   'name-desc': { sortKey: 'TITLE', reverse: true },
 }
 
-function normalizeListParams(params: ListProductsParams) {
-  const category = params.category?.trim().toLowerCase()
-  return {
-    sort: params.sort ?? 'newest',
-    category: category && category !== 'all' ? category : null,
-    tags: [...new Set((params.tags ?? []).map((t) => t.trim().toLowerCase()).filter(Boolean))].sort(),
-    exclusive: params.exclusive === true,
-    after: params.after ?? null,
-  }
-}
-
-function buildSearchQuery(p: ReturnType<typeof normalizeListParams>): string | null {
-  const parts: string[] = []
-  if (p.category) parts.push(`product_type:${JSON.stringify(p.category)}`)
-  if (p.tags.length > 0) parts.push(`(${p.tags.map((t) => `tag:${JSON.stringify(t)}`).join(' OR ')})`)
-  if (p.exclusive) parts.push('tag:exclusive')
-  return parts.length > 0 ? parts.join(' AND ') : null
-}
-
 export async function getProduct(handle: string): Promise<Product | null> {
   return getCached(keys.productByHandle(handle), ttl.product, async () => {
     const data = await shopifyQuery<ProductByHandleData, ProductByHandleVars>(PRODUCT_BY_HANDLE_QUERY, { handle })
-    return data.product ? parseProduct(data.product) : null
+    if (!data.product) return null
+    const product = parseProduct(data.product)
+    return { ...product, descriptionHtml: sanitizeDescriptionHtml(product.descriptionHtml) }
   })
 }
 
 export async function listProducts(params: ListProductsParams = {}): Promise<ProductPage> {
   const p = normalizeListParams(params)
-  const sig = [
-    `sort=${p.sort}`,
-    `category=${p.category ?? ''}`,
-    `tags=${p.tags.join(',')}`,
-    `exclusive=${p.exclusive}`,
-    `after=${p.after ?? ''}`,
-  ].join('|')
 
   return getCached(
-    keys.productList(sig),
+    keys.productList(stableListKey(p)),
     ttl.productList,
     async () => {
       const data = await shopifyQuery<ProductsListData, ProductsListVars>(PRODUCTS_LIST_QUERY, {
         first: PRODUCT_PAGE_SIZE,
         after: p.after,
-        query: buildSearchQuery(p),
+        query: buildShopifyProductQuery(p),
         ...SORTS[p.sort],
       })
       return parseProductPage(data)
@@ -94,19 +73,6 @@ export async function getNewestProducts(n: number): Promise<ProductSummary[]> {
       first: n,
       sortKey: 'CREATED_AT',
       reverse: true,
-    })
-    return parseProductPage(data).products
-  })
-}
-
-export async function searchProducts(q: string, first = 10): Promise<ProductSummary[]> {
-  const term = q.trim()
-  if (!term) return []
-  return getCached(keys.productSearch(term), ttl.productSearch, async () => {
-    const data = await shopifyQuery<ProductsListData, ProductsListVars>(PRODUCTS_LIST_QUERY, {
-      first,
-      query: term,
-      sortKey: 'RELEVANCE',
     })
     return parseProductPage(data).products
   })

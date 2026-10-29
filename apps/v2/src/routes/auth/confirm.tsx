@@ -1,7 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { AuthCard } from '~/components/auth/auth-card'
 import { confirmOtpFn } from '~/fns/auth.fn'
 import { confirmSearchSchema } from '~/lib/auth-schemas'
 import { seo } from '~/seo/head'
+import { ButtonLink } from '~/ui/button'
 
 export const Route = createFileRoute('/auth/confirm')({
   validateSearch: (search) => {
@@ -26,11 +28,13 @@ export const Route = createFileRoute('/auth/confirm')({
 
 function ConfirmError() {
   return (
-    <section className="content-container section-wrapper flex max-w-md flex-col gap-4">
-      <h1 className="text-h2">This link has expired or was already used</h1>
-      <p>
-        <Link to="/login" className="link">Go to log in</Link> to request a new one.
+    <AuthCard eyebrow="Email link" title="LINK EXPIRED">
+      <p className="text-body-m text-secondary">
+        This link has expired or was already used. Sign in to request a new one.
       </p>
-    </section>
+      <ButtonLink to="/login" className="w-full">
+        Go to sign in
+      </ButtonLink>
+    </AuthCard>
   )
 }

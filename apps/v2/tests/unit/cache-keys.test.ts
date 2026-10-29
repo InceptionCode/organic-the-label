@@ -11,16 +11,29 @@ describe('cache keys', () => {
     keys.productsNewest(5),
     keys.productsSitemap(),
     keys.productSearch('Drums'),
+    keys.productsByIds('abc123'),
     keys.compositionsList(),
     keys.compositionBySlug('song'),
     keys.compositionsSitemap(),
+    keys.compositionsRecent(4),
+    keys.compositionsSearch('808 drums'),
     keys.freeResourcesList(),
     keys.freeResourceBySlug('kit'),
     keys.freeResourcesSitemap(),
+    keys.compositionsListBy('range=all|sort=newest|tags=-|search=-'),
+    keys.freeResourceFeatured(),
   ]
 
+  // TTL-only keys, deliberately outside the apps/api busting contract (pages/work-with-me.md).
+  const ttlOnly: string[] = [keys.workWithMeSpotify(), keys.workWithMeYoutube(), keys.workWithMeInstagram()]
+
   test('every key builder is covered by the samples', () => {
-    expect(samples).toHaveLength(Object.keys(keys).length)
+    expect(samples.length + ttlOnly.length).toBe(Object.keys(keys).length)
+  })
+
+  test.each(ttlOnly)('%s is TTL only (no busted prefix)', (key) => {
+    expect(key.startsWith('work-with-me:')).toBe(true)
+    expect(BUSTED.some((re) => re.test(key))).toBe(false)
   })
 
   test.each(samples)('%s matches a busted prefix', (key) => {
@@ -34,8 +47,8 @@ describe('cache keys', () => {
   })
 
   test('TTLs', () => {
-    expect(ttl.product).toBe(3600)
-    expect(ttl.productList).toBe(3600)
+    expect(ttl.product).toBe(2_592_000)
+    expect(ttl.productList).toBe(900)
     expect(ttl.productSearch).toBe(300)
   })
 })

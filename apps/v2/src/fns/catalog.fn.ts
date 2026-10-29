@@ -4,7 +4,6 @@ import {
   getNewestProductsInputSchema,
   getProductInputSchema,
   listProductsInputSchema,
-  searchProductsInputSchema,
 } from '~/server/shopify/types'
 import { toSafeError } from './errors'
 
@@ -34,8 +33,3 @@ export const listProductsFn = createServerFn({ method: 'GET' })
     run('listProducts', () => catalog.listProducts(data)),
   )
 
-export const searchProductsFn = createServerFn({ method: 'GET' })
-  .validator(searchProductsInputSchema)
-  .handler(({ data }) =>
-    run('searchProducts', () => catalog.searchProducts(data.q), 'Search is unavailable right now.'),
-  )

@@ -51,6 +51,9 @@ export function CloseIcon({ className }: { className?: string }) {
 export const closeButtonClasses =
   'inline-flex size-11 items-center justify-center rounded-full border border-subtle bg-surface-1 text-primary shadow-xs transition-soft hover:cursor-pointer hover:bg-surface-2 active:scale-[0.97] outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-canvas)]'
 
+export const flatCloseButtonClasses =
+  'inline-flex size-11 items-center justify-center rounded-[2px] text-secondary transition-[color,background-color,transform] duration-150 hover:cursor-pointer hover:bg-[color:color-mix(in_srgb,var(--text-primary)_6%,transparent)] hover:text-[color:var(--text-primary)] active:scale-[0.94] touch-manipulation outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]'
+
 type DialogProps = {
   open: boolean
   onClose: () => void
@@ -73,12 +76,12 @@ export function Dialog({ open, onClose, title, hideTitle, className, children }:
       aria-labelledby={titleId}
       onClick={onBackdropClick}
       className={cn(
-        'os-dialog m-auto w-[min(32rem,calc(100%-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-lg border border-strong bg-surface-2 p-0 text-primary shadow-lg-premium',
+        'os-dialog m-auto w-[min(32rem,calc(100%-2rem))] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain rounded-[2px] border border-[color:var(--border-default)] bg-surface-1 p-0 text-primary shadow-float',
         className,
       )}
     >
       <div className="relative p-6">
-        <button type="button" aria-label="Close dialog" onClick={() => ref.current?.close()} className={cn(closeButtonClasses, 'absolute right-3 top-3')}>
+        <button type="button" aria-label="Close dialog" onClick={() => ref.current?.close()} className={cn(flatCloseButtonClasses, 'absolute right-3 top-3')}>
           <CloseIcon />
         </button>
         <h2 id={titleId} className={cn('text-h3 text-primary pr-12 mb-4', hideTitle && 'sr-only')}>

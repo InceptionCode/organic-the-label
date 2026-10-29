@@ -21,9 +21,9 @@ uniform float uGlow;
 
 // Brand palette: deep black base → red glow → beige warmth
 vec3 palette(float t) {
-  vec3 darkBase  = vec3(0.09, 0.09, 0.09);   // #171717 near-black
-  vec3 redAccent = vec3(0.875, 0.239, 0.165); // #E03D2A brand red
-  vec3 beige     = vec3(0.831, 0.769, 0.659); // #D4C4A8 brand beige
+  vec3 darkBase  = vec3(0.027, 0.027, 0.027); // #070707 ink
+  vec3 redAccent = vec3(0.702, 0.098, 0.098); // #B31919 brand red
+  vec3 beige     = vec3(0.851, 0.780, 0.655); // #D9C7A7 brand sand
   float m = 0.5 + 0.5 * sin(t * 0.7);
   // Shift from dark → red at peak, then toward beige at extreme
   vec3 warm = mix(darkBase, redAccent, smoothstep(0.0, 0.65, m));
@@ -52,7 +52,7 @@ void main() {
   float dist = abs(y - waveLine);
   float g = glowFn(dist, uGlow);
 
-  vec3 bg  = vec3(0.09, 0.09, 0.09);
+  vec3 bg  = vec3(0.027, 0.027, 0.027);
   vec3 col = palette(waveLine + y * 0.6);
   col = mix(bg, col, g * 1.2);
 
@@ -120,6 +120,7 @@ export default function AuroraWaves({
 
     const start = performance.now();
     let frame = 0;
+    let onScreen = false;
 
     const loop = () => {
       program.uniforms.uTime.value = (performance.now() - start) / 1000;
@@ -127,10 +128,22 @@ export default function AuroraWaves({
       frame = requestAnimationFrame(loop);
     };
 
-    loop();
+    // Render only while on screen and the tab is visible.
+    const run = () => {
+      cancelAnimationFrame(frame);
+      if (onScreen && document.visibilityState === "visible") loop();
+    };
+    const io = new IntersectionObserver((entries) => {
+      onScreen = entries.some((e) => e.isIntersecting);
+      run();
+    });
+    io.observe(canvas);
+    document.addEventListener("visibilitychange", run);
 
     return () => {
       cancelAnimationFrame(frame);
+      io.disconnect();
+      document.removeEventListener("visibilitychange", run);
       window.removeEventListener("resize", resize);
     };
   }, [speed, glow, resolutionScale]);

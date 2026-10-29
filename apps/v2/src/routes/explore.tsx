@@ -1,35 +1,44 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { SignOutButton } from '~/components/auth/sign-out-button'
-import { useSession } from '~/lib/use-session'
+import { createFileRoute } from '@tanstack/react-router'
+import { ExploreShell } from '~/components/explore/explore-shell'
+import { accountQueries } from '~/queries/account'
+import { exploreQueries } from '~/queries/explore'
+import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 
-// Placeholder landing for every sign-in completion until the explore page is built in phase 05.
+// Landing page for every sign-in completion, and indexable: the SSR render is the anonymous
+// default with real catalog content (pages/explore.md, decided 2026-10-26). Each source is
+// optional; a failed or empty one hides only its own section and the page stays 200.
 export const Route = createFileRoute('/explore')({
+  codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  loader: async ({ context }) => {
+    const qc = context.queryClient
+    const [products, compositions, freeResources] = await Promise.allSettled([
+      qc.query(productQueries.list({ sort: 'newest' })),
+      qc.query(exploreQueries.recentCompositions()),
+      qc.query(exploreQueries.freeResources()),
+      // Signed in only: the profile's display_name for the header greeting. Crawlers never send a
+      // session, so their HTML stays the anonymous default.
+      context.session ? qc.query(accountQueries.summary()) : null,
+    ])
+    return {
+      available: {
+        products: products.status === 'fulfilled' && products.value.products.length > 0,
+        compositions: compositions.status === 'fulfilled' && compositions.value.length > 0,
+        freeResources: freeResources.status === 'fulfilled' && freeResources.value.length > 0,
+      },
+    }
+  },
   head: () =>
     seo({
       title: 'Explore',
       description:
-        'Personalized discovery from Organic Sonics: producer news, new kits and packs, community highlights, and free resources picked for you.',
+        'Explore what is new at Organic Sonics: the latest kits and packs, free loops you can download with their terms, and free resources for producers.',
       path: '/explore',
     }),
-  component: Explore,
+  component: ExplorePage,
 })
 
-function Explore() {
-  const session = useSession()
-  return (
-    <section className="content-container section-wrapper flex flex-col gap-4">
-      <h1 className="text-h2">Explore</h1>
-      {session ? (
-        <>
-          <p data-testid="session-user">Signed in as {session.email}</p>
-          <SignOutButton />
-        </>
-      ) : (
-        <p data-testid="session-user">
-          Not signed in. <Link to="/login" className="link">Log in</Link>
-        </p>
-      )}
-    </section>
-  )
+function ExplorePage() {
+  const { available } = Route.useLoaderData()
+  return <ExploreShell available={available} />
 }

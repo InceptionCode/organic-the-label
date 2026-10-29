@@ -2,7 +2,8 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import { nitroV2Plugin } from '@tanstack/nitro-v2-vite-plugin'
-import viteReact from '@vitejs/plugin-react'
+import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
@@ -12,6 +13,7 @@ export default defineConfig({
     // Stable Nitro v2 engine (Nitro v3 is still beta); writes .vercel/output on build.
     nitroV2Plugin({ preset: 'vercel', compatibilityDate: '2026-10-18' }),
     viteReact(),
+    babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
   resolve: {

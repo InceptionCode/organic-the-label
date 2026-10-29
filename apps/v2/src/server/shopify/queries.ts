@@ -6,7 +6,7 @@ export type RawImage = { url: string; altText: string | null; width: number | nu
 type Edges<T> = { edges: { node: T }[] }
 type RawPageInfo = { hasNextPage: boolean; endCursor: string | null }
 
-const PRODUCT_SUMMARY_FIELDS = `
+export const PRODUCT_SUMMARY_FIELDS = `
   id
   handle
   title
@@ -34,12 +34,19 @@ export type RawProductSummary = {
   audioPreviewMetafield: { value: string | null } | null
 }
 
+export type RawVariant = { id: string; title: string; availableForSale: boolean; price: RawMoney }
+
 export type RawProduct = RawProductSummary & {
   description: string
   descriptionHtml: string
   images: Edges<RawImage>
+  /** Every variant (license tiers), separate from the summary's `variants(first: 1)`. */
+  licenseVariants: Edges<RawVariant>
   whatsIncludedMetafield: { value: string | null } | null
 }
+
+/** Upper bound on license variants per product; Shopify's default variant limit is 100. */
+export const LICENSE_VARIANTS_LIMIT = 25
 
 export const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
@@ -48,6 +55,9 @@ export const PRODUCT_BY_HANDLE_QUERY = `
       description
       descriptionHtml
       images(first: 10) { edges { node { url altText width height } } }
+      licenseVariants: variants(first: ${LICENSE_VARIANTS_LIMIT}) {
+        edges { node { id title availableForSale price { amount currencyCode } } }
+      }
       whatsIncludedMetafield: metafield(namespace: "custom", key: "whats_included") { value }
     }
   }

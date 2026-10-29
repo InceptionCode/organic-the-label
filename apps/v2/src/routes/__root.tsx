@@ -1,13 +1,15 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import { noop } from '@tanstack/react-query'
-import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useLocation } from '@tanstack/react-router'
 import type { RouterContext } from '~/router'
 import { AuthSync } from '~/components/shell/auth-sync'
 import { CartDrawerProvider } from '~/components/shell/cart-drawer-provider'
 import { Footer } from '~/components/shell/footer'
 import { Navbar } from '~/components/shell/navbar'
 import { SkipLink } from '~/components/shell/skip-link'
+import { ErrorPage } from '~/components/errors/error-page'
 import { NotFoundPage } from '~/components/errors/not-found-page'
+import { useMarkHydrated } from '~/lib/use-client-nav-focus'
 import { productQueries } from '~/queries/products'
 import { sessionQueryOptions } from '~/queries/session'
 import { seo } from '~/seo/head'
@@ -20,6 +22,10 @@ import bebasLatinWoff2 from '@fontsource/bebas-neue/files/bebas-neue-latin-400-n
 const StickyProductBar = lazy(() =>
   import('~/components/shell/sticky-product-bar').then((m) => ({ default: m.StickyProductBar })),
 )
+
+// Hidden on the store and product pages: the grid already lists every product, and on a product page the
+// bar repeats the product being viewed (and covers the tracklist). It shows on every other page.
+const hidesStickyBar = (pathname: string) => pathname === '/store' || pathname.startsWith('/store/')
 
 const NOT_FOUND_DESCRIPTION =
   'The page you were looking for could not be found. Head back to the Organic Sonics home page or browse the store for kits and packs.'
@@ -46,12 +52,13 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
   head: ({ matches }) => {
     const notFound = matches.some((m) => m.status === 'notFound' || m._notFound)
+    const failed = !notFound && matches.some((m) => m.status === 'error')
     const ogImage = absoluteUrl(DEFAULT_OG_IMAGE.url)
     return {
       meta: [
         { charSet: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-        { name: 'theme-color', content: '#171717' },
+        { name: 'theme-color', content: '#070707' },
         { title: SITE_NAME },
         { name: 'description', content: DEFAULT_DESCRIPTION },
         { property: 'og:site_name', content: SITE_NAME },
@@ -59,6 +66,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:image', content: ogImage },
         ...(notFound ? seo({ title: 'Page not found', description: NOT_FOUND_DESCRIPTION, path: '/', noindex: true }).meta : []),
+        ...(failed ? seo({ title: 'Something went wrong', description: DEFAULT_DESCRIPTION, path: '/', noindex: true }).meta : []),
         organizationJsonLd(),
         websiteJsonLd(),
       ],
@@ -72,6 +80,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     }
   },
   notFoundComponent: NotFoundPage,
+  errorComponent: ErrorPage,
   shellComponent: RootDocument,
   component: RootLayout,
 })
@@ -92,6 +101,8 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 
 function RootLayout() {
+  useMarkHydrated()
+  const showStickyBar = useLocation({ select: (l) => !hidesStickyBar(l.pathname) })
   return (
     <CartDrawerProvider>
       <SkipLink />
@@ -100,9 +111,11 @@ function RootLayout() {
         <Outlet />
       </main>
       <Footer />
-      <Suspense fallback={null}>
-        <StickyProductBar />
-      </Suspense>
+      {showStickyBar && (
+        <Suspense fallback={null}>
+          <StickyProductBar />
+        </Suspense>
+      )}
       <AuthSync />
     </CartDrawerProvider>
   )

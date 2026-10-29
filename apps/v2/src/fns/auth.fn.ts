@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { redirect } from '@tanstack/react-router'
-import { getCookie, setResponseStatus } from '@tanstack/react-start/server'
+import { deleteCookie, getCookie, setCookie, setResponseStatus } from '@tanstack/react-start/server'
 import type { AuthError, User } from '@supabase/supabase-js'
 import {
   confirmSearchSchema,
@@ -11,13 +11,21 @@ import {
   updatePasswordSchema,
 } from '~/lib/auth-schemas'
 import { mapUser } from '~/lib/map-user'
+import { isRecoverySession } from '~/lib/recovery'
 import { safeNext } from '~/lib/safe-next'
 import { env } from '~/server/env'
 import { bootstrapUser } from '~/server/identity/bootstrap'
+import {
+  RECOVERY_COOKIE,
+  RECOVERY_COOKIE_MAX_AGE,
+  createRecoveryCookieValue,
+  isValidRecoveryCookie,
+} from '~/server/identity/recovery-cookie'
 import { ANON_COOKIE } from '~/server/identity/visitor'
 import { createSupabasePublicClient, createSupabaseServerClient } from '~/server/supabase/server'
 import { tanstackCookieAdapter } from './cookies'
 import { requireUser } from './middleware/require-user'
+import { supabaseSession } from './middleware/session'
 
 const confirmUrl = () => `${env.SITE_URL}/auth/confirm`
 
@@ -110,16 +118,35 @@ export const requestPasswordResetFn = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
+// A recovery session: the signed pw_recovery cookie set by /auth/confirm for this user, or an amr
+// 'recovery' entry if Supabase records one.
+function hasRecoveryProof(claims: { sub: string; amr?: unknown } | null): boolean {
+  if (!claims) return false
+  return (
+    isValidRecoveryCookie(getCookie(RECOVERY_COOKIE), claims.sub, env.SUPABASE_SECRET_KEY) || isRecoverySession(claims)
+  )
+}
+
+// UX check for the /login/reset-password guard; updatePasswordFn enforces the same rule.
+export const isRecoverySessionFn = createServerFn({ method: 'GET' })
+  .middleware([supabaseSession])
+  .handler(({ context }) => hasRecoveryProof(context.claims))
+
 export const updatePasswordFn = createServerFn({ method: 'POST' })
   .middleware([requireUser])
   .validator(updatePasswordSchema)
-  .handler(async ({ data }): Promise<AuthResult> => {
+  .handler(async ({ data, context }): Promise<AuthResult> => {
+    if (!hasRecoveryProof(context.claims)) {
+      setResponseStatus(403)
+      return { ok: false, error: 'This reset link has expired. Request a new one from the sign in page.' }
+    }
     const supabase = createSupabaseServerClient(tanstackCookieAdapter())
     const { error } = await supabase.auth.updateUser({ password: data.password })
     if (error) {
       const message = error.code === 'same_password' || error.code === 'weak_password' ? error.message : ''
       return authFailure('updatePassword', error, message || 'We could not update your password. Please try again.')
     }
+    deleteCookie(RECOVERY_COOKIE, { path: '/' })
     await supabase.auth.signOut()
     return { ok: true }
   })
@@ -146,5 +173,15 @@ export const confirmOtpFn = createServerFn({ method: 'POST' })
       return { ok: false as const }
     }
     await bootstrapSafely(result.user)
+    if (data.type === 'recovery') {
+      setCookie(RECOVERY_COOKIE, createRecoveryCookieValue(result.user.id, env.SUPABASE_SECRET_KEY), {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: RECOVERY_COOKIE_MAX_AGE,
+      })
+      throw redirect({ href: '/login/reset-password' })
+    }
     throw redirect({ href: safeNext(data.next) })
   })

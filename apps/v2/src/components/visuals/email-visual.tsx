@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
-import type { Vec3 as OGLVec3 } from 'ogl';
+import type { Polyline as OGLPolyline, Vec3 as OGLVec3 } from 'ogl';
 import {
   BRAND_BEIGE_NORM,
   BRAND_CREAM_NORM,
@@ -193,17 +193,14 @@ export function EmailVisual({
         });
 
       // ── Polyline factory ─────────────────────────────────────────────────
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const allLines: any[] = [];
+      const allLines: OGLPolyline[] = [];
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mkLine = (pts: OGLVec3[], frag: string, color: BrandRgbNormalized, alpha: number, thickness: number): any => {
+      const mkLine = (pts: OGLVec3[], frag: string, color: BrandRgbNormalized, alpha: number, thickness: number): OGLPolyline => {
         const line = new Polyline(gl, {
           points: pts,
           fragment: frag,
           uniforms: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            uColor: { value: color as any },
+            uColor: { value: color },
             uAlpha: { value: alpha },
             uThickness: { value: thickness },
           },
@@ -236,10 +233,8 @@ export function EmailVisual({
       type RingObj = {
         pts: OGLVec3[];
         glowPts: OGLVec3[] | null;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        crisp: any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        glow: any | null;
+        crisp: OGLPolyline;
+        glow: OGLPolyline | null;
         cfg: RC;
       };
       const rings: RingObj[] = [];
@@ -272,8 +267,7 @@ export function EmailVisual({
       const sigPts: OGLVec3[] = allLiss.slice(0, SEG_LEN);
 
       // 4 stacked layers (2 on mobile) for bloom-style glow accumulation
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const SIG_LAYERS: any[] = isMobile
+      const SIG_LAYERS: OGLPolyline[] = isMobile
         ? [
           mkLine(sigPts, FRAG_SIGNAL, RED, 0.30 * glowAmount, 8.0),
           mkLine(sigPts, FRAG_SIGNAL, RED_HOT, 0.88, 1.8),
@@ -388,8 +382,8 @@ export function EmailVisual({
       cancelAnimationFrame(rafId);
       teardown?.();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Primitive props: the scene is rebuilt only if a caller actually changes one of them.
+  }, [intensity, motionSpeed, glowAmount, contourDensity, depthAmount, cameraIntensity]);
 
   return (
     <div

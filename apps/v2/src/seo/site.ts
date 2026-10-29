@@ -17,9 +17,9 @@ export const DEFAULT_OG_IMAGE = {
 
 export const LOGO_PATH = '/brand-assets/organic-sonics-logo.png'
 
-// Organization.sameAs: the brand's own profiles (confirmed by the owner 2026-10-26). The YouTube
-// handle is @juicetheprod; v1's @juiceman-theprod is wrong. No Twitter/X handle, so
-// TWITTER_HANDLE is intentionally not defined.
+// Organization.sameAs: the brand's own profiles (confirmed by the owner 2026-10-26). YouTube main
+// channel is @juicetheprod; @juiceman-theprod is the separate Shorts channel. No Twitter/X handle,
+// so TWITTER_HANDLE is intentionally not defined.
 export const SOCIAL_PROFILES: readonly string[] = [
   'https://open.spotify.com/artist/1rfSEaVxpWG8WXtL6Wj0SH',
   'https://music.apple.com/us/artist/juiceman/6788973192',

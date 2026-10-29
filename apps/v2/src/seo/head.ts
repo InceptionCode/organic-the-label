@@ -21,7 +21,8 @@ export type MetaTag =
 
 export type LinkTag = { rel: string; href: string }
 
-// Trailing "| Organic Sonics", "- Organic Sonics", "– Organic Sonics" or "— Organic Sonics".
+// Trailing brand suffix after "|", "-", an en dash (U+2013) or an em dash (U+2014). The dashes
+// are written as \u escapes so no literal em dash sits in the source.
 const BRAND_SUFFIX = new RegExp(`\\s*[|\\-\\u2013\\u2014]\\s*${SITE_NAME}\\s*$`, 'i')
 
 /** Applies `%s | Organic Sonics` once, stripping any brand suffix the caller already added. */

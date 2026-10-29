@@ -1,4 +1,4 @@
-import { createContext, lazy, Suspense, use, useCallback, useMemo, useState, type ReactNode } from 'react'
+import { createContext, lazy, Suspense, use, useState, type ReactNode } from 'react'
 
 type CartDrawerContextValue = {
   open: boolean
@@ -6,6 +6,9 @@ type CartDrawerContextValue = {
   closeCart: () => void
   preloadCart: () => void
 }
+
+/** id of the cart <dialog>, for the cart button's aria-controls. */
+export const CART_DRAWER_ID = 'cart-drawer'
 
 const CartDrawerContext = createContext<CartDrawerContextValue | null>(null)
 
@@ -15,13 +18,13 @@ const CartDrawer = lazy(() => loadCartDrawer().then((m) => ({ default: m.CartDra
 export function CartDrawerProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const openCart = useCallback(() => {
+  const openCart = () => {
     setMounted(true)
     setOpen(true)
-  }, [])
-  const closeCart = useCallback(() => setOpen(false), [])
-  const preloadCart = useCallback(() => void loadCartDrawer(), [])
-  const value = useMemo(() => ({ open, openCart, closeCart, preloadCart }), [open, openCart, closeCart, preloadCart])
+  }
+  const closeCart = () => setOpen(false)
+  const preloadCart = () => void loadCartDrawer()
+  const value = { open, openCart, closeCart, preloadCart }
 
   return (
     <CartDrawerContext value={value}>

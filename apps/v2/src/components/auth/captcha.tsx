@@ -1,22 +1,43 @@
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState, useSyncExternalStore } from 'react'
 import HCaptcha from '@hcaptcha/react-hcaptcha'
 
-// Visible checkbox hCaptcha (used on signup, matching v1). The user completes it before submitting;
-// the token is single use, so call reset() after every submit attempt.
-export function useCheckboxCaptcha() {
-  const ref = useRef<HCaptcha>(null)
-  const [token, setToken] = useState('')
+// The normal checkbox widget is 303px wide; below `sm` the auth card is narrower, so use compact.
+const SM_QUERY = '(min-width: 640px)'
+const subscribeSm = (onChange: () => void) => {
+  const media = window.matchMedia(SM_QUERY)
+  media.addEventListener('change', onChange)
+  return () => media.removeEventListener('change', onChange)
+}
+type CheckboxSize = 'normal' | 'compact'
+const useCheckboxSize = () =>
+  useSyncExternalStore<CheckboxSize>(
+    subscribeSm,
+    () => (window.matchMedia(SM_QUERY).matches ? 'normal' : 'compact'),
+    () => 'normal',
+  )
 
-  const reset = useCallback(() => {
+/** `theme` defaults to dark; pass 'light' when the widget sits on a light surface (the work-with-me sand band). */
+export function useCheckboxCaptcha({ theme = 'dark' }: { theme?: 'light' | 'dark' } = {}) {
+  const ref = useRef<HCaptcha>(null)
+  const size = useCheckboxSize()
+  // The widget remounts when its size changes (react-hcaptcha ignores prop updates), which drops its
+  // token, so a token only counts for the size it was issued under.
+  const [issued, setIssued] = useState({ size, token: '' })
+  const token = issued.size === size ? issued.token : ''
+  const setToken = (value: string) => setIssued({ size, token: value })
+
+  const reset = () => {
     ref.current?.resetCaptcha()
     setToken('')
-  }, [])
+  }
 
   const element = (
     <HCaptcha
+      key={size}
       ref={ref}
       sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
-      theme="dark"
+      theme={theme}
+      size={size}
       onVerify={(value) => setToken(value)}
       onExpire={() => setToken('')}
       onError={(code) => {
@@ -29,12 +50,10 @@ export function useCheckboxCaptcha() {
   return { element, token, reset }
 }
 
-// Invisible hCaptcha: most visitors are verified silently at submit; suspicious traffic may see a challenge.
-// Supabase Attack Protection requires a token on every auth call, including password sign-in.
 export function useInvisibleCaptcha() {
   const ref = useRef<HCaptcha>(null)
 
-  const getToken = useCallback(async (): Promise<string> => {
+  const getToken = async (): Promise<string> => {
     const captcha = ref.current
     if (!captcha) throw new Error('captcha-not-mounted')
     // Tokens are single use, so reset before each execution to always get a fresh one.
@@ -48,7 +67,7 @@ export function useInvisibleCaptcha() {
       console.error('[hcaptcha] execute failed:', code)
       throw new Error(code)
     }
-  }, [])
+  }
 
   const element = (
     <HCaptcha ref={ref} sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY} size="invisible" />

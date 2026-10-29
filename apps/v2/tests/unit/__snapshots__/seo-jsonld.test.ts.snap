@@ -124,3 +124,101 @@ exports[`JSON-LD builders compositionJsonLd: MusicComposition with audio 1`] = `
   "url": "https://organicsonics.com/compositions#late-night",
 }
 `;
+
+exports[`JSON-LD builders compositionsItemListJsonLd: one ItemList, loops nested without their own @context 1`] = `
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "item": {
+        "@type": "MusicComposition",
+        "audio": {
+          "@type": "AudioObject",
+          "contentUrl": "https://cdn.shopify.com/late-night.mp3",
+          "encodingFormat": "audio/mpeg",
+        },
+        "composer": {
+          "@type": "Organization",
+          "name": "Organic Sonics",
+          "url": "https://organicsonics.com",
+        },
+        "isAccessibleForFree": true,
+        "name": "Late Night",
+        "url": "https://organicsonics.com/compositions#late-night",
+      },
+      "position": 1,
+    },
+    {
+      "@type": "ListItem",
+      "item": {
+        "@type": "CreativeWork",
+        "creator": {
+          "@type": "Organization",
+          "name": "Organic Sonics",
+          "url": "https://organicsonics.com",
+        },
+        "isAccessibleForFree": true,
+        "name": "X",
+        "url": "https://organicsonics.com/compositions#x",
+      },
+      "position": 2,
+    },
+  ],
+  "numberOfItems": 2,
+  "url": "https://organicsonics.com/compositions",
+}
+`;
+
+exports[`JSON-LD builders freeResourceJsonLd: free CreativeWork with a publisher 1`] = `
+{
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "image": "https://organicsonics.com/free/starter.png",
+  "isAccessibleForFree": true,
+  "name": "Starter Kit",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Organic Sonics",
+    "url": "https://organicsonics.com",
+  },
+  "url": "https://organicsonics.com/free/starter-kit",
+}
+`;
+
+exports[`JSON-LD builders productJsonLd: several license variants emit an AggregateOffer 1`] = `
+{
+  "@context": "https://schema.org",
+  "@id": "https://organicsonics.com/store/night-drive#product",
+  "@type": "Product",
+  "brand": {
+    "@type": "Brand",
+    "name": "Organic Sonics",
+  },
+  "category": "drum kit",
+  "description": "A dark drum kit.",
+  "image": [
+    "https://cdn.shopify.com/a.png",
+    "https://cdn.shopify.com/b.png",
+  ],
+  "name": "Night Drive",
+  "offers": {
+    "@type": "AggregateOffer",
+    "availability": "https://schema.org/InStock",
+    "highPrice": "299.0",
+    "itemCondition": "https://schema.org/NewCondition",
+    "lowPrice": "29.99",
+    "offerCount": 3,
+    "priceCurrency": "USD",
+    "seller": {
+      "@type": "Organization",
+      "name": "Organic Sonics",
+      "url": "https://organicsonics.com",
+    },
+    "url": "https://organicsonics.com/store/night-drive",
+  },
+  "sku": "4242",
+  "url": "https://organicsonics.com/store/night-drive",
+}
+`;

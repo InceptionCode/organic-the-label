@@ -23,6 +23,8 @@ type LazyVisualProps<P extends object> = {
   poster: ReactNode
   className?: string
   props?: P
+  /** Extra media query gate, e.g. '(min-width: 768px)'. Below it the poster stays. */
+  media?: string
 }
 
 /**
@@ -30,7 +32,7 @@ type LazyVisualProps<P extends object> = {
  * viewport, the browser is idle, prefers-reduced-motion is not `reduce`, and Save-Data is off.
  * Otherwise the poster stays. The visual module is fetched only once those gates pass.
  */
-export function LazyVisual<P extends object>({ load, poster, className, props }: LazyVisualProps<P>) {
+export function LazyVisual<P extends object>({ load, poster, className, props, media }: LazyVisualProps<P>) {
   const ref = useRef<HTMLDivElement>(null)
   const [Visual] = useState(() => lazy(load))
   const [active, setActive] = useState(false)
@@ -39,6 +41,7 @@ export function LazyVisual<P extends object>({ load, poster, className, props }:
     const el = ref.current
     if (!el) return
     const motion = window.matchMedia(REDUCED_MOTION)
+    const gate = media ? window.matchMedia(media) : null
     const w = window as IdleWindow
     let idleHandle: number | undefined
     let observer: IntersectionObserver | undefined
@@ -54,7 +57,7 @@ export function LazyVisual<P extends object>({ load, poster, className, props }:
     const arm = () => {
       observer?.disconnect()
       cancelIdle()
-      if (prefersStaticVisuals()) return
+      if (prefersStaticVisuals() || (gate && !gate.matches)) return
       observer = new IntersectionObserver(
         (entries) => {
           if (!entries.some((e) => e.isIntersecting)) return
@@ -74,12 +77,14 @@ export function LazyVisual<P extends object>({ load, poster, className, props }:
 
     arm()
     motion.addEventListener('change', onMotionChange)
+    gate?.addEventListener('change', onMotionChange)
     return () => {
       motion.removeEventListener('change', onMotionChange)
+      gate?.removeEventListener('change', onMotionChange)
       observer?.disconnect()
       cancelIdle()
     }
-  }, [])
+  }, [media])
 
   return (
     <div ref={ref} className={cn('relative', className)} data-visual-state={active ? 'live' : 'poster'}>

@@ -11,14 +11,26 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as WorkWithMeRouteImport } from './routes/work-with-me'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
+import { Route as CompositionsIndexRouteImport } from './routes/compositions/index'
+import { Route as FreeIndexRouteImport } from './routes/free/index'
+import { Route as FreeSlugRouteImport } from './routes/free/$slug'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as LoginResetPasswordRouteImport } from './routes/login/reset-password'
+import { Route as StoreIndexRouteImport } from './routes/store/index'
+import { Route as StoreHandleRouteImport } from './routes/store/$handle'
+import { Route as CompositionsDownloadSlugRouteImport } from './routes/compositions/download.$slug'
+import { Route as FreeDownloadIdRouteImport } from './routes/free/download.$id'
+import { Route as ApiInstagramVideoIdRouteImport } from './routes/api/instagram/video.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,14 +41,29 @@ const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExploreRoute = ExploreRouteImport.update({
   id: '/explore',
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsletterRoute = NewsletterRouteImport.update({
+  id: '/newsletter',
+  path: '/newsletter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -49,6 +76,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkWithMeRoute = WorkWithMeRouteImport.update({
+  id: '/work-with-me',
+  path: '/work-with-me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedAccountRoute = AuthedAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -57,6 +89,21 @@ const AuthedAccountRoute = AuthedAccountRouteImport.update({
 const AuthConfirmRoute = AuthConfirmRouteImport.update({
   id: '/auth/confirm',
   path: '/auth/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompositionsIndexRoute = CompositionsIndexRouteImport.update({
+  id: '/compositions/',
+  path: '/compositions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreeIndexRoute = FreeIndexRouteImport.update({
+  id: '/free/',
+  path: '/free/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreeSlugRoute = FreeSlugRouteImport.update({
+  id: '/free/$slug',
+  path: '/free/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
@@ -69,89 +116,199 @@ const LoginResetPasswordRoute = LoginResetPasswordRouteImport.update({
   path: '/login/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StoreIndexRoute = StoreIndexRouteImport.update({
+  id: '/store/',
+  path: '/store/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreHandleRoute = StoreHandleRouteImport.update({
+  id: '/store/$handle',
+  path: '/store/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompositionsDownloadSlugRoute =
+  CompositionsDownloadSlugRouteImport.update({
+    id: '/compositions/download/$slug',
+    path: '/compositions/download/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const FreeDownloadIdRoute = FreeDownloadIdRouteImport.update({
+  id: '/free/download/$id',
+  path: '/free/download/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInstagramVideoIdRoute = ApiInstagramVideoIdRouteImport.update({
+  id: '/api/instagram/video/$id',
+  path: '/api/instagram/video/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
   '/explore': typeof ExploreRoute
+  '/newsletter': typeof NewsletterRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
+  '/store/$handle': typeof StoreHandleRoute
+  '/compositions/': typeof CompositionsIndexRoute
+  '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/store/': typeof StoreIndexRoute
+  '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
+  '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
   '/explore': typeof ExploreRoute
+  '/newsletter': typeof NewsletterRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
+  '/store/$handle': typeof StoreHandleRoute
+  '/compositions': typeof CompositionsIndexRoute
+  '/free': typeof FreeIndexRoute
   '/login': typeof LoginIndexRoute
+  '/store': typeof StoreIndexRoute
+  '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
+  '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authed': typeof AuthedRouteWithChildren
+  '/contact': typeof ContactRoute
   '/explore': typeof ExploreRoute
+  '/newsletter': typeof NewsletterRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/work-with-me': typeof WorkWithMeRoute
   '/_authed/account': typeof AuthedAccountRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
+  '/store/$handle': typeof StoreHandleRoute
+  '/compositions/': typeof CompositionsIndexRoute
+  '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
+  '/store/': typeof StoreIndexRoute
+  '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
+  '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contact'
     | '/explore'
+    | '/newsletter'
     | '/robots.txt'
+    | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/work-with-me'
     | '/account'
     | '/auth/confirm'
+    | '/free/$slug'
     | '/login/reset-password'
+    | '/store/$handle'
+    | '/compositions/'
+    | '/free/'
     | '/login/'
+    | '/store/'
+    | '/compositions/download/$slug'
+    | '/free/download/$id'
+    | '/api/instagram/video/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contact'
     | '/explore'
+    | '/newsletter'
     | '/robots.txt'
+    | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/work-with-me'
     | '/account'
     | '/auth/confirm'
+    | '/free/$slug'
     | '/login/reset-password'
+    | '/store/$handle'
+    | '/compositions'
+    | '/free'
     | '/login'
+    | '/store'
+    | '/compositions/download/$slug'
+    | '/free/download/$id'
+    | '/api/instagram/video/$id'
   id:
     | '__root__'
     | '/'
     | '/_authed'
+    | '/contact'
     | '/explore'
+    | '/newsletter'
     | '/robots.txt'
+    | '/search'
     | '/signup'
     | '/sitemap.xml'
+    | '/work-with-me'
     | '/_authed/account'
     | '/auth/confirm'
+    | '/free/$slug'
     | '/login/reset-password'
+    | '/store/$handle'
+    | '/compositions/'
+    | '/free/'
     | '/login/'
+    | '/store/'
+    | '/compositions/download/$slug'
+    | '/free/download/$id'
+    | '/api/instagram/video/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthedRoute: typeof AuthedRouteWithChildren
+  ContactRoute: typeof ContactRoute
   ExploreRoute: typeof ExploreRoute
+  NewsletterRoute: typeof NewsletterRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  WorkWithMeRoute: typeof WorkWithMeRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
+  FreeSlugRoute: typeof FreeSlugRoute
   LoginResetPasswordRoute: typeof LoginResetPasswordRoute
+  StoreHandleRoute: typeof StoreHandleRoute
+  CompositionsIndexRoute: typeof CompositionsIndexRoute
+  FreeIndexRoute: typeof FreeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
+  StoreIndexRoute: typeof StoreIndexRoute
+  CompositionsDownloadSlugRoute: typeof CompositionsDownloadSlugRoute
+  FreeDownloadIdRoute: typeof FreeDownloadIdRoute
+  ApiInstagramVideoIdRoute: typeof ApiInstagramVideoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -170,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore': {
       id: '/explore'
       path: '/explore'
@@ -177,11 +341,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/newsletter': {
+      id: '/newsletter'
+      path: '/newsletter'
+      fullPath: '/newsletter'
+      preLoaderRoute: typeof NewsletterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -198,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/work-with-me': {
+      id: '/work-with-me'
+      path: '/work-with-me'
+      fullPath: '/work-with-me'
+      preLoaderRoute: typeof WorkWithMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/account': {
       id: '/_authed/account'
       path: '/account'
@@ -212,6 +397,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compositions/': {
+      id: '/compositions/'
+      path: '/compositions'
+      fullPath: '/compositions/'
+      preLoaderRoute: typeof CompositionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free/': {
+      id: '/free/'
+      path: '/free'
+      fullPath: '/free/'
+      preLoaderRoute: typeof FreeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free/$slug': {
+      id: '/free/$slug'
+      path: '/free/$slug'
+      fullPath: '/free/$slug'
+      preLoaderRoute: typeof FreeSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -224,6 +430,41 @@ declare module '@tanstack/react-router' {
       path: '/login/reset-password'
       fullPath: '/login/reset-password'
       preLoaderRoute: typeof LoginResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/': {
+      id: '/store/'
+      path: '/store'
+      fullPath: '/store/'
+      preLoaderRoute: typeof StoreIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/$handle': {
+      id: '/store/$handle'
+      path: '/store/$handle'
+      fullPath: '/store/$handle'
+      preLoaderRoute: typeof StoreHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compositions/download/$slug': {
+      id: '/compositions/download/$slug'
+      path: '/compositions/download/$slug'
+      fullPath: '/compositions/download/$slug'
+      preLoaderRoute: typeof CompositionsDownloadSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free/download/$id': {
+      id: '/free/download/$id'
+      path: '/free/download/$id'
+      fullPath: '/free/download/$id'
+      preLoaderRoute: typeof FreeDownloadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/instagram/video/$id': {
+      id: '/api/instagram/video/$id'
+      path: '/api/instagram/video/$id'
+      fullPath: '/api/instagram/video/$id'
+      preLoaderRoute: typeof ApiInstagramVideoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -243,13 +484,25 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthedRoute: AuthedRouteWithChildren,
+  ContactRoute: ContactRoute,
   ExploreRoute: ExploreRoute,
+  NewsletterRoute: NewsletterRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  WorkWithMeRoute: WorkWithMeRoute,
   AuthConfirmRoute: AuthConfirmRoute,
+  FreeSlugRoute: FreeSlugRoute,
   LoginResetPasswordRoute: LoginResetPasswordRoute,
+  StoreHandleRoute: StoreHandleRoute,
+  CompositionsIndexRoute: CompositionsIndexRoute,
+  FreeIndexRoute: FreeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
+  StoreIndexRoute: StoreIndexRoute,
+  CompositionsDownloadSlugRoute: CompositionsDownloadSlugRoute,
+  FreeDownloadIdRoute: FreeDownloadIdRoute,
+  ApiInstagramVideoIdRoute: ApiInstagramVideoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
