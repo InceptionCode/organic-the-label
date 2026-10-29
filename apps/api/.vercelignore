@@ -1,0 +1,4 @@
+# The legacy api/index.ts entry is not used in production: the build emits a
+# Build Output API function (.vercel/output). Excluding api/ keeps Vercel from
+# also building it as a zero-config function.
+/api
