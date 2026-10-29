@@ -18,22 +18,36 @@ export type SplashEnv = {
   reducedMotion: boolean
   webdriver: boolean
   saveData: boolean
+  /** Below the md breakpoint; same query as MOBILE_FRAMES_QUERY in scrub-math (not imported, to keep the entry small). */
+  phone: boolean
+  /** Network Information API `effectiveType`; undefined where unsupported (Safari, Firefox). */
+  effectiveType: string | undefined
   userAgent: string
 }
+
+const PHONE_QUERY = '(max-width: 767px)'
+// Owner decision 2026-10-29: phones on 3G or slower skip the splash (even the light set is ~1.9 MB).
+const SLOW_CONNECTIONS = ['slow-2g', '2g', '3g']
+
+export const isSlowPhone = (env: Pick<SplashEnv, 'phone' | 'effectiveType'>) =>
+  env.phone && env.effectiveType !== undefined && SLOW_CONNECTIONS.includes(env.effectiveType)
 
 export const isSplashExcludedPath = (pathname: string) => EXCLUDED.some((re) => re.test(pathname))
 
 export const isSplashForced = (search: string) => new URLSearchParams(search).get('splash') === 'force'
 
-/** `?splash=force` always shows it (testing); otherwise once per session, never for automation or on excluded paths. */
+/**
+ * `?splash=force` always shows it (testing); otherwise once per session, never for automation, slow
+ * phones (3G or slower) or on excluded paths.
+ */
 export function shouldShowSplash(env: SplashEnv): boolean {
   if (isSplashForced(env.search)) return true
-  if (env.seen || env.reducedMotion || env.webdriver || env.saveData) return false
+  if (env.seen || env.reducedMotion || env.webdriver || env.saveData || isSlowPhone(env)) return false
   if (BOT_UA.test(env.userAgent)) return false
   return !isSplashExcludedPath(env.pathname)
 }
 
-type NetworkNavigator = Navigator & { connection?: { saveData?: boolean } }
+type NetworkNavigator = Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
 
 function readSeen(): boolean {
   try {
@@ -59,6 +73,8 @@ export function readSplashEnv(): SplashEnv {
     reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     webdriver: navigator.webdriver === true,
     saveData: (navigator as NetworkNavigator).connection?.saveData === true,
+    phone: window.matchMedia(PHONE_QUERY).matches,
+    effectiveType: (navigator as NetworkNavigator).connection?.effectiveType,
     userAgent: navigator.userAgent,
   }
 }

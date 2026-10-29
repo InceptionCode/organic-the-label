@@ -4,13 +4,13 @@ import { CONTACT_TITLE, ContactIntro } from '~/components/contact/contact-header
 import { SplitFormPage } from '~/components/forms/split-form-page'
 import { validateContactSearch } from '~/lib/contact-prefill'
 import { seo } from '~/seo/head'
-import { publicPageHeaders } from '~/server/http/cache-headers'
+import { CDN_TAG, publicPageHeaders } from '~/server/http/cache-headers'
 
 // Static page; the form is the only interactive island (pages/contact.md).
 export const Route = createFileRoute('/contact')({
   codeSplitGroupings: [['component'], ['errorComponent'], ['notFoundComponent']],
   // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
-  headers: publicPageHeaders,
+  headers: () => publicPageHeaders([CDN_TAG.products]),
   // Optional prefill (category, subject, message, order), e.g. from an owned product's "Request access".
   validateSearch: validateContactSearch,
   head: () =>

@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { productPurgeTags, purgeCdnTags } from "./cdn-purge.ts";
 
 let _redis: Redis | null = null;
 
@@ -34,22 +35,29 @@ async function scanAndDelete(pattern: string): Promise<number> {
   return deleted;
 }
 
+// Each bust clears Redis first, then asks v2 to purge the Vercel CDN tags for the same family
+// (cdn-purge.ts). The purge never throws, so a CDN failure cannot fail or retry the webhook; a Redis
+// failure still throws before the purge, exactly as before.
+
 export async function bustProductCache(handle?: string): Promise<void> {
   const redis = getRedis();
   if (!redis) {
     console.warn("[cache] Redis not configured — skipping product cache bust");
-    return;
+  } else {
+    if (handle) {
+      await redis.del(`product:handle:${handle}`);
+    }
+    await scanAndDelete("shopify:products:*");
   }
-  if (handle) {
-    await redis.del(`product:handle:${handle}`);
-  }
-  await scanAndDelete("shopify:products:*");
+  await purgeCdnTags(productPurgeTags(handle));
 }
 
 export async function bustCompositionsCache(): Promise<void> {
   await scanAndDelete("compositions:*");
+  await purgeCdnTags(["compositions"]);
 }
 
 export async function bustFreeResourcesCache(): Promise<void> {
   await scanAndDelete("free-resources:*");
+  await purgeCdnTags(["free-resources"]);
 }

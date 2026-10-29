@@ -58,15 +58,20 @@ function PostPlayer({ slide, onClose }: { slide: PostSlide | null; onClose: () =
         </h2>
         {slide ? youtube ? <YouTubeFrame slide={slide} /> : <InstagramPlayer key={slide.key} slide={slide} /> : null}
         <div className="flex items-center justify-between gap-4 px-4 py-3">
-          <a
-            href={slide?.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-md text-caption text-secondary transition-colors duration-150 hover:text-[color:var(--text-primary)] active:opacity-70 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
-          >
-            <ExternalLink className="size-3.5" aria-hidden="true" />
-            {youtube ? 'Open on YouTube' : 'Open on Instagram'}
-          </a>
+          {/* Only with a slide: an <a> without href (closed player in the SSR HTML) fails "links are crawlable". */}
+          {slide ? (
+            <a
+              href={slide.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-md text-caption text-secondary transition-colors duration-150 hover:text-[color:var(--text-primary)] active:opacity-70 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)]"
+            >
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+              {youtube ? 'Open on YouTube' : 'Open on Instagram'}
+            </a>
+          ) : (
+            <span />
+          )}
           <button type="button" aria-label="Close" onClick={() => ref.current?.close()} className={closeButtonClasses}>
             <CloseIcon className="size-4" />
           </button>

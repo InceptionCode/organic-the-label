@@ -39,6 +39,8 @@ const schema = z.object({
   // refreshes it); this env value is only the fallback. The user id defaults to `me`.
   INSTAGRAM_ACCESS_TOKEN: optional,
   INSTAGRAM_USER_ID: optional,
+  // Shared with apps/api, which signs CDN purge requests to /api/cache/purge (phase 07.8). Unset: 503.
+  CACHE_PURGE_SECRET: optional,
   // Dev-only E2E email sandbox (src/server/sandbox.ts). Refused at boot in production.
   E2E_SANDBOX: z.enum(['true', 'false']).optional(),
 })

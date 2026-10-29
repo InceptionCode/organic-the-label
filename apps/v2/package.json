@@ -27,6 +27,7 @@
     "@tanstack/react-router-ssr-query": "1.167.3",
     "@tanstack/react-start": "1.169.3",
     "@upstash/redis": "1.39.0",
+    "@vercel/functions": "3.10.1",
     "clsx": "2.1.1",
     "lucide-react": "1.59.0",
     "ogl": "1.0.11",

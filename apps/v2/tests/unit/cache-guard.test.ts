@@ -1,10 +1,13 @@
 import { describe, expect, test } from 'bun:test'
+import { isAllowedTag } from '~/server/cache/purge'
 import {
+  CDN_TAG,
   PRIVATE_NO_STORE,
   PUBLIC_PAGE_CACHE_CONTROL,
   cookieNames,
   guardCacheControl,
   isSharedCacheable,
+  productTag,
   publicPageHeaders,
   type CacheGuardInput,
 } from '~/server/http/cache-headers'
@@ -19,8 +22,18 @@ const anon: CacheGuardInput = {
 }
 
 describe('publicPageHeaders', () => {
-  test('is the shared s-maxage policy', () => {
-    expect(publicPageHeaders()).toEqual({ 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=600' })
+  test('is the shared s-maxage policy plus the Vercel cache tags', () => {
+    expect(publicPageHeaders([CDN_TAG.products, ...productTag('wave-pack')])).toEqual({
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=600',
+      'Vercel-Cache-Tag': 'products,product:wave-pack',
+    })
+  })
+  test('productTag skips handles that are not plain Shopify handles', () => {
+    expect(productTag('wave-pack')).toEqual(['product:wave-pack'])
+    for (const handle of ['Wave', 'a,b', 'a b', '', 'x'.repeat(201)]) expect(productTag(handle)).toEqual([])
+  })
+  test('every tag a page can carry passes the purge allow-list', () => {
+    for (const tag of [...Object.values(CDN_TAG), ...productTag('wave-pack')]) expect(isAllowedTag(tag)).toBe(true)
   })
 })
 

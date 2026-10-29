@@ -10,7 +10,7 @@ import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { RevealSection } from '~/ui/reveal-section'
-import { publicPageHeaders } from '~/server/http/cache-headers'
+import { CDN_TAG, publicPageHeaders } from '~/server/http/cache-headers'
 
 // Same cache entry as /store with no params (compacted to { sort: 'newest' }), so either page warms the other.
 const newest = () => productQueries.list({ sort: 'newest' })
@@ -18,7 +18,7 @@ const newest = () => productQueries.list({ sort: 'newest' })
 export const Route = createFileRoute('/')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
   // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
-  headers: publicPageHeaders,
+  headers: () => publicPageHeaders([CDN_TAG.products]),
   loader: async ({ context }) => {
     try {
       const page = await context.queryClient.query(newest())

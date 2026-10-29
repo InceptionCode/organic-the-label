@@ -11,8 +11,22 @@
 export const PUBLIC_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=600'
 export const PRIVATE_NO_STORE = 'private, no-store'
 
-/** Route `headers()` for public, anonymous-safe pages. */
-export const publicPageHeaders = () => ({ 'Cache-Control': PUBLIC_PAGE_CACHE_CONTROL })
+// Vercel CDN cache tags (phase 07.8, 00-architecture section 7). One tag per Redis key family that
+// apps/api busts on webhooks; apps/api then POSTs the same tags to /api/cache/purge, which calls
+// invalidateByTag. The purge allow-list (server/cache/purge.ts) accepts exactly these shapes. Every
+// public page carries `products`: the root loader dehydrates productQueries.newest(5) for the sticky bar.
+export const CDN_TAG = { products: 'products', compositions: 'compositions', freeResources: 'free-resources' } as const
+export type CdnTag = (typeof CDN_TAG)[keyof typeof CDN_TAG] | `product:${string}`
+
+/** Shopify handles are lowercase ASCII and hyphens; anything else gets no per-product tag (`products` still covers it). */
+export const PRODUCT_HANDLE_TAG = /^[a-z0-9][a-z0-9-]{0,199}$/
+export const productTag = (handle: string): CdnTag[] => (PRODUCT_HANDLE_TAG.test(handle) ? [`product:${handle}`] : [])
+
+/** Route `headers()` for public, anonymous-safe pages, tagged with every data family the HTML renders. */
+export const publicPageHeaders = (tags: readonly CdnTag[]) => ({
+  'Cache-Control': PUBLIC_PAGE_CACHE_CONTROL,
+  'Vercel-Cache-Tag': tags.join(','),
+})
 
 /** Paths that never get a shared cache, whatever a handler set: auth, account, search, APIs, downloads, server fns. */
 const NEVER_PUBLIC = [

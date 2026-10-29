@@ -10,9 +10,16 @@ export const getServerEnv = createServerOnlyFn(() => env)
 
 // Validate server fn calls and unsafe methods only, so cross-site page navigations
 // (search engines, inbound links) still render.
+// One exemption (phase 07.8): apps/api's server-to-server POST to /api/cache/purge carries no Origin.
+// That route authenticates with a timestamped HMAC (server/cache/purge.ts) and changes no user state.
+// Exact path, POST, non-serverFn only; the literal keeps purge.ts (node:crypto) out of this module.
+const isSignedCachePurge = (handlerType: string, method: string, pathname: string) =>
+  handlerType !== 'serverFn' && method === 'POST' && pathname === '/api/cache/purge'
+
 const csrf = createCsrfMiddleware({
-  filter: ({ handlerType, request }) =>
-    handlerType === 'serverFn' || !['GET', 'HEAD', 'OPTIONS'].includes(request.method),
+  filter: ({ handlerType, request, pathname }) =>
+    !isSignedCachePurge(handlerType, request.method, pathname) &&
+    (handlerType === 'serverFn' || !['GET', 'HEAD', 'OPTIONS'].includes(request.method)),
 })
 
 // robotsHeader runs first so even a CSRF rejection carries X-Robots-Tag on non-production hosts.

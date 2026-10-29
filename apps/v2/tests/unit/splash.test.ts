@@ -25,6 +25,8 @@ const env = (over: Partial<SplashEnv> = {}): SplashEnv => ({
   reducedMotion: false,
   webdriver: false,
   saveData: false,
+  phone: false,
+  effectiveType: undefined,
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0 Safari/537.36',
   ...over,
 })
@@ -34,6 +36,17 @@ describe('splash gate', () => {
     for (const pathname of ['/', '/store', '/store/wave-pack', '/compositions', '/work-with-me', '/search']) {
       expect(shouldShowSplash(env({ pathname }))).toBe(true)
     }
+  })
+
+  test('phones on 3G or slower skip it; desktops and unknown connections do not', () => {
+    for (const effectiveType of ['slow-2g', '2g', '3g']) {
+      expect(shouldShowSplash(env({ phone: true, effectiveType }))).toBe(false)
+      expect(shouldShowSplash(env({ phone: false, effectiveType }))).toBe(true)
+    }
+    expect(shouldShowSplash(env({ phone: true, effectiveType: '4g' }))).toBe(true)
+    // Safari and Firefox do not report a connection type: shown.
+    expect(shouldShowSplash(env({ phone: true, effectiveType: undefined }))).toBe(true)
+    expect(shouldShowSplash(env({ phone: true, effectiveType: '2g', search: '?splash=force' }))).toBe(true)
   })
 
   test('once per session', () => {

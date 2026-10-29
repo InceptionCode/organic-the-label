@@ -15,12 +15,13 @@ import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, productJsonLd } from '~/seo/jsonld'
 import { shopifyImageUrl } from '~/ui/shopify-image'
-import { publicPageHeaders } from '~/server/http/cache-headers'
+import { CDN_TAG, productTag, publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/store/$handle')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
   // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
-  headers: publicPageHeaders,
+  // Annotated so this callback does not take part in inferring the loader's types.
+  headers: ({ params }: { params: { handle: string } }) => publicPageHeaders([CDN_TAG.products, ...productTag(params.handle)]),
   loader: async ({ context, params }) => {
     const product = await context.queryClient.query(productQueries.byHandle(params.handle))
     if (!product) throw notFound()

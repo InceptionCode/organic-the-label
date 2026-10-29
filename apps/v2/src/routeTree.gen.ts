@@ -30,6 +30,7 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as LoginResetPasswordRouteImport } from './routes/login/reset-password'
 import { Route as StoreIndexRouteImport } from './routes/store/index'
 import { Route as StoreHandleRouteImport } from './routes/store/$handle'
+import { Route as ApiCachePurgeRouteImport } from './routes/api/cache/purge'
 import { Route as CompositionsDownloadSlugRouteImport } from './routes/compositions/download.$slug'
 import { Route as FreeDownloadIdRouteImport } from './routes/free/download.$id'
 import { Route as ApiInstagramVideoIdRouteImport } from './routes/api/instagram/video.$id'
@@ -139,6 +140,11 @@ const StoreHandleRoute = StoreHandleRouteImport.update({
   path: '/store/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCachePurgeRoute = ApiCachePurgeRouteImport.update({
+  id: '/api/cache/purge',
+  path: '/api/cache/purge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompositionsDownloadSlugRoute =
   CompositionsDownloadSlugRouteImport.update({
     id: '/compositions/download/$slug',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/free': typeof FreeIndexRoute
   '/login': typeof LoginIndexRoute
   '/store': typeof StoreIndexRoute
+  '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/free/'
     | '/login/'
     | '/store/'
+    | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
     | '/api/instagram/video/$id'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/free'
     | '/login'
     | '/store'
+    | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
     | '/api/instagram/video/$id'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/free/'
     | '/login/'
     | '/store/'
+    | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
     | '/api/instagram/video/$id'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   FreeIndexRoute: typeof FreeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   StoreIndexRoute: typeof StoreIndexRoute
+  ApiCachePurgeRoute: typeof ApiCachePurgeRoute
   CompositionsDownloadSlugRoute: typeof CompositionsDownloadSlugRoute
   FreeDownloadIdRoute: typeof FreeDownloadIdRoute
   ApiInstagramVideoIdRoute: typeof ApiInstagramVideoIdRoute
@@ -487,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cache/purge': {
+      id: '/api/cache/purge'
+      path: '/api/cache/purge'
+      fullPath: '/api/cache/purge'
+      preLoaderRoute: typeof ApiCachePurgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compositions/download/$slug': {
       id: '/compositions/download/$slug'
       path: '/compositions/download/$slug'
@@ -543,6 +563,7 @@ const rootRouteChildren: RootRouteChildren = {
   FreeIndexRoute: FreeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   StoreIndexRoute: StoreIndexRoute,
+  ApiCachePurgeRoute: ApiCachePurgeRoute,
   CompositionsDownloadSlugRoute: CompositionsDownloadSlugRoute,
   FreeDownloadIdRoute: FreeDownloadIdRoute,
   ApiInstagramVideoIdRoute: ApiInstagramVideoIdRoute,

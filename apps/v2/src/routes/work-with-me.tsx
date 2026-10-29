@@ -5,12 +5,12 @@ import { PERSON_SAME_AS, SERVICES } from '~/lib/work-with-me-content'
 import { workWithMeQueries } from '~/queries/work-with-me'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, personJsonLd } from '~/seo/jsonld'
-import { publicPageHeaders } from '~/server/http/cache-headers'
+import { CDN_TAG, publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/work-with-me')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
   // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
-  headers: publicPageHeaders,
+  headers: () => publicPageHeaders([CDN_TAG.products]),
   loader: async ({ context }) => {
     const qc = context.queryClient
     // The hero needs the artist; recent posts stream in after the shell. Neither ever throws.

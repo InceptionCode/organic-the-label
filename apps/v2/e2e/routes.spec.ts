@@ -89,6 +89,21 @@ test.describe('public routes @smoke', () => {
     expect(await res.text()).toContain('User-agent: *')
   })
 
+  // Phase 07.8. Locally only the headers are observable; a real purge needs a Vercel Function.
+  test('public pages carry Vercel cache tags; /api/cache/purge rejects an unsigned POST', async ({ request }) => {
+    const tagsOf = async (path: string) => (await request.get(path)).headers()['vercel-cache-tag']
+    expect(await tagsOf('/store')).toBe('products')
+    expect(await tagsOf(KNOWN_PRODUCT)).toBe('products,product:wave-pack')
+    expect(await tagsOf('/explore')).toBe('products,compositions,free-resources')
+    expect(await tagsOf('/sitemap.xml')).toBe('products,compositions,free-resources')
+
+    // Server-to-server shape: no Origin, so this also proves the CSRF exemption lets it reach the
+    // handler (a CSRF rejection would be a 403). 401 with CACHE_PURGE_SECRET set, 503 without.
+    const res = await request.post('/api/cache/purge', { data: { tags: ['products'] } })
+    expect([401, 503]).toContain(res.status())
+    expect(res.headers()['cache-control']).toBe('no-store')
+  })
+
   test('non-production responses carry X-Robots-Tag', async ({ request }) => {
     const res = await request.get('/')
     expect(res.headers()['x-robots-tag']).toContain('noindex')
