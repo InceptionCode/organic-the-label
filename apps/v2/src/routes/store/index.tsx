@@ -8,9 +8,12 @@ import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, productItemListJsonLd } from '~/seo/jsonld'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/store/')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   validateSearch: validateStoreSearch,
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {

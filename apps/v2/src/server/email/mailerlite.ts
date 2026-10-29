@@ -1,5 +1,6 @@
 import { env } from '~/server/env'
-import { EmailError } from './resend'
+import { isSandboxed, recordSandboxCall } from '~/server/sandbox'
+import { EmailError, type EmailClientOptions } from './resend'
 
 export type UpsertSubscriberInput = {
   email: string
@@ -16,8 +17,12 @@ export type UpsertSubscriberInput = {
 // https://developers.mailerlite.com/docs/subscribers.html ("Create/upsert subscriber").
 const SUBSCRIBERS_URL = 'https://connect.mailerlite.com/api/subscribers'
 
-export function createMailerLiteClient(apiKey: string | undefined) {
+export function createMailerLiteClient(apiKey: string | undefined, { sandboxed = isSandboxed }: EmailClientOptions = {}) {
   async function postSubscriber(body: Record<string, unknown>): Promise<{ id: string }> {
+    if (sandboxed()) {
+      const call = recordSandboxCall('mailerlite', body.status === 'unsubscribed' ? 'unsubscribe' : 'upsert', body)
+      return { id: `sandbox_${call.seq}` }
+    }
     if (!apiKey) throw new Error('MAILERLITE_API_KEY is not set')
 
     const res = await fetch(SUBSCRIBERS_URL, {

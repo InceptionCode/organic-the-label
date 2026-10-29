@@ -1,10 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { whenLoadedAndIdle } from '~/lib/after-load'
 import { cn } from './cn'
-
-type IdleWindow = Window & {
-  requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
-  cancelIdleCallback?: (handle: number) => void
-}
 
 type NetworkNavigator = Navigator & { connection?: { saveData?: boolean } }
 
@@ -29,7 +25,8 @@ type LazyVisualProps<P extends object> = {
 
 /**
  * Mounts a heavy WebGL/shader visual only when all hold: the element is within 200px of the
- * viewport, the browser is idle, prefers-reduced-motion is not `reduce`, and Save-Data is off.
+ * viewport, the page has finished loading and the browser is idle (so the visual never competes with
+ * the LCP resources), prefers-reduced-motion is not `reduce`, and Save-Data is off.
  * Otherwise the poster stays. The visual module is fetched only once those gates pass.
  */
 export function LazyVisual<P extends object>({ load, poster, className, props, media }: LazyVisualProps<P>) {
@@ -42,16 +39,8 @@ export function LazyVisual<P extends object>({ load, poster, className, props, m
     if (!el) return
     const motion = window.matchMedia(REDUCED_MOTION)
     const gate = media ? window.matchMedia(media) : null
-    const w = window as IdleWindow
-    let idleHandle: number | undefined
+    let cancelIdle = () => {}
     let observer: IntersectionObserver | undefined
-
-    const cancelIdle = () => {
-      if (idleHandle === undefined) return
-      if (w.cancelIdleCallback) w.cancelIdleCallback(idleHandle)
-      else window.clearTimeout(idleHandle)
-      idleHandle = undefined
-    }
 
     // Sets up the observer only; never sets state, so the initial run stays effect-safe.
     const arm = () => {
@@ -62,8 +51,7 @@ export function LazyVisual<P extends object>({ load, poster, className, props, m
         (entries) => {
           if (!entries.some((e) => e.isIntersecting)) return
           observer?.disconnect()
-          const run = () => setActive(true)
-          idleHandle = w.requestIdleCallback ? w.requestIdleCallback(run, { timeout: 2000 }) : window.setTimeout(run, 200)
+          cancelIdle = whenLoadedAndIdle(() => setActive(true))
         },
         { rootMargin: '200px' },
       )

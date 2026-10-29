@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { LOGO_UI_PATH } from '~/seo/site'
 import { cn } from '~/ui/cn'
 import { accountLinks, companyLinks, storeCategoryLinks, type FooterLink } from './nav-links'
 
@@ -39,7 +40,7 @@ export function Footer() {
               aria-label="Organic Sonics home"
             >
               <img
-                src="/brand-assets/organic-sonics-logo.png"
+                src={LOGO_UI_PATH}
                 alt=""
                 width={32}
                 height={32}

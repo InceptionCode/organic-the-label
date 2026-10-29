@@ -7,9 +7,12 @@ import { toCompositionListParams, validateCompositionSearch } from '~/lib/compos
 import { compositionQueries } from '~/queries/compositions'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, compositionsItemListJsonLd, type CompositionJsonLdInput } from '~/seo/jsonld'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/compositions/')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   validateSearch: validateCompositionSearch,
   loaderDeps: ({ search }) => search,
   loader: async ({ context, deps }) => {

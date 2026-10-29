@@ -10,6 +10,6 @@ const fake: Record<string, string> = {
   SHOPIFY_STOREFRONT_API_VERSION: '2026-01',
 }
 for (const [key, value] of Object.entries(fake)) process.env[key] = value
-for (const key of ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'RESEND_API_KEY', 'MAILERLITE_API_KEY']) {
+for (const key of ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'RESEND_API_KEY', 'MAILERLITE_API_KEY', 'E2E_SANDBOX']) {
   delete process.env[key]
 }

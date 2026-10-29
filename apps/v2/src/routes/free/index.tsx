@@ -5,9 +5,12 @@ import { FREE_DESCRIPTION, freeIndexTitle } from '~/lib/free-seo'
 import { freeResourceQueries } from '~/queries/free-resources'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, freeResourceJsonLd } from '~/seo/jsonld'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/free/')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   // A null resource is valid: the view renders v1's default starter kit copy with a 200.
   loader: async ({ context }) => ({ resource: await context.queryClient.query(freeResourceQueries.featured()) }),
   head: ({ loaderData }) => {

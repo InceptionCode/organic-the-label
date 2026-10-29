@@ -1,4 +1,5 @@
 import { env } from '~/server/env'
+import { isSandboxed, recordSandboxCall } from '~/server/sandbox'
 
 export type SendEmailInput = {
   from: string
@@ -18,8 +19,17 @@ export class EmailError extends Error {
   }
 }
 
-export function createResendClient(apiKey: string | undefined) {
+export type EmailClientOptions = {
+  /** E2E sandbox (src/server/sandbox.ts): record the call instead of sending. Defaults to the env flag. */
+  sandboxed?: () => boolean
+}
+
+export function createResendClient(apiKey: string | undefined, { sandboxed = isSandboxed }: EmailClientOptions = {}) {
   async function sendEmail(input: SendEmailInput): Promise<{ id: string }> {
+    if (sandboxed()) {
+      const call = recordSandboxCall('resend', 'send', { ...input })
+      return { id: `sandbox_${call.seq}` }
+    }
     if (!apiKey) throw new Error('RESEND_API_KEY is not set')
 
     const res = await fetch('https://api.resend.com/emails', {

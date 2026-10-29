@@ -1,4 +1,5 @@
 import { env } from '~/server/env'
+import { HCAPTCHA_TEST_TOKEN, isSandboxed } from '~/server/sandbox'
 
 // Server-side hCaptcha check for forms that do not go through Supabase Auth (contact, free resource
 // request, newsletter). Supabase verifies its own auth forms; never call this for those.
@@ -7,9 +8,16 @@ export type CaptchaResult = { ok: true } | { ok: false; reason: 'missing-token' 
 
 type SiteverifyResponse = { success: boolean; 'error-codes'?: string[] }
 
-export function createCaptchaVerifier(secret: string | undefined, fetchImpl: typeof fetch = fetch) {
+export function createCaptchaVerifier(
+  secret: string | undefined,
+  fetchImpl: typeof fetch = fetch,
+  { sandboxed = isSandboxed }: { sandboxed?: () => boolean } = {},
+) {
   return async function verifyCaptcha(token: string | null | undefined, remoteIp?: string | null): Promise<CaptchaResult> {
     if (!token) return { ok: false, reason: 'missing-token' }
+    // E2E sandbox only (never production, see src/server/sandbox.ts): hCaptcha's documented test
+    // token passes without a network call. Any other token still goes to siteverify.
+    if (token === HCAPTCHA_TEST_TOKEN && sandboxed()) return { ok: true }
     if (!secret) {
       console.error('[captcha] HCAPTCHA_SECRET_KEY is not set')
       return { ok: false, reason: 'not-configured' }

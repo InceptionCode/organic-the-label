@@ -32,7 +32,7 @@ export function CollectionHeader() {
       </div>
 
       <div className="content-container relative z-10 pb-10 pt-16 md:pb-12 lg:pb-14">
-        <h1 className="os-enter max-w-[18ch] text-display-l text-primary" style={enter(32, 0.65, 0.1)}>
+        <h1 className="os-enter-slide max-w-[18ch] text-display-l text-primary" style={enter(32, 0.65, 0)}>
           PURE ORGANIC SONICS FOR YA HEAD TOP!
         </h1>
         <p className="os-enter mt-4 text-h2 text-secondary" style={enter(20, 0.6, 0.22)}>

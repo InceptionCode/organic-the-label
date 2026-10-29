@@ -37,7 +37,7 @@ function PlacementRow({ placement, index }: { placement: EnrichedPlacement; inde
         )}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-label">{placement.role}</span>
+        <span className="text-label">{placement.role}</span>{' '}
         <span className="text-h4 text-secondary transition-colors duration-150 [overflow-wrap:anywhere] group-hover:text-[color:var(--text-primary)] group-focus-visible:text-[color:var(--text-primary)]">
           {label}
         </span>
@@ -58,10 +58,11 @@ function PlacementRow({ placement, index }: { placement: EnrichedPlacement; inde
           href={placement.href}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={`${label}, ${placement.role}. Open on Spotify`}
           className={cn(rowClass, 'active:opacity-80', focusRing)}
         >
           {body}
+          {/* Name from content (role, then title, as shown), so it contains the visible text (WCAG 2.5.3). */}
+          <span className="sr-only">, open on Spotify</span>
         </a>
       ) : (
         <div className={rowClass}>{body}</div>

@@ -4,10 +4,13 @@ import { NEWSLETTER_BENEFITS } from '~/components/newsletter/newsletter-benefits
 import { NEWSLETTER_TITLE, NewsletterIntro } from '~/components/newsletter/newsletter-header'
 import { NewsletterSignupForm } from '~/components/newsletter/newsletter-signup-form'
 import { seo } from '~/seo/head'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 // Static page. Viewing it creates no visitor; only a submit does (pages/newsletter.md).
 export const Route = createFileRoute('/newsletter')({
   codeSplitGroupings: [['component'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   head: () =>
     seo({
       title: 'Newsletter',

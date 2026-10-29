@@ -3,3 +3,6 @@ dist
 .vercel
 .nitro
 .tanstack
+test-results
+playwright-report
+blob-report

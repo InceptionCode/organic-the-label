@@ -1,7 +1,6 @@
-import { z } from 'zod'
-
 // /search query helpers (pages/search.md). Pure and framework free so the route, the server fns,
-// and the unit tests share one definition.
+// and the unit tests share one definition. Zod-free on purpose: validateSiteSearch is the route's
+// validateSearch, which ships in the entry chunk (phase 07.6 budget).
 
 export const SEARCH_Q_MAX = 100
 
@@ -11,24 +10,24 @@ export type SearchType = (typeof SEARCH_TYPES)[number]
 
 export type SiteSearch = { q?: string; type?: SearchType }
 
-const typeSchema = z
-  .preprocess((v) => (Array.isArray(v) ? v[0] : v), z.enum(SEARCH_TYPES))
-  .optional()
-  .catch(undefined)
+// Repeated keys arrive as arrays and numbers can arrive unquoted; keep the first plain value.
+const first = (v: unknown) => (Array.isArray(v) ? v[0] : v)
 
-const qSchema = z
-  .preprocess(
-    // Repeated keys arrive as arrays and numbers can arrive unquoted; keep the first plain value.
-    (v) => (Array.isArray(v) ? v[0] : typeof v === 'number' ? String(v) : v),
-    z.string().transform((s) => s.trim().replace(/\s+/g, ' ').slice(0, SEARCH_Q_MAX).trim() || undefined),
-  )
-  .optional()
-  .catch(undefined)
+const parseType = (v: unknown): SearchType | undefined => {
+  const value = first(v)
+  return typeof value === 'string' && (SEARCH_TYPES as readonly string[]).includes(value) ? (value as SearchType) : undefined
+}
+
+const parseQ = (v: unknown): string | undefined => {
+  const value = Array.isArray(v) ? v[0] : typeof v === 'number' ? String(v) : v
+  if (typeof value !== 'string') return undefined
+  return value.trim().replace(/\s+/g, ' ').slice(0, SEARCH_Q_MAX).trim() || undefined
+}
 
 /** validateSearch for /search. Never throws; blank or invalid `q` and invalid `type` become absent. */
 export function validateSiteSearch(raw: Record<string, unknown>): SiteSearch {
   // Keys are always present (undefined when dropped) so the router does not keep a stale raw value.
-  return { q: qSchema.parse(raw.q), type: typeSchema.parse(raw.type) }
+  return { q: parseQ(raw.q), type: parseType(raw.type) }
 }
 
 /** Cache-key form of a query: trimmed, lowercased, whitespace collapsed. The raw q is echoed to users. */

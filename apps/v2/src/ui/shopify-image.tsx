@@ -1,6 +1,8 @@
 import type { ComponentProps } from 'react'
 
-export const SHOPIFY_WIDTHS = [320, 480, 640, 768, 960, 1200, 1600] as const
+// 400 and 560 fill the gaps phones land in (a 2-up card needs ~360px at DPR 1.75, a 68vw featured card
+// ~490px), so they no longer jump to the next 480/640 file (phase 07.2).
+export const SHOPIFY_WIDTHS = [320, 400, 480, 560, 640, 768, 960, 1200, 1600] as const
 
 /** Shopify CDN URL resized via the `width` query parameter. */
 export function shopifyImageUrl(src: string, width: number) {

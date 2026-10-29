@@ -64,7 +64,6 @@ export function CompositionRow({ composition, selected, desktop, watching, onSel
           onClick={onWatch}
           aria-expanded={watchExpanded}
           aria-controls={desktop ? 'composition-video-panel' : videoId}
-          aria-label={`${desktop && selected ? 'Watching' : 'Watch'} ${composition.title} on ${WATCH_LABEL[composition.platform]}`}
           className={cn(
             '-my-3 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm text-body-s font-medium transition-colors duration-150 hover:cursor-pointer active:opacity-70',
             watchExpanded ? 'text-[color:var(--text-primary)]' : 'text-secondary hover:text-[color:var(--text-primary)]',
@@ -75,6 +74,8 @@ export function CompositionRow({ composition, selected, desktop, watching, onSel
           <span className="link-underline">
             {desktop && selected ? 'Watching' : 'Watch'}
             <span className="max-sm:hidden"> on {WATCH_LABEL[composition.platform]}</span>
+            {/* Name from content: the visible words first, then the loop (WCAG 2.5.3 label in name). */}
+            <span className="sr-only">: {composition.title}</span>
           </span>
           {!desktop && <ChevronDown aria-hidden className={cn('size-4 transition-transform duration-200', watching && 'rotate-180')} />}
         </button>

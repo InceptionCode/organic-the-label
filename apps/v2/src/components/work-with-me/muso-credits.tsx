@@ -12,7 +12,7 @@ export function MusoCredits() {
         href={MUSO_PROFILE_URL}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Open full verified credits on Muso.ai"
+        aria-label="Verified on Muso.ai: open the full verified credits"
         className={`group relative block aspect-[915/950] overflow-hidden bg-surface-1 active:opacity-90 ${focusRing}`}
       >
         <img

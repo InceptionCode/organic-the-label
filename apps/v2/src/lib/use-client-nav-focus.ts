@@ -8,6 +8,8 @@ let hydrated = false
 export function useMarkHydrated() {
   useEffect(() => {
     hydrated = true
+    // Lets E2E tests (and anything else) wait for interactivity: <html data-hydrated="true">.
+    document.documentElement.dataset.hydrated = 'true'
   }, [])
 }
 

@@ -1,14 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { deleteCookie, getCookie, getRequestHeader, setCookie } from '@tanstack/react-start/server'
 import * as cartService from '~/server/shopify/cart'
-import {
-  addToCartInputSchema,
-  CART_UNAVAILABLE_MESSAGE,
-  removeCartLinesInputSchema,
-  updateCartLineInputSchema,
-  type CartOutcome,
-  type CartResult,
-} from '~/server/shopify/types'
+import { addToCartInputSchema, removeCartLinesInputSchema, updateCartLineInputSchema } from '~/server/shopify/input-schemas'
+import { CART_UNAVAILABLE_MESSAGE, type CartOutcome, type CartResult } from '~/server/shopify/types'
 import { toSafeError } from './errors'
 
 // Same name as v1 so carts started on v1 survive the cutover on the same domain.

@@ -5,9 +5,12 @@ import { freeSlugDescription, freeSlugTitle } from '~/lib/free-seo'
 import { freeResourceQueries } from '~/queries/free-resources'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, freeResourceJsonLd } from '~/seo/jsonld'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/free/$slug')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   loader: async ({ context, params }) => {
     const resource = await context.queryClient.query(freeResourceQueries.bySlug(params.slug))
     // Unknown or inactive slug: a real 404 (pages/free.md).

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useRouterState } from '@tanstack/react-router'
 import { Search, X } from 'lucide-react'
-import { applyFilterUpdate, hasActiveFilters, type FilterUpdate, type StoreSearch } from '~/lib/store-search'
+import { applyFilterUpdate, hasActiveFilters, validateStoreSearch, type FilterUpdate, type StoreSearch } from '~/lib/store-search'
 import { cn } from '~/ui/cn'
 import { FilterBar } from './filter-bar'
 
@@ -14,9 +14,14 @@ const focusRing =
  * Search, the sticky filter bar, and the clear/updating row. Search sits in the bar from xl and in
  * its own row above the bar below xl, so it never needs the filter sheet. Both instances read the URL.
  */
-export function StoreFilters({ search }: { search: StoreSearch }) {
+export function StoreFilters({ search: resolved }: { search: StoreSearch }) {
   const navigate = useNavigate({ from: '/store/' })
   const isLoading = useRouterState({ select: (s) => s.isLoading })
+  // The controls follow the URL being loaded (router state.location), not the last resolved match:
+  // while the loader runs, Route.useSearch() still holds the previous search, so a quick second
+  // toggle (Exclusive off, another tag) computed from it would undo the first change.
+  const latest = useRouterState({ select: (s) => (isStorePath(s.location.pathname) ? s.location.search : null) })
+  const search = latest ? validateStoreSearch(latest as Record<string, unknown>) : resolved
 
   const update = (change: FilterUpdate, replace = false) =>
     navigate({ search: (prev: StoreSearch) => applyFilterUpdate(prev, change), replace, resetScroll: false })
@@ -49,6 +54,8 @@ export function StoreFilters({ search }: { search: StoreSearch }) {
     </div>
   )
 }
+
+const isStorePath = (pathname: string) => pathname.replace(/\/+$/, '') === '/store'
 
 type SearchBoxProps = { id: string; value: string; onCommit: (term: string) => void; className?: string }
 

@@ -65,7 +65,7 @@ export function LatestDrop({ product }: { product: ProductSummary | undefined })
                 'link-underline inline-flex min-h-11 items-center rounded-sm text-body-m text-primary outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-canvas)]',
               )}
             >
-              Learn more
+              View {product.title}
             </Link>
           </div>
         </div>

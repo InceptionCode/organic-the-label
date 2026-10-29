@@ -2,14 +2,10 @@ import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { whenLoadedAndIdle } from '~/lib/after-load'
 import { mapUser, type SessionUser } from '~/lib/map-user'
 import { ACCOUNT_KEY } from '~/queries/account'
 import { SESSION_KEY } from '~/queries/session'
-
-type IdleWindow = Window & {
-  requestIdleCallback?: (cb: () => void) => number
-  cancelIdleCallback?: (handle: number) => void
-}
 
 export function AuthSync() {
   const queryClient = useQueryClient()
@@ -54,14 +50,13 @@ export function AuthSync() {
       unsubscribe = () => data.subscription.unsubscribe()
     }
 
-    const w = window as IdleWindow
-    const run = () => void start().catch((error) => console.error('[AuthSync]', error))
-    const handle = w.requestIdleCallback ? w.requestIdleCallback(run) : window.setTimeout(run, 1)
+    // After load and idle: the Supabase client (about 50 KB) never competes with the LCP resources. A
+    // cached anonymous page still reconciles a signed-in session via INITIAL_SESSION (phase 07.3).
+    const cancelStart = whenLoadedAndIdle(() => void start().catch((error) => console.error('[AuthSync]', error)), 1000)
 
     return () => {
       cancelled = true
-      if (w.cancelIdleCallback) w.cancelIdleCallback(handle)
-      else window.clearTimeout(handle)
+      cancelStart()
       unsubscribe?.()
     }
   }, [queryClient, router])

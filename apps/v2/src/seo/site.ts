@@ -16,6 +16,12 @@ export const DEFAULT_OG_IMAGE = {
 } as const
 
 export const LOGO_PATH = '/brand-assets/organic-sonics-logo.png'
+// Downscaled copies of the 1024px (1.7 MB) logo for on-page use and browser icons (phase 07.2).
+// 128px covers the 40px navbar mark at 3x; 96px is the favicon (a multiple of 48 for search results);
+// 192px covers the 180px apple-touch-icon.
+export const LOGO_UI_PATH = '/brand-assets/organic-sonics-logo-128.png'
+export const LOGO_FAVICON_PATH = '/brand-assets/organic-sonics-logo-96.png'
+export const LOGO_ICON_PATH = '/brand-assets/organic-sonics-logo-192.png'
 
 // Organization.sameAs: the brand's own profiles (confirmed by the owner 2026-10-26). YouTube main
 // channel is @juicetheprod; @juiceman-theprod is the separate Shorts channel. No Twitter/X handle,

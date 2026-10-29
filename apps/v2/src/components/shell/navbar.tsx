@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useSession } from '~/lib/use-session'
 import { cartQueries } from '~/queries/cart'
+import { LOGO_UI_PATH } from '~/seo/site'
 import { cn } from '~/ui/cn'
 import { CART_DRAWER_ID, useCartDrawer } from './cart-drawer-provider'
 import { MobileMenu } from './mobile-menu'
@@ -36,10 +37,12 @@ export function Navbar() {
               aria-label="Organic Sonics home"
             >
               <img
-                src="/brand-assets/organic-sonics-logo.png"
+                src={LOGO_UI_PATH}
                 alt="Organic Sonics"
                 width={40}
                 height={40}
+                // Above the fold on every page (and the home LCP element, since the hero headline animates in).
+                fetchPriority="high"
                 className="object-contain size-10"
               />
               <span className="text-primary hidden sm:block font-heading text-[1.5rem] leading-none tracking-[0.05em] pt-0.5">

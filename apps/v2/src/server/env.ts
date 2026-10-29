@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { assertSandboxAllowed } from './sandbox'
 
 // Server-only environment. Never import from client code (src/server is server-only).
 // Validates on import so a misconfigured deploy fails at boot with every bad variable named.
@@ -38,11 +39,15 @@ const schema = z.object({
   // refreshes it); this env value is only the fallback. The user id defaults to `me`.
   INSTAGRAM_ACCESS_TOKEN: optional,
   INSTAGRAM_USER_ID: optional,
+  // Dev-only E2E email sandbox (src/server/sandbox.ts). Refused at boot in production.
+  E2E_SANDBOX: z.enum(['true', 'false']).optional(),
 })
 
 export type ServerEnv = z.infer<typeof schema>
 
 function parse(): ServerEnv {
+  // Fail fast: the E2E sandbox must never be enabled on a production runtime.
+  assertSandboxAllowed(process.env)
   // Treat empty strings as unset so optional vars left blank in .env files pass.
   const source = Object.fromEntries(
     Object.entries(process.env).filter(([, value]) => value !== undefined && value !== ''),

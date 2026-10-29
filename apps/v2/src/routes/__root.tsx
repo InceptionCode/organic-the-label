@@ -7,6 +7,7 @@ import { CartDrawerProvider } from '~/components/shell/cart-drawer-provider'
 import { Footer } from '~/components/shell/footer'
 import { Navbar } from '~/components/shell/navbar'
 import { SkipLink } from '~/components/shell/skip-link'
+import { SplashGate } from '~/components/splash/splash-gate'
 import { ErrorPage } from '~/components/errors/error-page'
 import { NotFoundPage } from '~/components/errors/not-found-page'
 import { useMarkHydrated } from '~/lib/use-client-nav-focus'
@@ -14,7 +15,7 @@ import { productQueries } from '~/queries/products'
 import { sessionQueryOptions } from '~/queries/session'
 import { seo } from '~/seo/head'
 import { organizationJsonLd, websiteJsonLd } from '~/seo/jsonld'
-import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, LOGO_PATH, SITE_NAME, absoluteUrl } from '~/seo/site'
+import { DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE, LOGO_FAVICON_PATH, LOGO_ICON_PATH, SITE_NAME, absoluteUrl } from '~/seo/site'
 import appCss from '~/styles/app.css?url'
 import interLatinWoff2 from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url'
 import bebasLatinWoff2 from '@fontsource/bebas-neue/files/bebas-neue-latin-400-normal.woff2?url'
@@ -74,8 +75,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         fontPreload(interLatinWoff2),
         fontPreload(bebasLatinWoff2),
         { rel: 'stylesheet', href: appCss },
-        { rel: 'icon', type: 'image/png', href: LOGO_PATH },
-        { rel: 'apple-touch-icon', href: LOGO_PATH },
+        { rel: 'icon', type: 'image/png', sizes: '96x96', href: LOGO_FAVICON_PATH },
+        { rel: 'apple-touch-icon', href: LOGO_ICON_PATH },
       ],
     }
   },
@@ -117,6 +118,8 @@ function RootLayout() {
         </Suspense>
       )}
       <AuthSync />
+      {/* Phase 07.7: once-per-session intro. Client-only, decides after load; the overlay is a lazy chunk. */}
+      <SplashGate />
     </CartDrawerProvider>
   )
 }

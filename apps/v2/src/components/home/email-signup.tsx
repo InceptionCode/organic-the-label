@@ -1,5 +1,5 @@
 import { LazyEmailVisual } from '~/components/visuals/lazy'
-import { LOGO_PATH } from '~/seo/site'
+import { LOGO_UI_PATH } from '~/seo/site'
 import { EmailSignupForm } from './email-signup-form'
 
 /**
@@ -26,7 +26,7 @@ export function EmailSignup() {
       <div className="relative z-10 -mt-12 flex flex-col justify-center px-6 pb-16 md:px-10 md:pb-24 lg:order-1 lg:col-span-5 lg:mt-0 lg:items-end lg:py-24 lg:pl-16 lg:pr-0 lg:-mr-12 xl:pl-24 xl:-mr-20">
         <div className="w-full lg:max-w-[34rem]">
           <img
-            src={LOGO_PATH}
+            src={LOGO_UI_PATH}
             alt="Organic Sonics"
             width={56}
             height={56}

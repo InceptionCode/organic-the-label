@@ -15,9 +15,12 @@ import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, productJsonLd } from '~/seo/jsonld'
 import { shopifyImageUrl } from '~/ui/shopify-image'
+import { publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/store/$handle')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  headers: publicPageHeaders,
   loader: async ({ context, params }) => {
     const product = await context.queryClient.query(productQueries.byHandle(params.handle))
     if (!product) throw notFound()

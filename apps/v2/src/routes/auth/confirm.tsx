@@ -1,15 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { AuthCard } from '~/components/auth/auth-card'
 import { confirmOtpFn } from '~/fns/auth.fn'
-import { confirmSearchSchema } from '~/lib/auth-schemas'
+import { validateConfirmSearch } from '~/lib/confirm-search'
 import { seo } from '~/seo/head'
 import { ButtonLink } from '~/ui/button'
 
 export const Route = createFileRoute('/auth/confirm')({
-  validateSearch: (search) => {
-    const parsed = confirmSearchSchema.safeParse(search)
-    return parsed.success ? parsed.data : {}
-  },
+  validateSearch: validateConfirmSearch,
 
   beforeLoad: async ({ search }) => {
     const result = await confirmOtpFn({ data: search })

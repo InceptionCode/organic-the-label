@@ -4,7 +4,7 @@ import {
   getNewestProductsInputSchema,
   getProductInputSchema,
   listProductsInputSchema,
-} from '~/server/shopify/types'
+} from '~/server/shopify/input-schemas'
 import { toSafeError } from './errors'
 
 async function run<T>(scope: string, fn: () => Promise<T>, publicMessage: string = 'Could not load products.'): Promise<T> {

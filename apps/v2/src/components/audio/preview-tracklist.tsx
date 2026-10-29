@@ -58,7 +58,6 @@ export function PreviewTracklist({ previews, headingId, onPreviewPlay, source }:
                   type="button"
                   onClick={() => toggleAt(i)}
                   aria-pressed={isPlaying}
-                  aria-label={`${isPlaying ? 'Pause' : 'Play'} ${preview.preview_title}`}
                   className={cn(
                     'group/row relative grid min-h-14 w-full grid-cols-[2.25rem_minmax(0,1fr)_auto_2.75rem] items-center gap-3 rounded-sm text-left transition-colors duration-150 hover:cursor-pointer touch-manipulation',
                     focusRing,
@@ -76,6 +75,8 @@ export function PreviewTracklist({ previews, headingId, onPreviewPlay, source }:
                       isCurrent ? 'text-primary' : 'text-secondary group-hover/row:text-[color:var(--text-primary)]',
                     )}
                   >
+                    {/* The name comes from the content ("Play {title}") so it contains the visible title (WCAG 2.5.3). */}
+                    <span className="sr-only">{isPlaying ? 'Pause' : 'Play'} </span>
                     {preview.preview_title}
                   </span>
                   <span aria-hidden className="text-body-s tabular-nums text-muted">

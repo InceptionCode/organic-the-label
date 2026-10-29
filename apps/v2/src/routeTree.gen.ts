@@ -20,6 +20,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WorkWithMeRouteImport } from './routes/work-with-me'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
+import { Route as ApiChar91__sandboxChar93RouteImport } from './routes/api/[__sandbox]'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 import { Route as CompositionsIndexRouteImport } from './routes/compositions/index'
@@ -87,6 +88,12 @@ const AuthedAccountRoute = AuthedAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiChar91__sandboxChar93Route =
+  ApiChar91__sandboxChar93RouteImport.update({
+    id: '/api/__sandbox',
+    path: '/api/__sandbox',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiTrackRoute = ApiTrackRouteImport.update({
   id: '/api/track',
   path: '/api/track',
@@ -160,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
+  '/api/__sandbox': typeof ApiChar91__sandboxChar93Route
   '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
@@ -184,6 +192,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
+  '/api/__sandbox': typeof ApiChar91__sandboxChar93Route
   '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
@@ -210,6 +219,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/_authed/account': typeof AuthedAccountRoute
+  '/api/__sandbox': typeof ApiChar91__sandboxChar93Route
   '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/account'
+    | '/api/__sandbox'
     | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/account'
+    | '/api/__sandbox'
     | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
@@ -285,6 +297,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/_authed/account'
+    | '/api/__sandbox'
     | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
@@ -310,6 +323,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WorkWithMeRoute: typeof WorkWithMeRoute
+  ApiChar91__sandboxChar93Route: typeof ApiChar91__sandboxChar93Route
   ApiTrackRoute: typeof ApiTrackRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
   FreeSlugRoute: typeof FreeSlugRoute
@@ -402,6 +416,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account'
       preLoaderRoute: typeof AuthedAccountRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/api/__sandbox': {
+      id: '/api/__sandbox'
+      path: '/api/__sandbox'
+      fullPath: '/api/__sandbox'
+      preLoaderRoute: typeof ApiChar91__sandboxChar93RouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/track': {
       id: '/api/track'
@@ -512,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WorkWithMeRoute: WorkWithMeRoute,
+  ApiChar91__sandboxChar93Route: ApiChar91__sandboxChar93Route,
   ApiTrackRoute: ApiTrackRoute,
   AuthConfirmRoute: AuthConfirmRoute,
   FreeSlugRoute: FreeSlugRoute,

@@ -191,6 +191,10 @@
   /* Global link defaults: red text token (the fill red fails contrast as text on black) */
   a:not([class]) {
     color: var(--accent-text);
+    /* Underlined at rest: inside text, color alone must not mark a link (WCAG 1.4.1, phase 07.5). */
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
     text-underline-offset: 3px;
     transition: color var(--motion-fast) var(--ease-soft), opacity var(--motion-fast) var(--ease-soft);
   }
@@ -802,8 +806,19 @@
     animation-delay: var(--enter-delay, 0s);
   }
 
+  /* Slide only, visible from the first frame: for an LCP heading, where starting at opacity 0 delays
+     the LCP mark until the fade begins (owner decision 2026-10-29, store heading). */
+  @keyframes os-slide-up-in {
+    from { transform: translateY(var(--rise-from, 24px)); }
+    to { transform: none; }
+  }
+  .os-enter-slide {
+    animation: os-slide-up-in var(--enter-duration, 0.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--enter-delay, 0s);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .os-rise, .os-enter { animation: none; }
+    .os-rise, .os-enter, .os-enter-slide { animation: none; }
   }
 }
 

@@ -10,6 +10,7 @@ import {
   hasActiveCompositionFilters,
   normalizeCompositionTags,
   toCompositionListParams,
+  validateCompositionSearch,
   type CompositionRange,
   type CompositionSearch,
   type CompositionTag,
@@ -38,11 +39,18 @@ type Update = Partial<CompositionSearch>
  * on the left; from xl search, released, sort and tags inline; below xl one "Filters & sort" sheet.
  * URL-driven; defaults are omitted from the URL.
  */
-export function CompositionFilters({ search }: { search: CompositionSearch }) {
+export function CompositionFilters({ search: resolved }: { search: CompositionSearch }) {
   const navigate = useNavigate({ from: '/compositions/' })
   const isLoading = useRouterState({ select: (s) => s.isLoading })
   // Same key the results read, so this is the cached list (undefined while the first load is pending).
-  const { data } = useQuery(compositionQueries.list(toCompositionListParams(search)))
+  const { data } = useQuery(compositionQueries.list(toCompositionListParams(resolved)))
+  // The controls follow the URL being loaded (router state.location), not the last resolved match:
+  // while the loader runs, Route.useSearch() still holds the previous search, so a quick second tag
+  // toggle computed from it would drop the first one.
+  const latest = useRouterState({
+    select: (s) => (s.location.pathname.replace(/\/+$/, '') === '/compositions' ? s.location.search : null),
+  })
+  const search = latest ? validateCompositionSearch(latest as Record<string, unknown>) : resolved
   const [sheetOpen, setSheetOpen] = useState(false)
 
   const update = (change: Update, replace = false) =>

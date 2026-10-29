@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import { CONTACT_FORM_CATEGORIES } from '~/server/support/schema'
+import { CONTACT_FORM_CATEGORIES } from './support-categories'
 
 // /contact prefill (pages/contact.md). Optional search params that seed the form's initial values;
 // the form stays fully editable and nothing auto-submits. Pure, so the route, the "Request access"
-// links, and the unit tests share one definition.
+// links, and the unit tests share one definition. Zod-free on purpose: validateContactSearch is the
+// route's validateSearch, which ships in the entry chunk (phase 07.6 budget).
 
 export const CONTACT_SUBJECT_MAX = 200
 export const CONTACT_MESSAGE_MAX = 2000
@@ -23,31 +23,36 @@ export type ContactPrefill = {
 const first = (v: unknown) => (Array.isArray(v) ? v[0] : typeof v === 'number' ? String(v) : v)
 
 /** A trimmed string up to `max`. Oversized or blank values are dropped, not truncated. */
-const text = (max: number) =>
-  z
-    .preprocess(first, z.string().trim().min(1).max(max))
-    .optional()
-    .catch(undefined)
-
-const categorySchema = z.preprocess(first, z.enum(CONTACT_FORM_CATEGORIES)).optional().catch(undefined)
-// v2's codec never JSON-quotes (lib/search-params.ts), but a hand-built link might: `"123"` -> `123`.
-const unquote = (v: unknown) => {
+const text = (v: unknown, max: number): string | undefined => {
   const value = first(v)
-  return typeof value === 'string' ? value.replace(/^"(.*)"$/, '$1') : value
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length >= 1 && trimmed.length <= max ? trimmed : undefined
 }
-const orderSchema = z
-  .preprocess(unquote, z.string().trim().regex(/^[A-Za-z0-9#-]{1,40}$/))
-  .optional()
-  .catch(undefined)
+
+const category = (v: unknown): ContactCategory | undefined => {
+  const value = first(v)
+  return typeof value === 'string' && (CONTACT_FORM_CATEGORIES as readonly string[]).includes(value)
+    ? (value as ContactCategory)
+    : undefined
+}
+
+// v2's codec never JSON-quotes (lib/search-params.ts), but a hand-built link might: `"123"` -> `123`.
+const order = (v: unknown): string | undefined => {
+  const value = first(v)
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.replace(/^"(.*)"$/, '$1').trim()
+  return /^[A-Za-z0-9#-]{1,40}$/.test(trimmed) ? trimmed : undefined
+}
 
 /** validateSearch for /contact. Never throws; invalid or oversized values become absent. */
 export function validateContactSearch(raw: Record<string, unknown>): ContactPrefill {
   // Keys are always present (undefined when dropped) so the router does not keep a stale raw value.
   return {
-    category: categorySchema.parse(raw.category),
-    subject: text(CONTACT_SUBJECT_MAX).parse(raw.subject),
-    message: text(CONTACT_MESSAGE_MAX).parse(raw.message),
-    order: orderSchema.parse(raw.order),
+    category: category(raw.category),
+    subject: text(raw.subject, CONTACT_SUBJECT_MAX),
+    message: text(raw.message, CONTACT_MESSAGE_MAX),
+    order: order(raw.order),
   }
 }
 

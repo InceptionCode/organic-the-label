@@ -4,9 +4,9 @@ import { buildSrcSet, SHOPIFY_WIDTHS, shopifyImageUrl } from '~/ui/shopify-image
 const SRC = 'https://cdn.shopify.com/s/files/1/0001/products/kit.png'
 
 describe('ShopifyImage srcset', () => {
-  test('has one candidate per width (7)', () => {
+  test('has one candidate per width (9)', () => {
     const candidates = buildSrcSet(SRC).split(', ')
-    expect(candidates).toHaveLength(7)
+    expect(candidates).toHaveLength(9)
     expect(candidates.map((c) => Number(c.split(' ')[1].replace('w', '')))).toEqual([...SHOPIFY_WIDTHS])
     expect(candidates[0]).toBe(`${SRC}?width=320 320w`)
   })

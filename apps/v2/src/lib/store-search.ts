@@ -1,4 +1,5 @@
-import { z } from 'zod'
+// Zod-free on purpose: validateStoreSearch is the /store route's validateSearch, which ships in the entry
+// chunk (phase 07.6 budget). Same rules as the earlier zod schema; tests/unit/store-search.test.ts pins them.
 import {
   SEARCH_MAX,
   STORE_SORTS,
@@ -74,8 +75,6 @@ export type StoreSearch = {
   after?: string
 }
 
-const lower = (v: unknown) => (typeof v === 'string' ? v.trim().toLowerCase() : v)
-
 /** Splits comma lists (and arrays from repeated keys) into allowed, sorted, unique tags. */
 export function normalizeTags(...inputs: unknown[]): StoreTag[] {
   const out = new Set<StoreTag>()
@@ -92,30 +91,27 @@ export function normalizeTags(...inputs: unknown[]): StoreTag[] {
   return [...out].sort()
 }
 
-const schema = z.object({
-  category: z.preprocess(lower, z.enum(STORE_CATEGORIES)).optional().catch(undefined),
-  exclusive: z.preprocess((v) => (v === true || v === 'true' ? true : undefined), z.literal(true).optional()).catch(undefined),
-  sort: z
-    .preprocess(lower, z.enum(STORE_SORTS))
-    .transform((s) => (s === 'newest' ? undefined : s))
-    .optional()
-    .catch(undefined),
-  search: z
-    .preprocess(
-      (v) => (typeof v === 'number' ? String(v) : v),
-      z.string().transform((s) => s.trim().slice(0, SEARCH_MAX) || undefined),
-    )
-    .optional()
-    .catch(undefined),
-  after: z
-    .preprocess((v) => (typeof v === 'number' ? String(v) : v), z.string().min(1).max(512))
-    .optional()
-    .catch(undefined),
-})
+const lower = (v: unknown) => (typeof v === 'string' ? v.trim().toLowerCase() : v)
+const numberToString = (v: unknown) => (typeof v === 'number' ? String(v) : v)
+const oneOf = <T extends string>(allowed: readonly T[], v: unknown): T | undefined =>
+  typeof v === 'string' && (allowed as readonly string[]).includes(v) ? (v as T) : undefined
+
+function parseStoreSearch(raw: Record<string, unknown>) {
+  const sort = oneOf(STORE_SORTS, lower(raw.sort))
+  const search = numberToString(raw.search)
+  const after = numberToString(raw.after)
+  return {
+    category: oneOf(STORE_CATEGORIES, lower(raw.category)),
+    exclusive: raw.exclusive === true || raw.exclusive === 'true' ? (true as const) : undefined,
+    sort: sort === 'newest' ? undefined : sort,
+    search: typeof search === 'string' ? search.trim().slice(0, SEARCH_MAX) || undefined : undefined,
+    after: typeof after === 'string' && after.length >= 1 && after.length <= 512 ? after : undefined,
+  }
+}
 
 /** validateSearch for /store. Never throws: bad values are dropped. Merges legacy `tag=` keys. */
 export function validateStoreSearch(raw: Record<string, unknown>): StoreSearch {
-  const parsed = schema.parse(raw)
+  const parsed = parseStoreSearch(raw)
   const tags = normalizeTags(raw.tags, raw.tag)
   // Every known key is present (undefined when dropped): the router merges validated output over
   // the raw params, so an omitted key (default sort, legacy `tag`) would otherwise survive.

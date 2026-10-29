@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { otpTypes } from './confirm-search'
 
 const email = z.email('Please enter a valid email').trim()
 const captchaToken = z.string().min(1, 'We could not verify you are human. Please try again.')
@@ -36,7 +37,7 @@ export const updatePasswordSchema = z
   .object({ password: newPassword, confirmPassword: z.string().trim() })
   .refine(passwordsMatch, mismatch)
 
-export const otpTypes = ['email', 'signup', 'magiclink', 'recovery', 'invite', 'email_change'] as const
+export { otpTypes } from './confirm-search'
 
 export const confirmSearchSchema = z.object({
   token_hash: z.string().min(1).optional(),
