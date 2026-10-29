@@ -1,19 +1,22 @@
 import type { ReactNode } from 'react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { accountQueries } from '~/queries/account'
+import { preferencesQueries } from '~/queries/preferences'
 import { AccountLibrary } from './account-library'
 import { AccountProfile } from './account-profile'
+import { PreferencesForm } from './preferences-form'
 
-export function AccountLayout({ profile, library }: { profile: ReactNode; library: ReactNode }) {
+export function AccountLayout({ profile, preferences, library }: { profile: ReactNode; preferences?: ReactNode; library: ReactNode }) {
   return (
     <div className="content-container pt-10 pb-16 md:pt-16 md:pb-24">
       <header className="mb-10 md:mb-14">
         <p className="text-label mb-4">Your account</p>
         <h1 className="text-display-l text-primary">ACCOUNT</h1>
       </header>
-      {/* Flat sections stacked on the canvas: profile, then library (each with its label column on lg). */}
+      {/* Flat sections stacked on the canvas: profile, preferences, then library (each with its label column on lg). */}
       <div className="hairline-b">
         {profile}
+        {preferences}
         {library}
       </div>
     </div>
@@ -24,9 +27,11 @@ export function AccountPage() {
   const { data: summary } = useSuspenseQuery(accountQueries.summary())
   const { data: items } = useSuspenseQuery(accountQueries.ownedProducts())
   const { data: resources } = useSuspenseQuery(accountQueries.ownedResources())
+  const { data: preferences } = useSuspenseQuery(preferencesQueries.current())
   return (
     <AccountLayout
       profile={<AccountProfile summary={summary} />}
+      preferences={<PreferencesForm preferences={preferences} emailVerified={summary.emailConfirmed} />}
       library={<AccountLibrary items={items} resources={resources} />}
     />
   )

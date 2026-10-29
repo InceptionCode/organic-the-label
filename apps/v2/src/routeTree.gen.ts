@@ -20,6 +20,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as WorkWithMeRouteImport } from './routes/work-with-me'
 import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
+import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 import { Route as CompositionsIndexRouteImport } from './routes/compositions/index'
 import { Route as FreeIndexRouteImport } from './routes/free/index'
@@ -85,6 +86,11 @@ const AuthedAccountRoute = AuthedAccountRouteImport.update({
   id: '/account',
   path: '/account',
   getParentRoute: () => AuthedRoute,
+} as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthConfirmRoute = AuthConfirmRouteImport.update({
   id: '/auth/confirm',
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
+  '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/account': typeof AuthedAccountRoute
+  '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/work-with-me': typeof WorkWithMeRoute
   '/_authed/account': typeof AuthedAccountRoute
+  '/api/track': typeof ApiTrackRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/free/$slug': typeof FreeSlugRoute
   '/login/reset-password': typeof LoginResetPasswordRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/account'
+    | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
     | '/login/reset-password'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/account'
+    | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
     | '/login/reset-password'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/work-with-me'
     | '/_authed/account'
+    | '/api/track'
     | '/auth/confirm'
     | '/free/$slug'
     | '/login/reset-password'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   WorkWithMeRoute: typeof WorkWithMeRoute
+  ApiTrackRoute: typeof ApiTrackRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
   FreeSlugRoute: typeof FreeSlugRoute
   LoginResetPasswordRoute: typeof LoginResetPasswordRoute
@@ -389,6 +402,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account'
       preLoaderRoute: typeof AuthedAccountRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/confirm': {
       id: '/auth/confirm'
@@ -492,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   WorkWithMeRoute: WorkWithMeRoute,
+  ApiTrackRoute: ApiTrackRoute,
   AuthConfirmRoute: AuthConfirmRoute,
   FreeSlugRoute: FreeSlugRoute,
   LoginResetPasswordRoute: LoginResetPasswordRoute,

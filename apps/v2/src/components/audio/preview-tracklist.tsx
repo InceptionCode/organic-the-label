@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type Mous
 import { Pause, Play } from 'lucide-react'
 import type { AudioPreview } from '~/server/shopify/types'
 import { cn } from '~/ui/cn'
-import { claimPlayback, releasePlayback } from './exclusive-playback'
+import { claimPlayback, releasePlayback, type PlaybackSource } from './exclusive-playback'
 import { formatTime, seekFraction } from './format-time'
 import { seededBars } from './waveform-player'
 
@@ -14,18 +14,15 @@ type Status = 'idle' | 'playing' | 'paused'
 type PreviewTracklistProps = {
   previews: AudioPreview[]
   headingId: string
-  /** Fired once per track, on its first play (tracking hooks in here in phase 06). */
+  /** Fired once per track, on its first play. */
   onPreviewPlay?: (previewTitle: string) => void
+  /** The product, for `audio_preview_played` (exclusive-playback reports each track's play start). */
+  source?: Omit<PlaybackSource, 'title'>
 }
 
-/**
- * Product previews as one tracklist: a single waveform for the current track, then every track as a
- * numbered row. One <audio> element swaps `src`; `ended` advances to the next track and the last one
- * stops. Joins the page-wide one-at-a-time playback (product cards pause this and vice versa).
- */
-export function PreviewTracklist({ previews, headingId, onPreviewPlay }: PreviewTracklistProps) {
+export function PreviewTracklist({ previews, headingId, onPreviewPlay, source }: PreviewTracklistProps) {
   const { audioRef, index, status, time, duration, durations, toggleAt, seekTo, seekBy, onPlaying, onPause, onEnded, onError, onTimeUpdate, onLoadedMetadata } =
-    usePlaylist(previews, onPreviewPlay)
+    usePlaylist(previews, onPreviewPlay, source)
   const multi = previews.length > 1
   const current = previews[index] ?? previews[0]
   if (!current) return null
@@ -198,7 +195,7 @@ function Waveform({ title, src, status, time, duration, onToggle, onSeekTo, onSe
   )
 }
 
-function usePlaylist(previews: AudioPreview[], onPreviewPlay?: (title: string) => void) {
+function usePlaylist(previews: AudioPreview[], onPreviewPlay?: (title: string) => void, source?: Omit<PlaybackSource, 'title'>) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const indexRef = useRef(0)
   // True while a src swap loads: the element can report `pause` mid-swap, which is not a user pause.
@@ -221,7 +218,7 @@ function usePlaylist(previews: AudioPreview[], onPreviewPlay?: (title: string) =
         setTime(0)
         setDuration(0)
       }
-      claimPlayback(el)
+      claimPlayback(el, source && { ...source, title: track.preview_title })
       indexRef.current = i
       setIndex(i)
       setStatus('playing')
@@ -236,7 +233,7 @@ function usePlaylist(previews: AudioPreview[], onPreviewPlay?: (title: string) =
         setStatus('paused')
       })
     },
-    [previews, onPreviewPlay],
+    [previews, onPreviewPlay, source],
   )
 
   const toggleAt = useCallback(

@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ExploreShell } from '~/components/explore/explore-shell'
+import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { accountQueries } from '~/queries/account'
 import { exploreQueries } from '~/queries/explore'
 import { productQueries } from '~/queries/products'
@@ -40,5 +41,6 @@ export const Route = createFileRoute('/explore')({
 
 function ExplorePage() {
   const { available } = Route.useLoaderData()
+  useTrackOnMount('explore_viewed')
   return <ExploreShell available={available} />
 }

@@ -1,4 +1,7 @@
 import { createContext, lazy, Suspense, use, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { track } from '~/lib/track'
+import type { CartResult } from '~/server/shopify/types'
 
 type CartDrawerContextValue = {
   open: boolean
@@ -18,7 +21,12 @@ const CartDrawer = lazy(() => loadCartDrawer().then((m) => ({ default: m.CartDra
 export function CartDrawerProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const queryClient = useQueryClient()
   const openCart = () => {
+    if (!open) {
+      const cart = queryClient.getQueryData<CartResult>(['cart'])?.cart
+      track('cart_opened', { cartCount: cart?.totalQuantity ?? 0 })
+    }
     setMounted(true)
     setOpen(true)
   }

@@ -34,12 +34,6 @@ type CompositionCardProps = {
   onWatch?: () => void
 }
 
-/**
- * Compact composition used outside /compositions (search, explore), in the same flat row language
- * as `CompositionRow`: meta, Bebas title, BPM and key, description, tags, then the compact player and
- * actions. No video panel here: with `onWatch`, "Watch" opens the embed inline under the row. The red
- * left bar marks the open row, matching /compositions on mobile.
- */
 export function CompositionCard({ composition, headingLevel: Heading = 'h2', actions, watching = false, onWatch }: CompositionCardProps) {
   const videoId = useId()
   const meta = [composition.bpm ? `${composition.bpm} BPM` : null, composition.musical_key].filter(Boolean).join(' · ')
@@ -89,7 +83,14 @@ export function CompositionCard({ composition, headingLevel: Heading = 'h2', act
       {tags.length > 0 && <p className="mt-2 text-label">{tags.join(' · ')}</p>}
 
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-        {playerSrc && <AudioPlayer src={playerSrc} title={composition.title} className="sm:flex-1" />}
+        {playerSrc && (
+          <AudioPlayer
+            src={playerSrc}
+            title={composition.title}
+            source={{ surface: 'composition', title: composition.title, slug: composition.slug }}
+            className="sm:flex-1"
+          />
+        )}
         {actions ?? (
           <a
             href={`/compositions#${composition.slug}`}

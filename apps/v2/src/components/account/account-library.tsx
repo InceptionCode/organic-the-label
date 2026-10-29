@@ -118,7 +118,15 @@ function LibraryRow({ item }: { item: OwnedProduct }) {
           ) : null}
         </div>
       </Link>
-      <OwnedAccessLink access={resolveOwnedAccess(item)} title={product.title} variant="link" size="sm" className="shrink-0" />
+      <OwnedAccessLink
+        access={resolveOwnedAccess(item)}
+        title={product.title}
+        product={product}
+        surface="library"
+        variant="link"
+        size="sm"
+        className="shrink-0"
+      />
     </div>
   )
 }

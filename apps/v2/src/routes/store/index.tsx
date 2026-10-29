@@ -4,6 +4,7 @@ import { CollectionHeader } from '~/components/store/collection-header'
 import { StoreFilters } from '~/components/store/store-filters'
 import { StoreError, StoreResults, StoreResultsSkeleton } from '~/components/store/store-results'
 import { storeSearchToListParams, validateStoreSearch } from '~/lib/store-search'
+import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, productItemListJsonLd } from '~/seo/jsonld'
@@ -44,6 +45,7 @@ export const Route = createFileRoute('/store/')({
 function StorePage() {
   const { error } = Route.useLoaderData()
   const search = Route.useSearch()
+  useTrackOnMount('store_viewed')
   return <StoreLayout results={error ? <StoreError /> : <StoreResults search={search} />} />
 }
 

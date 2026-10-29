@@ -109,8 +109,10 @@ async function syncOptIn(id: string, input: ParsedSupportPayload, client: Supaba
   const upsert = deps.upsertSubscriber ?? defaultUpsert
   const firstName = input.name.split(' ')[0] || undefined
 
+  // Only reached when input.marketingOptIn is true (see createSupportRequest).
   const contact = await syncContact(client, {
     email: input.email,
+    marketingConsent: true,
     firstName,
     source: 'website',
     signupSource: 'support_form',
@@ -119,6 +121,8 @@ async function syncOptIn(id: string, input: ParsedSupportPayload, client: Supaba
   const subscriber = await upsert({
     email: input.email,
     groups: [groupId],
+    // Explicit consent on this form reactivates someone who unsubscribed earlier, matching the contact row.
+    resubscribe: true,
     fields: { name: firstName ?? null, signup_source: 'support_form', supabase_contact_id: contact.id },
   })
   if (subscriber.id) await storeMailerLiteId(client, contact.id, subscriber.id)

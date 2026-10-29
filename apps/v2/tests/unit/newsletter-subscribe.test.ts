@@ -55,6 +55,7 @@ describe('subscribeToNewsletter', () => {
       first_name: 'Kay',
       status: 'subscribed',
       marketing_opt_in: true,
+      unsubscribed_at: null,
       signup_source: 'footer',
       supabase_user_id: 'u1',
     })
@@ -62,6 +63,7 @@ describe('subscribeToNewsletter', () => {
     expect(upsertSubscriber).toHaveBeenCalledWith({
       email: 'A@B.co',
       groups: ['g1'],
+      resubscribe: true,
       fields: { name: 'Kay', signup_source: 'footer', supabase_contact_id: 'contact-1' },
     })
     expect(calls[2]).toMatchObject({ table: 'email_contacts', op: 'update', payload: { mailerlite_subscriber_id: 'ml-1' } })

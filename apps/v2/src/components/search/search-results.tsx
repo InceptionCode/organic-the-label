@@ -5,6 +5,7 @@ import { CompositionActions } from '~/components/compositions/composition-action
 import { CompositionCard } from '~/components/compositions/composition-card'
 import { ProductGrid, productGridClasses } from '~/components/product/product-grid'
 import type { SearchType } from '~/lib/search-query'
+import { track } from '~/lib/track'
 import { searchQueries } from '~/queries/search'
 import { cn } from '~/ui/cn'
 import { SearchNoResults } from './search-empty'
@@ -94,7 +95,8 @@ const TABS: { value: SearchType | undefined; label: string }[] = [
 /**
  * Type filter, styled like the Store category tabs (muted -> bone, active = bone + 2px red underline).
  * Links that set `?type=` (absent = all), so back/forward and shared URLs keep the tab. Not sticky:
- * search results are short (two groups), so a pinned bar would only add chrome.
+ * search results are short (two groups), so a pinned bar would only add chrome. Switching to another
+ * tab records `search_filter_changed` (the query is trimmed and capped at 100 characters).
  */
 function TypeTabs({ q, type, products, compositions }: { q: string; type?: SearchType; products: number; compositions: number }) {
   const counts = { all: products + compositions, products, compositions }
@@ -109,6 +111,9 @@ function TypeTabs({ q, type, products, compositions }: { q: string; type?: Searc
               to="/search"
               search={{ q, type: tab.value }}
               resetScroll={false}
+              onClick={() => {
+                if (!active) track('search_filter_changed', { type: tab.value ?? 'all', query: q.trim().slice(0, 100) })
+              }}
               // Router active matching: "All" (type undefined) must not match ?type=products.
               activeOptions={{ includeSearch: true, explicitUndefined: true }}
               className={cn(

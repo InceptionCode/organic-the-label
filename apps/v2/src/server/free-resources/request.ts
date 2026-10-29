@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { CAPTCHA_FAILED_MESSAGE, verifyCaptcha as defaultVerifyCaptcha, type CaptchaResult } from '~/server/captcha/verify'
-import { logContactEvent, storeMailerLiteId, syncContact } from '~/server/email/contacts'
+import { isSuppressedContact, logContactEvent, storeMailerLiteId, syncContact } from '~/server/email/contacts'
 import { buildFreeResourceEmail } from '~/server/email/free-resource-email'
 import { upsertSubscriber as defaultUpsertSubscriber, type UpsertSubscriberInput } from '~/server/email/mailerlite'
 import { sendEmail as defaultSendEmail, type SendEmailInput } from '~/server/email/resend'
@@ -80,11 +80,13 @@ export async function requestFreeResource(input: FreeResourceRequest, deps: Free
   const resource = resourceRow as { id: string; name: string; download_url: string; mailerlite_group_id: string | null } | null
   if (!resource) return fail(404, FREE_REQUEST_MESSAGES.notFound)
 
-  // 4. Contact plus tags.
+  // 4. Contact plus tags. Consent comes only from the box; without it an existing contact's
+  // newsletter state is left as it is (see syncContact).
   const tags = ['free_resource', `downloaded_${slug.replace(/-/g, '_')}`]
   if (input.marketingOptIn) tags.push('newsletter')
   const contact = await syncContact(client, {
     email: input.email,
+    marketingConsent: input.marketingOptIn,
     firstName: input.firstName,
     source: 'website',
     signupSource: 'free_resource',
@@ -92,26 +94,33 @@ export async function requestFreeResource(input: FreeResourceRequest, deps: Free
     userId: deps.userId,
   })
 
-  // 5. MailerLite groups. Non-fatal (decided 2026-10-18): log and carry on.
+  // 5. MailerLite groups. Non-fatal (decided 2026-10-18): log and carry on. Without consent, a
+  // contact who unsubscribed, bounced or complained is not re-added at all (decided 2026-10-29); the
+  // resource still goes out below (Resend, transactional). With consent they are reactivated.
+  const skipMailerLite = !input.marketingOptIn && isSuppressedContact(contact)
   const resourceGroupId = resource.mailerlite_group_id ?? (slug === DEFAULT_FREE_RESOURCE_SLUG ? config.starterKitGroupId : undefined)
   const groups = [config.leadsGroupId, resourceGroupId, input.marketingOptIn ? config.newsletterGroupId : undefined].filter(
     (g): g is string => Boolean(g),
   )
   if (!config.leadsGroupId) console.error(TAG, 'MAILERLITE_GROUP_FREE_RESOURCE_LEADS_ID is not set')
-  try {
-    const subscriber = await (deps.upsertSubscriber ?? defaultUpsertSubscriber)({
-      email: input.email,
-      groups,
-      fields: {
-        name: input.firstName ?? null,
-        signup_source: 'free_resource',
-        supabase_contact_id: contact.id,
-        last_resource_downloaded: slug,
-      },
-    })
-    if (subscriber.id) await storeMailerLiteId(client, contact.id, subscriber.id)
-  } catch (error) {
-    console.error(TAG, 'MailerLite sync failed (non-fatal)', message(error))
+  if (!skipMailerLite) {
+    try {
+      const subscriber = await (deps.upsertSubscriber ?? defaultUpsertSubscriber)({
+        email: input.email,
+        groups,
+        // Fresh, explicit consent reactivates someone who unsubscribed earlier (as subscribeToNewsletter does).
+        ...(input.marketingOptIn ? { resubscribe: true } : {}),
+        fields: {
+          name: input.firstName ?? null,
+          signup_source: 'free_resource',
+          supabase_contact_id: contact.id,
+          last_resource_downloaded: slug,
+        },
+      })
+      if (subscriber.id) await storeMailerLiteId(client, contact.id, subscriber.id)
+    } catch (error) {
+      console.error(TAG, 'MailerLite sync failed (non-fatal)', message(error))
+    }
   }
 
   // 6. The tracked download row.

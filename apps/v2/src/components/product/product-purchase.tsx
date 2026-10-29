@@ -34,11 +34,6 @@ export function ProductPurchase({ product }: { product: Product }) {
   )
 }
 
-/**
- * Owned state: replaces license options and add-to-cart. v2 has no per-product download URL for paid
- * products yet (buyers get files through Shopify), so the primary is "Request access": /contact
- * prefilled with an access request and the order id. A direct URL, when one exists, becomes "Access".
- */
 function OwnedPurchase({ owned, handle, title }: { owned: OwnedProduct; handle: string; title: string }) {
   const hash = ownedLibraryHash(handle)
   return (
@@ -48,7 +43,14 @@ function OwnedPurchase({ owned, handle, title }: { owned: OwnedProduct; handle: 
         <p className="text-body-m text-primary">You own this.</p>
       </div>
       <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-        <OwnedAccessLink access={resolveOwnedAccess(owned)} title={title} size="lg" className="min-w-0 flex-1" />
+        <OwnedAccessLink
+          access={resolveOwnedAccess(owned)}
+          title={title}
+          product={owned.product}
+          surface="product"
+          size="lg"
+          className="min-w-0 flex-1"
+        />
         <Link
           to="/account"
           hash={hash}

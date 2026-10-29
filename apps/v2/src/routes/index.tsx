@@ -6,6 +6,7 @@ import { FeaturedKits } from '~/components/home/featured-kits'
 import { Hero } from '~/components/home/hero'
 import { LatestDrop } from '~/components/home/latest-drop'
 import { Membership } from '~/components/home/membership'
+import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { RevealSection } from '~/ui/reveal-section'
@@ -36,6 +37,7 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   const { hasProducts } = Route.useLoaderData()
+  useTrackOnMount('homepage_viewed')
   return (
     <>
       {hasProducts ? <ProductSections /> : <Hero />}

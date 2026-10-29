@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from 're
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Pause, Play, RotateCcw, SkipForward } from 'lucide-react'
+import { claimPlayback, releasePlayback } from '~/components/audio/exclusive-playback'
 import { AddToCartButton } from '~/components/product/add-to-cart-button'
 import { LazyAuroraWaves, LazyLiveWaveform } from '~/components/visuals/lazy'
 import { formatMoney } from '~/lib/format'
+import { track as trackEvent } from '~/lib/track'
 import { productQueries } from '~/queries/products'
 import type { AudioPreview, ProductSummary } from '~/server/shopify/types'
 import { ButtonLink } from '~/ui/button'
@@ -23,16 +25,10 @@ const squareButton = cn(
   'flex size-11 shrink-0 items-center justify-center rounded-sm border border-[color:var(--border-strong)] text-primary transition-soft hover:cursor-pointer hover:border-[color:var(--text-primary)] active:scale-[0.96] touch-manipulation',
   focusRing,
 )
-
-/**
- * Home hero. Two background layers: a faint AuroraWaves atmosphere and the live waveform, which
- * follows the latest drop's audio previews while they play. Headline anchored bottom-left.
- */
 export function Hero({ latest }: { latest?: ProductSummary }) {
-  // The full preview list is fetched on the first play, not on page load; most visitors never press play.
   const [requested, setRequested] = useState(false)
   const tracks = usePreviewTracks(latest, requested)
-  const { audioRef, index, status, toggle, next, onPlaying, onPause, onEnded, onError, getAnalyser } = usePreviewPlaylist(tracks)
+  const { audioRef, index, status, toggle, next, onPlaying, onPause, onEnded, onError, getAnalyser } = usePreviewPlaylist(tracks, latest)
   const onToggle = () => {
     setRequested(true)
     toggle()
@@ -240,9 +236,10 @@ type Status = 'idle' | 'playing' | 'paused' | 'ended'
  * One hidden <audio> routed through one Web Audio analyser; tracks swap `src` on the same element,
  * so the analyser stays connected across the playlist. The AudioContext is created on the first
  * play (a user gesture, as browsers require). Shopify's CDN sends `access-control-allow-origin: *`,
- * so `crossOrigin="anonymous"` keeps the analyser data readable.
+ * so `crossOrigin="anonymous"` keeps the analyser data readable. Joins the page-wide one-at-a-time
+ * playback, which also reports each track's play start; reaching the end reports the whole pack.
  */
-function usePreviewPlaylist(tracks: AudioPreview[]) {
+function usePreviewPlaylist(tracks: AudioPreview[], product?: ProductSummary) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const ctxRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
@@ -276,6 +273,7 @@ function usePreviewPlaylist(tracks: AudioPreview[]) {
       switchingRef.current = true
       el.src = track.preview_url
     }
+    claimPlayback(el, product && { surface: 'hero', title: track.preview_title, handle: product.handle, productId: product.id })
     void ctxRef.current.resume()
     indexRef.current = i
     endedRef.current = false
@@ -289,7 +287,7 @@ function usePreviewPlaylist(tracks: AudioPreview[]) {
       playingRef.current = false
       setStatus('paused')
     })
-  }, [])
+  }, [product])
 
   const toggle = useCallback(() => {
     if (playingRef.current) {
@@ -324,7 +322,10 @@ function usePreviewPlaylist(tracks: AudioPreview[]) {
     playingRef.current = false
     endedRef.current = true
     setStatus('ended')
-  }, [playAt])
+    if (product) {
+      trackEvent('preview_playlist_completed', { handle: product.handle, productId: product.id, trackCount: tracksRef.current.length })
+    }
+  }, [playAt, product])
 
   const onError = useCallback(() => {
     switchingRef.current = false
@@ -338,7 +339,10 @@ function usePreviewPlaylist(tracks: AudioPreview[]) {
   useEffect(() => {
     const el = audioRef.current
     return () => {
-      el?.pause()
+      if (el) {
+        el.pause()
+        releasePlayback(el)
+      }
       void ctxRef.current?.close()
     }
   }, [])

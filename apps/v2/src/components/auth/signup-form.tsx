@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { signUpFn } from '~/fns/auth.fn'
 import { signUpFieldsSchema } from '~/lib/auth-schemas'
+import { track } from '~/lib/track'
 import { Field } from '~/ui/field'
 import { AuthCard } from './auth-card'
 import { useCheckboxCaptcha } from './captcha'
@@ -25,6 +26,7 @@ export function SignupForm() {
     try {
       const result = await signUpFn({ data: { ...data, captchaToken: captcha.token } })
       if (!result.ok) return form.setFormError(result.error)
+      track('user_signed_up')
       setSentTo(data.email)
       setDialogOpen(true)
     } catch {

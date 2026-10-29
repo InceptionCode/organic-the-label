@@ -189,11 +189,12 @@ describe('createSupportRequest', () => {
       call.table === 'support_requests' ? { data: { id: 'req-1' }, error: null } : { data: { id: 'contact-1', mailerlite_subscriber_id: null }, error: null },
     )
     expect(await createSupportRequest(payload({ marketingOptIn: true }), {}, deps)).toEqual({ ok: true, id: 'req-1' })
-    expect(calls[1]).toMatchObject({ table: 'email_contacts', op: 'upsert', payload: { email: 'kay@example.com', first_name: 'Kay', signup_source: 'support_form' } })
+    expect(calls[1]).toMatchObject({ table: 'email_contacts', op: 'upsert', payload: { email: 'kay@example.com', first_name: 'Kay', signup_source: 'support_form', status: 'subscribed', marketing_opt_in: true } })
     expect(calls[2]).toMatchObject({ table: 'email_contact_tags', payload: [{ contact_id: 'contact-1', tag: 'newsletter' }] })
     expect(deps.upsertSubscriber).toHaveBeenCalledWith({
       email: 'Kay@Example.com',
       groups: ['g-news'],
+      resubscribe: true,
       fields: { name: 'Kay', signup_source: 'support_form', supabase_contact_id: 'contact-1' },
     })
     const event = calls.find((c) => c.table === 'email_contact_events')

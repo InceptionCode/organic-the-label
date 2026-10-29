@@ -10,6 +10,7 @@ import { RelatedProducts, RelatedProductsSkeleton } from '~/components/product/r
 import { TrustBadges } from '~/components/product/trust-badges'
 import { WhatsIncluded } from '~/components/product/whats-included'
 import { productSeoDescription, productSeoTitle } from '~/lib/product-seo'
+import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
 import { seo } from '~/seo/head'
 import { breadcrumbJsonLd, productJsonLd } from '~/seo/jsonld'
@@ -47,6 +48,7 @@ export const Route = createFileRoute('/store/$handle')({
 
 function ProductPage() {
   const { product } = Route.useLoaderData()
+  useTrackOnMount('product_viewed', { handle: product.handle, productId: product.id })
 
   return (
     <div>
@@ -62,7 +64,13 @@ function ProductPage() {
             <ProductPurchase key={product.handle} product={product} />
             <TrustBadges />
           </div>
-          <AudioPreviews key={product.handle} previews={product.audioPreviews} className="min-w-0 lg:col-span-7 lg:row-start-2 lg:pt-6" />
+          <AudioPreviews
+            key={product.handle}
+            previews={product.audioPreviews}
+            handle={product.handle}
+            productId={product.id}
+            className="min-w-0 lg:col-span-7 lg:row-start-2 lg:pt-6"
+          />
         </div>
       </div>
       <WhatsIncluded items={product.whatsIncluded} category={product.category} />

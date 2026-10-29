@@ -72,7 +72,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )
         )}
 
-        {preview && <CardPreview preview={preview} title={product.title} />}
+        {preview && <CardPreview preview={preview} product={product} />}
       </div>
 
       <div className="mt-4 flex items-start justify-between gap-3">
@@ -97,6 +97,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           <OwnedAccessLink
             access={resolveOwnedAccess(ownedEntry)}
             title={product.title}
+            product={product}
+            surface="card"
             variant="outline"
             size="sm"
             className="w-full flex-none md:w-auto"
@@ -134,7 +136,8 @@ export function OwnedBadge({ className }: { className?: string }) {
  * Play/pause on the art plus a 2px progress line along its bottom edge (scaleX, not width).
  * One preview plays at a time across the page; the audio stops when the card unmounts.
  */
-function CardPreview({ preview, title }: { preview: AudioPreview; title: string }) {
+function CardPreview({ preview, product }: { preview: AudioPreview; product: ProductSummary }) {
+  const title = product.title
   const audioRef = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -155,7 +158,7 @@ function CardPreview({ preview, title }: { preview: AudioPreview; title: string 
       el.pause()
       return
     }
-    claimPlayback(el)
+    claimPlayback(el, { surface: 'card', title: preview.preview_title, handle: product.handle, productId: product.id })
     el.play().catch(() => setPlaying(false))
   }
 

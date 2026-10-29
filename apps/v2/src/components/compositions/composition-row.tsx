@@ -32,11 +32,6 @@ type CompositionRowProps = {
   onWatch: () => void
 }
 
-/**
- * One loop on /compositions: a full-width row between hairlines (no card). Meta, Bebas title,
- * description and tags, then the compact player with Download (the row's one red control), the
- * actions menu, and "Watch". Selected rows carry a red bar on the left.
- */
 export function CompositionRow({ composition, selected, desktop, watching, onSelect, onWatch }: CompositionRowProps) {
   const videoId = useId()
   const meta = [composition.bpm ? `${composition.bpm} BPM` : null, composition.musical_key].filter(Boolean).join(' · ')
@@ -92,7 +87,15 @@ export function CompositionRow({ composition, selected, desktop, watching, onSel
       {tags.length > 0 && <p className="mt-2 text-label">{tags.join(' · ')}</p>}
 
       <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-        {playerSrc && <AudioPlayer src={playerSrc} title={composition.title} onStart={onSelect} className="sm:flex-1" />}
+        {playerSrc && (
+          <AudioPlayer
+            src={playerSrc}
+            title={composition.title}
+            onStart={onSelect}
+            source={{ surface: 'composition', title: composition.title, slug: composition.slug }}
+            className="sm:flex-1"
+          />
+        )}
         <CompositionActions
           slug={composition.slug}
           title={composition.title}

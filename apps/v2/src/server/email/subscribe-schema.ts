@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 // Port of v1 SubscribePayloadSchema (lib/validation/email.ts). Zod only, no server imports, so the
 // client forms import it for their messages and the server fn validates with the same schema.
-export const SUBSCRIBE_SOURCES = ['footer', 'newsletter_page', 'popup', 'checkout', 'explore'] as const
+export const SUBSCRIBE_SOURCES = ['footer', 'newsletter_page', 'popup', 'checkout', 'explore', 'account'] as const
 export type SubscribeSource = (typeof SUBSCRIBE_SOURCES)[number]
 
 export const SUBSCRIBE_MESSAGES = {

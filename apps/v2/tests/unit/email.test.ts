@@ -61,6 +61,29 @@ describe('mailerlite', () => {
     expect(JSON.parse(init?.body as string)).toEqual({ email: 'a@x.test', groups: ['g1'], fields: { name: 'A' } })
   })
 
+  test('sends resubscribe only when asked, so a returning subscriber is reactivated', async () => {
+    const fn = mockFetch(Response.json({ data: { id: 'sub_1' } }))
+    const { upsertSubscriber } = createMailerLiteClient('ml_key')
+    await upsertSubscriber({ email: 'a@x.test', groups: ['g1'], resubscribe: true })
+    expect(JSON.parse(fn.mock.calls[0]![1]?.body as string)).toEqual({ email: 'a@x.test', groups: ['g1'], resubscribe: true })
+  })
+
+  test('unsubscribes through the same upsert with status unsubscribed', async () => {
+    const fn = mockFetch(Response.json({ data: { id: 'sub_1' } }))
+    const { unsubscribeSubscriber } = createMailerLiteClient('ml_key')
+    await unsubscribeSubscriber('a@x.test')
+    const [url, init] = fn.mock.calls[0]!
+    expect(url).toBe('https://connect.mailerlite.com/api/subscribers')
+    expect(init?.method).toBe('POST')
+    expect(JSON.parse(init?.body as string)).toEqual({ email: 'a@x.test', status: 'unsubscribed' })
+  })
+
+  test('an unsubscribe error throws', async () => {
+    mockFetch(new Response('bad', { status: 422 }))
+    const { unsubscribeSubscriber } = createMailerLiteClient('ml_key')
+    await expect(unsubscribeSubscriber('a@x.test')).rejects.toThrow('422')
+  })
+
   test('throws naming MAILERLITE_API_KEY when unset', async () => {
     const fn = mockFetch(Response.json({}))
     await expect(upsertSubscriber({ email: 'a@x.test', groups: [] })).rejects.toThrow('MAILERLITE_API_KEY')

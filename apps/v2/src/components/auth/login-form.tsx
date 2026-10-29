@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Link, useRouter } from '@tanstack/react-router'
 import { signInWithPasswordFn } from '~/fns/auth.fn'
 import { signInFieldsSchema } from '~/lib/auth-schemas'
+import { track } from '~/lib/track'
 import { SESSION_KEY } from '~/queries/session'
 import { Field } from '~/ui/field'
 import { AuthCard } from './auth-card'
@@ -47,6 +48,8 @@ export function LoginForm() {
       const result = await signInWithPasswordFn({ data: { ...data, captchaToken } })
       if (!result.ok) return form.setFormError(result.error)
       queryClient.setQueryData(SESSION_KEY, result.user)
+      // Queued after the session cookie is set, so the flush is attributed to the user.
+      track('user_signed_in', { method: 'password' })
       await router.navigate({ to: '/explore' })
     } catch {
       form.setFormError('Something went wrong. Please try again.')

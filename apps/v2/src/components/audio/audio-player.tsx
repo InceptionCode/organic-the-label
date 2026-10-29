@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type TouchEvent } from 'react'
 import { Pause, Play } from 'lucide-react'
 import { cn } from '~/ui/cn'
-import { claimPlayback, releasePlayback } from './exclusive-playback'
+import { claimPlayback, releasePlayback, type PlaybackSource } from './exclusive-playback'
 import { formatTime, seekFraction } from './format-time'
 import { seededBars } from './waveform-player'
 
@@ -12,18 +12,15 @@ type AudioPlayerProps = {
   onPlay?: () => void
   /** Fired on every play (the compositions list selects the row). */
   onStart?: () => void
+  /** What is playing, for the `audio_preview_played` event (exclusive-playback reports play starts). */
+  source?: PlaybackSource
   className?: string
 }
 
 const focusRing =
   'outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-canvas)]'
 
-/**
- * Compact flat player: an outlined play button (the row's filled red control is its Download), a
- * seeded bar waveform that doubles as the seek slider, and the time. One preview plays at a time
- * across the page (exclusive-playback); the audio stops when the player unmounts.
- */
-export function AudioPlayer({ src, title, onPlay, onStart, className }: AudioPlayerProps) {
+export function AudioPlayer({ src, title, onPlay, onStart, source, className }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const firedOnPlay = useRef(false)
@@ -49,7 +46,7 @@ export function AudioPlayer({ src, title, onPlay, onStart, className }: AudioPla
       audio.pause()
       return
     }
-    claimPlayback(audio)
+    claimPlayback(audio, source)
     void audio.play().catch(() => setIsPlaying(false))
     onStart?.()
     if (!firedOnPlay.current) {

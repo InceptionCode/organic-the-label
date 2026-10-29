@@ -4,6 +4,7 @@ import { buildFreeResourceEmail } from '~/server/email/free-resource-email'
 import { handleFreeDownload, resolveFreeDownload } from '~/server/free-resources/download'
 import { getFeaturedFreeResource, getFreeResourceBySlug } from '~/server/free-resources/get'
 import { requestFreeResource, type FreeRequestDeps } from '~/server/free-resources/request'
+import { readNewsletterState } from '~/server/preferences/newsletter-sync'
 import { FREE_REQUEST_MESSAGES, FreeResourceRequestSchema, type FreeResourceRequest } from '~/server/free-resources/request-schema'
 import { cutAtWord, FREE_DEFAULT_TITLE, FREE_DESCRIPTION, freeIndexTitle, freeSlugDescription } from '~/lib/free-seo'
 import { fakeSupabase, type Call } from './fake-supabase'
@@ -33,10 +34,19 @@ const input = (over: Partial<FreeResourceRequest> = {}): FreeResourceRequest => 
 
 const config = { siteUrl: 'https://organicsonics.com', from: 'downloads@x.test', replyTo: 'support@x.test', leadsGroupId: 'leads', starterKitGroupId: 'starter', newsletterGroupId: 'news' }
 
-function requestDb(resource: unknown = { id: 'r1', name: 'Starter Kit', download_url: 'https://files.example/kit.zip', mailerlite_group_id: null }) {
+const STARTER_KIT = { id: 'r1', name: 'Starter Kit', download_url: 'https://files.example/kit.zip', mailerlite_group_id: null }
+
+/** `existing` is the email_contacts row the no-consent path reads first (null: a new email). */
+function requestDb(resource: unknown = STARTER_KIT, existing: unknown = null) {
   return fakeSupabase((call: Call) => {
     if (call.table === 'free_resources') return { data: resource, error: null }
-    if (call.table === 'email_contacts' && call.op === 'upsert') return { data: { id: 'contact-1', mailerlite_subscriber_id: null }, error: null }
+    if (call.table === 'email_contacts' && call.op === 'select') return { data: existing, error: null }
+    if (call.table === 'email_contacts' && call.op === 'insert') {
+      return { data: { id: 'contact-1', mailerlite_subscriber_id: null, status: 'subscribed', marketing_opt_in: false }, error: null }
+    }
+    if (call.table === 'email_contacts' && call.op === 'upsert') {
+      return { data: { id: 'contact-1', mailerlite_subscriber_id: null, status: 'subscribed', marketing_opt_in: true }, error: null }
+    }
     if (call.table === 'resource_downloads' && call.op === 'insert') return { data: { id: 'dl-1' }, error: null }
     return { data: null, error: null }
   })
@@ -96,13 +106,14 @@ describe('requestFreeResource', () => {
     expect(d.ensureVisitor).toHaveBeenCalledTimes(1)
 
     const contact = calls.find((c) => c.table === 'email_contacts' && c.op === 'upsert')!
-    expect(contact.payload).toMatchObject({ email: 'lead@example.test', first_name: 'Jay', source: 'website', signup_source: 'free_resource' })
+    expect(contact.payload).toMatchObject({ email: 'lead@example.test', first_name: 'Jay', source: 'website', signup_source: 'free_resource', status: 'subscribed', marketing_opt_in: true })
     const tags = calls.find((c) => c.table === 'email_contact_tags')!.payload as { tag: string }[]
     expect(tags.map((t) => t.tag)).toEqual(['free_resource', 'downloaded_starter_kit', 'newsletter'])
 
     expect(d.upsertSubscriber).toHaveBeenCalledWith({
       email: 'lead@example.test',
       groups: ['leads', 'starter', 'news'],
+      resubscribe: true,
       fields: { name: 'Jay', signup_source: 'free_resource', supabase_contact_id: 'contact-1', last_resource_downloaded: 'starter-kit' },
     })
     expect(calls.find((c) => c.table === 'resource_downloads' && c.op === 'insert')!.payload).toEqual({ contact_id: 'contact-1', resource_id: 'r1' })
@@ -123,6 +134,73 @@ describe('requestFreeResource', () => {
     const { d } = deps({}, requestDb({ id: 'r2', name: 'Kit 2', download_url: 'https://f/x', mailerlite_group_id: 'own-group' }))
     await requestFreeResource(input({ marketingOptIn: false, resourceSlug: 'kit-2' }), d)
     expect((d.upsertSubscriber.mock.calls[0] as unknown as [{ groups: string[] }])[0].groups).toEqual(['leads', 'own-group'])
+  })
+
+  test('without consent, a new email is a lead: not opted in, checkbox off, leads + resource groups only', async () => {
+    const db = requestDb()
+    const { d, calls } = deps({}, db)
+    expect((await requestFreeResource(input({ marketingOptIn: false }), d)).result).toEqual({ ok: true })
+
+    expect(calls.some((c) => c.table === 'email_contacts' && c.op === 'upsert')).toBe(false)
+    const inserted = calls.find((c) => c.table === 'email_contacts' && c.op === 'insert')!
+    expect(inserted.payload).toMatchObject({ email: 'lead@example.test', first_name: 'Jay', status: 'subscribed', marketing_opt_in: false, signup_source: 'free_resource' })
+    const tags = calls.find((c) => c.table === 'email_contact_tags')!.payload as { tag: string }[]
+    expect(tags.map((t) => t.tag)).toEqual(['free_resource', 'downloaded_starter_kit'])
+
+    const sub = (d.upsertSubscriber.mock.calls[0] as unknown as [Record<string, unknown>])[0]
+    expect(sub.groups).toEqual(['leads', 'starter'])
+    expect(sub).not.toHaveProperty('resubscribe')
+
+    // The account checkbox reads the row as written: subscribed (MailerLite lead) but not opted in.
+    const row = { id: 'contact-1', status: (inserted.payload as { status: string }).status, marketing_opt_in: (inserted.payload as { marketing_opt_in: boolean }).marketing_opt_in }
+    const state = await readNewsletterState({ email: 'lead@example.test', emailVerified: true }, fakeSupabase(() => ({ data: row, error: null })).client)
+    expect(state.subscribed).toBe(false)
+  })
+
+  test('without consent, an existing opted-in contact is not downgraded', async () => {
+    const existing = { id: 'contact-9', mailerlite_subscriber_id: 'ml-9', status: 'subscribed', marketing_opt_in: true }
+    const { d, calls } = deps({}, requestDb(STARTER_KIT, existing))
+    await requestFreeResource(input({ marketingOptIn: false }), d)
+
+    expect(calls.some((c) => c.table === 'email_contacts' && (c.op === 'upsert' || c.op === 'insert'))).toBe(false)
+    const neutral = calls.find((c) => c.table === 'email_contacts' && c.op === 'update' && 'signup_source' in (c.payload as object))!
+    expect(neutral.filters).toEqual([['eq', 'id', 'contact-9']])
+    for (const key of ['status', 'marketing_opt_in', 'unsubscribed_at']) expect(neutral.payload).not.toHaveProperty(key)
+    for (const c of calls.filter((c) => c.table === 'email_contacts' && c.op === 'update')) {
+      for (const key of ['status', 'marketing_opt_in', 'unsubscribed_at']) expect(c.payload).not.toHaveProperty(key)
+    }
+    expect((d.upsertSubscriber.mock.calls[0] as unknown as [{ groups: string[] }])[0].groups).toEqual(['leads', 'starter'])
+    expect(calls.find((c) => c.table === 'resource_downloads' && c.op === 'insert')!.payload).toEqual({ contact_id: 'contact-9', resource_id: 'r1' })
+  })
+
+  test('without consent, an unsubscribed contact stays unsubscribed, is not sent to MailerLite, and still gets the resource', async () => {
+    for (const status of ['unsubscribed', 'bounced', 'complained']) {
+      const existing = { id: 'contact-u', mailerlite_subscriber_id: 'ml-u', status, marketing_opt_in: false }
+      const { d, calls } = deps({}, requestDb(STARTER_KIT, existing))
+      expect((await requestFreeResource(input({ marketingOptIn: false }), d)).result).toEqual({ ok: true })
+
+      expect(calls.some((c) => c.table === 'email_contacts' && (c.op === 'upsert' || c.op === 'insert'))).toBe(false)
+      for (const c of calls.filter((c) => c.table === 'email_contacts' && c.op === 'update')) {
+        for (const key of ['status', 'marketing_opt_in', 'unsubscribed_at']) expect(c.payload).not.toHaveProperty(key)
+      }
+      expect(d.upsertSubscriber).not.toHaveBeenCalled()
+      expect(calls.find((c) => c.table === 'resource_downloads' && c.op === 'insert')!.payload).toEqual({ contact_id: 'contact-u', resource_id: 'r1' })
+      expect(d.sendEmail).toHaveBeenCalledTimes(1)
+      expect(calls.some((c) => c.table === 'resource_downloads' && c.op === 'update')).toBe(true)
+    }
+  })
+
+  test('with consent, an unsubscribed contact is resubscribed, opted in, and sent to the newsletter group', async () => {
+    const existing = { id: 'contact-1', mailerlite_subscriber_id: 'ml-1', status: 'unsubscribed', marketing_opt_in: false }
+    const { d, calls } = deps({}, requestDb(STARTER_KIT, existing))
+    await requestFreeResource(input({ marketingOptIn: true }), d)
+
+    const upsert = calls.find((c) => c.table === 'email_contacts' && c.op === 'upsert')!
+    expect(upsert.payload).toMatchObject({ status: 'subscribed', marketing_opt_in: true, unsubscribed_at: null })
+    expect(d.upsertSubscriber).toHaveBeenCalledTimes(1)
+    const sub = (d.upsertSubscriber.mock.calls[0] as unknown as [{ groups: string[]; resubscribe?: boolean }])[0]
+    expect(sub.groups).toEqual(['leads', 'starter', 'news'])
+    expect(sub.resubscribe).toBe(true)
   })
 
   test('a MailerLite failure is logged and the email still goes out', async () => {
