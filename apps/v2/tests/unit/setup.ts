@@ -5,7 +5,7 @@ const fake: Record<string, string> = {
   VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test',
   SUPABASE_SECRET_KEY: 'sb_secret_test',
   SITE_URL: 'https://example.test',
-  SHOPIFY_DEV_STORE_DOMAIN: 'test-store.myshopify.com',
+  SHOPIFY_STORE_DOMAIN: 'test-store.myshopify.com',
   SHOPIFY_STOREFRONT_ACCESS_TOKEN: 'shpat_test',
   SHOPIFY_STOREFRONT_API_VERSION: '2026-01',
 }

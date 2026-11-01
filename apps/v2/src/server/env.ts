@@ -15,8 +15,11 @@ const schema = z.object({
   // Site origin, no trailing slash (used for auth email redirects)
   SITE_URL: z.url().refine((v) => !v.endsWith('/'), 'must not end with a slash'),
 
-  // Shopify Storefront
-  SHOPIFY_DEV_STORE_DOMAIN: z.string().min(1),
+  // Shopify Storefront. One name in every environment, a different value per Vercel scope (live store in
+  // Production, dev store in Preview). SHOPIFY_DEV_STORE_DOMAIN is the old name, read only when the new
+  // one is unset so existing dev and CI settings keep working; v1's SHOPIFY_PROD_STORE_DOMAIN is never read.
+  SHOPIFY_STORE_DOMAIN: optional,
+  SHOPIFY_DEV_STORE_DOMAIN: optional,
   SHOPIFY_STOREFRONT_ACCESS_TOKEN: z.string().min(1),
   SHOPIFY_STOREFRONT_API_VERSION: z.string().regex(/^\d{4}-\d{2}$/, 'expected YYYY-MM'),
 
@@ -44,6 +47,14 @@ const schema = z.object({
   // Dev-only E2E email sandbox (src/server/sandbox.ts). Refused at boot in production.
   E2E_SANDBOX: z.enum(['true', 'false']).optional(),
 })
+  .refine((v) => v.SHOPIFY_STORE_DOMAIN || v.SHOPIFY_DEV_STORE_DOMAIN, {
+    path: ['SHOPIFY_STORE_DOMAIN'],
+    message: 'required (the store domain for this environment)',
+  })
+  .transform(({ SHOPIFY_DEV_STORE_DOMAIN, ...rest }) => ({
+    ...rest,
+    SHOPIFY_STORE_DOMAIN: (rest.SHOPIFY_STORE_DOMAIN ?? SHOPIFY_DEV_STORE_DOMAIN) as string,
+  }))
 
 export type ServerEnv = z.infer<typeof schema>
 
