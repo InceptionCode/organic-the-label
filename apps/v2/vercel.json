@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo 'dependencies installed in buildCommand'",
+  "buildCommand": "cd ../.. && bun install --frozen-lockfile && cd apps/v2 && bun run build"
+}

@@ -28,7 +28,6 @@ const fetchSupabase =
 
 export const createSupabaseServerClient = async (fallbackUrl?: string, options?: FetchSupabaseOptions) => {
   const cookieStore = await cookies()
-  // @ts-expect-error the function itself is not deprecated just a particular usage within the options.
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL! || fallbackUrl!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

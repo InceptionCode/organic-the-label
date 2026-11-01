@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { parseAudioPreviewUrls } from '@/utils/helpers/parse-preview-urls'
 import { parseWhatsIncluded } from '@/utils/helpers/parse-whats-included'
 

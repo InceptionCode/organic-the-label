@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { instagramEmbedSrc, youtubeIdFromUrl } from '@/lib/composition/embed-url'
 
 // Pure URL parsing. These run on every /compositions card render to decide

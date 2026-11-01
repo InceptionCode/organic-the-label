@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi } from 'bun:test'
 import InitAuthStore from '@/store/init-auth-store'
 import { AuthStoreProvider } from '@/store/auth-context'
 import { signedInUser } from '../../fixtures/users'

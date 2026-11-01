@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { resolveAuthStateChange, mapSupabaseUser } from '@/store/auth-context'
 import { supabaseSignedInUser } from '../../fixtures/users'
 

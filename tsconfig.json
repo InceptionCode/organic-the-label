@@ -46,6 +46,14 @@
     "playwright-report",
     "test-results",
     ".claude",
-    ".cursor"
+    ".cursor",
+    "tests",
+    "test.setup.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "apps/v2/**",
+    "apps/api/**"
   ]
 }
