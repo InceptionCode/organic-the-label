@@ -4,7 +4,7 @@ import { ensureVisitor as defaultEnsureVisitor, type EnsureVisitorInput } from '
 import { recordEvents as defaultRecordEvents, type RecordEventsInput } from './record'
 import { trackBatchSchema } from './schema'
 
-// POST /api/track (phase 06.3), framework-free so unit tests drive it with a plain Request and fakes.
+// POST /api/track, framework-free so unit tests drive it with a plain Request and fakes.
 // The only public write endpoint: same-origin only, bots are answered 204 with nothing written, the
 // body is the allow-listed batch schema, and the anonymous visitor is created here lazily.
 

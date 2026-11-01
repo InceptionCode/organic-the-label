@@ -1,0 +1,94 @@
+name: Post-deploy cache flush
+
+# After a successful v2 deployment (or on demand), flush v2's Redis namespaces and every CDN tag
+# family through the signed POST /api/cache/flush (apps/v2/scripts/flush-caches.ts).
+# Docs: apps/v2/docs/internal-docs/ci-cd.md
+#
+# Repository variables:
+#   V2_PRODUCTION_ENVIRONMENT  exact Vercel deployment environment name of v2 Production
+#   V2_DEV_ENVIRONMENT         exact Vercel deployment environment name of v2 Preview
+#   V2_DEV_BRANCH              branch bound to dev.organicsonics.com (default: dev); other Preview
+#                              deployments (feature branches) never trigger a flush
+# Environment variable (GitHub environments `production` and `preview`):
+#   FLUSH_TARGET_URL           site origin to flush (custom domain); falls back to the deployment URL
+# Environment secrets:
+#   CACHE_PURGE_SECRET               the v2 value for that environment
+#   VERCEL_AUTOMATION_BYPASS_SECRET  `preview` only: reaches the protected dev deployment
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Which v2 environment to flush
+        required: true
+        type: choice
+        options: [production, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve target
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' && (
+        (vars.V2_PRODUCTION_ENVIRONMENT != '' && github.event.deployment.environment == vars.V2_PRODUCTION_ENVIRONMENT) ||
+        (vars.V2_DEV_ENVIRONMENT != '' && github.event.deployment.environment == vars.V2_DEV_ENVIRONMENT &&
+          github.event.deployment.ref == (vars.V2_DEV_BRANCH || 'dev'))
+      ))
+    outputs:
+      target: ${{ steps.target.outputs.target }}
+    steps:
+      - name: Pick production or dev
+        id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TARGET: ${{ inputs.target }}
+          DEPLOY_ENV: ${{ github.event.deployment.environment }}
+          PRODUCTION_ENV: ${{ vars.V2_PRODUCTION_ENVIRONMENT }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            target="$INPUT_TARGET"
+          elif [ -n "$PRODUCTION_ENV" ] && [ "$DEPLOY_ENV" = "$PRODUCTION_ENV" ]; then
+            target=production
+          else
+            target=dev
+          fi
+          echo "Flushing v2 ${target}"
+          echo "target=${target}" >> "$GITHUB_OUTPUT"
+
+  flush:
+    name: Flush v2 caches (${{ needs.resolve.outputs.target }})
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ needs.resolve.outputs.target == 'production' && 'production' || 'preview' }}
+    concurrency:
+      group: post-deploy-flush-${{ needs.resolve.outputs.target }}
+      cancel-in-progress: false
+    env:
+      FLUSH_TARGET_URL: ${{ vars.FLUSH_TARGET_URL || github.event.deployment_status.environment_url }}
+      CACHE_PURGE_SECRET: ${{ secrets.CACHE_PURGE_SECRET }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Flush caches
+        run: bun run --cwd apps/v2 flush:caches

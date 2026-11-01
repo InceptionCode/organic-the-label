@@ -10,7 +10,6 @@ export function hasAuthCookie(cookies: Record<string, string>): boolean {
   return Object.keys(cookies).some((name) => name.startsWith('sb-') && name.includes('-auth-token'))
 }
 
-// Anonymous visitors and bots (no sb-*-auth-token cookie) never touch Supabase.
 export const supabaseSession = createMiddleware().server(async ({ next }) => {
   if (!hasAuthCookie(getCookies())) return next({ context: { claims: null as Claims | null } })
   const { data } = await createSupabaseServerClient(tanstackCookieAdapter()).auth.getClaims()

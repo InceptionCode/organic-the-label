@@ -1,7 +1,6 @@
 import { Redis } from '@upstash/redis'
 import { env } from '~/server/env'
 
-// The subset of the Upstash client getCached uses, so tests can pass a fake.
 export type CacheStore = {
   get<T>(key: string): Promise<T | null>
   set(key: string, value: unknown, opts: { ex: number }): Promise<unknown>
@@ -55,7 +54,8 @@ export function createCache(redis: CacheStore | null, logger: Pick<Console, 'war
   return { getCached }
 }
 
-const redis =
+/** Shared Upstash client, or null when unconfigured. getCached and /api/cache/flush both use it. */
+export const redis =
   env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
     ? new Redis({ url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN })
     : null

@@ -2,14 +2,15 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
 import { PRODUCT_HANDLE_TAG } from '~/server/http/cache-headers'
 
-// POST /api/cache/purge (phase 07.8). apps/api calls this after each Redis bust so the CDN copies of
+// POST /api/cache/purge. apps/api calls this after each Redis bust so the CDN copies of
 // the pages tagged with that family (server/http/cache-headers.ts) are invalidated too. Framework-free
 // so unit tests drive it with a plain Request and a fake invalidate.
 //
 // Auth: X-Purge-Signature is the hex HMAC-SHA256 of `${timestamp}.${rawBody}` with CACHE_PURGE_SECRET,
 // and X-Purge-Timestamp (unix seconds) must be within 5 minutes, so a captured request cannot be
-// replayed later or re-signed with a fresh timestamp. This is why src/start.ts exempts this one path
-// from the same-origin CSRF check: the caller is a server with no Origin header.
+// replayed later or re-signed with a fresh timestamp. This is why src/start.ts exempts these paths
+// from the same-origin CSRF check: the caller is a server with no Origin header. /api/cache/flush
+// (server/cache/flush.ts) reuses readSignedBody, so both endpoints share one secret and format.
 
 const TAG = '[api/cache/purge]'
 
@@ -70,15 +71,27 @@ export type PurgeDeps = {
   now?: () => number
 }
 
-const json = (status: number, body: Record<string, unknown>) => Response.json(body, { status, headers: PURGE_HEADERS })
+/** JSON response with the purge endpoints' no-store, noindex headers. */
+export const purgeJson = (status: number, body: Record<string, unknown>) =>
+  Response.json(body, { status, headers: PURGE_HEADERS })
 
-export async function handlePurgeRequest(request: Request, deps: PurgeDeps): Promise<Response> {
-  if (!deps.secret) return json(503, { ok: false, error: 'Purge is not configured.' })
+export type SignedRequestDeps = Pick<PurgeDeps, 'secret' | 'now'>
+
+/**
+ * Shared by /api/cache/purge and /api/cache/flush: reads the body (16 KB cap) and checks the HMAC
+ * signature and timestamp window. Returns the raw body, or the 503 / 413 / 401 response to send.
+ */
+export async function readSignedBody(
+  request: Request,
+  deps: SignedRequestDeps,
+  logTag: string,
+): Promise<{ rawBody: string } | Response> {
+  if (!deps.secret) return purgeJson(503, { ok: false, error: 'Purge is not configured.' })
 
   const declared = Number(request.headers.get('content-length') ?? 0)
-  if (declared > MAX_BODY_BYTES) return json(413, { ok: false, error: 'Body too large.' })
+  if (declared > MAX_BODY_BYTES) return purgeJson(413, { ok: false, error: 'Body too large.' })
   const rawBody = await request.text()
-  if (rawBody.length > MAX_BODY_BYTES) return json(413, { ok: false, error: 'Body too large.' })
+  if (rawBody.length > MAX_BODY_BYTES) return purgeJson(413, { ok: false, error: 'Body too large.' })
 
   const check = verifyPurgeSignature({
     secret: deps.secret,
@@ -88,30 +101,37 @@ export async function handlePurgeRequest(request: Request, deps: PurgeDeps): Pro
     nowSeconds: (deps.now ?? (() => Math.floor(Date.now() / 1000)))(),
   })
   if (check !== 'ok') {
-    console.warn(TAG, 'rejected', check)
-    return json(401, { ok: false, error: 'Unauthorized' })
+    console.warn(logTag, 'rejected', check)
+    return purgeJson(401, { ok: false, error: 'Unauthorized' })
   }
+  return { rawBody }
+}
+
+export async function handlePurgeRequest(request: Request, deps: PurgeDeps): Promise<Response> {
+  const signed = await readSignedBody(request, deps, TAG)
+  if (signed instanceof Response) return signed
+  const { rawBody } = signed
 
   let tags: string[]
   try {
     const parsed = purgeBodySchema.safeParse(JSON.parse(rawBody))
-    if (!parsed.success) return json(400, { ok: false, error: 'Invalid tags.' })
+    if (!parsed.success) return purgeJson(400, { ok: false, error: 'Invalid tags.' })
     tags = tagsToInvalidate(parsed.data.tags)
   } catch {
-    return json(400, { ok: false, error: 'Invalid JSON.' })
+    return purgeJson(400, { ok: false, error: 'Invalid JSON.' })
   }
 
   if (!deps.available()) {
     console.warn(TAG, 'CDN purge API unavailable outside a Vercel Function', { tags })
-    return json(503, { ok: false, error: 'CDN purge is unavailable on this runtime.', tags })
+    return purgeJson(503, { ok: false, error: 'CDN purge is unavailable on this runtime.', tags })
   }
 
   try {
     await deps.invalidate(tags)
   } catch (error) {
     console.error(TAG, 'invalidateByTag failed', error instanceof Error ? error.message : error)
-    return json(502, { ok: false, error: 'Invalidation failed.' })
+    return purgeJson(502, { ok: false, error: 'Invalidation failed.' })
   }
   console.info(TAG, 'invalidated', { tags })
-  return json(200, { ok: true, invalidated: tags })
+  return purgeJson(200, { ok: true, invalidated: tags })
 }

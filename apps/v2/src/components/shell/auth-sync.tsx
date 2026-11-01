@@ -16,8 +16,6 @@ export function AuthSync() {
     let unsubscribe: (() => void) | undefined
 
     const apply = (next: SessionUser | null) => {
-      // A different user (or none) must never see the previous user's account data: owned badges,
-      // library, profile. Covers sign-out in another tab and a new sign-in without the sign-out button.
       const previousId = queryClient.getQueryData<SessionUser | null>(SESSION_KEY)?.id ?? null
       if (previousId !== (next?.id ?? null)) queryClient.removeQueries({ queryKey: ACCOUNT_KEY })
       queryClient.setQueryData(SESSION_KEY, next)
@@ -51,7 +49,7 @@ export function AuthSync() {
     }
 
     // After load and idle: the Supabase client (about 50 KB) never competes with the LCP resources. A
-    // cached anonymous page still reconciles a signed-in session via INITIAL_SESSION (phase 07.3).
+    // cached anonymous page still reconciles a signed-in session via INITIAL_SESSION
     const cancelStart = whenLoadedAndIdle(() => void start().catch((error) => console.error('[AuthSync]', error)), 1000)
 
     return () => {

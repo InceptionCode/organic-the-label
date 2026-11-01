@@ -8,13 +8,11 @@ import { supabaseSession } from '~/fns/middleware/session'
 // the client build drops the import (a bare side-effect import would ship env.ts to the browser).
 export const getServerEnv = createServerOnlyFn(() => env)
 
-// Validate server fn calls and unsafe methods only, so cross-site page navigations
-// (search engines, inbound links) still render.
-// One exemption (phase 07.8): apps/api's server-to-server POST to /api/cache/purge carries no Origin.
-// That route authenticates with a timestamped HMAC (server/cache/purge.ts) and changes no user state.
-// Exact path, POST, non-serverFn only; the literal keeps purge.ts (node:crypto) out of this module.
+// Server-to-server POSTs that verify their own HMAC signature (server/cache/purge.ts); exact paths only.
+const SIGNED_CACHE_PATHS: ReadonlySet<string> = new Set(['/api/cache/purge', '/api/cache/flush'])
+
 const isSignedCachePurge = (handlerType: string, method: string, pathname: string) =>
-  handlerType !== 'serverFn' && method === 'POST' && pathname === '/api/cache/purge'
+  handlerType !== 'serverFn' && method === 'POST' && SIGNED_CACHE_PATHS.has(pathname)
 
 const csrf = createCsrfMiddleware({
   filter: ({ handlerType, request, pathname }) =>
@@ -22,9 +20,6 @@ const csrf = createCsrfMiddleware({
     (handlerType === 'serverFn' || !['GET', 'HEAD', 'OPTIONS'].includes(request.method)),
 })
 
-// robotsHeader runs first so even a CSRF rejection carries X-Robots-Tag on non-production hosts.
-// cacheGuard runs innermost (after supabaseSession), so it sees the route's final response and downgrades
-// any publicly cacheable one that could carry per-visitor state (phase 07.3).
 export const startInstance = createStart(() => ({
   requestMiddleware: [robotsHeader, csrf, supabaseSession, cacheGuard],
 }))

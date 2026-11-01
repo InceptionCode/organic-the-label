@@ -1,6 +1,6 @@
 import { invalidateByTag } from '@vercel/functions'
 
-// The only module that touches @vercel/functions (phase 07.8, 00-architecture section 10). Server only:
+// The only module that touches @vercel/functions. Server only:
 // imported by the /api/cache/purge handler, never by route components.
 //
 // invalidateByTag reads the purge API from the Vercel request context and silently resolves when there

@@ -1,20 +1,13 @@
-// Anonymous CDN caching (phase 07.3, 00-architecture section 7). Public, data-driven pages send
+// Anonymous CDN caching. Public, data-driven pages send
 // PUBLIC_PAGE_CACHE_CONTROL from their route `headers()`; the cache-guard request middleware then
 // downgrades any response that could carry per-visitor state to PRIVATE_NO_STORE.
-//
-// Why this is safe: the Vercel cache key ignores cookies, so a signed-in visitor can be served the cached
-// anonymous HTML. That HTML holds no user data (session is null, the cart and owned badges load on the
-// client), and <AuthSync/> reconciles ['session'] on INITIAL_SESSION after hydration.
-//
-// Pure (no server imports) so the decision is unit tested directly.
 
 export const PUBLIC_PAGE_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=600'
 export const PRIVATE_NO_STORE = 'private, no-store'
 
-// Vercel CDN cache tags (phase 07.8, 00-architecture section 7). One tag per Redis key family that
-// apps/api busts on webhooks; apps/api then POSTs the same tags to /api/cache/purge, which calls
-// invalidateByTag. The purge allow-list (server/cache/purge.ts) accepts exactly these shapes. Every
-// public page carries `products`: the root loader dehydrates productQueries.newest(5) for the sticky bar.
+// Vercel CDN cache tags. One tag per Redis key family.
+// Every public page carries `products`: the root loader dehydrates productQueries.newest(5) for the sticky bar.
+
 export const CDN_TAG = { products: 'products', compositions: 'compositions', freeResources: 'free-resources' } as const
 export type CdnTag = (typeof CDN_TAG)[keyof typeof CDN_TAG] | `product:${string}`
 

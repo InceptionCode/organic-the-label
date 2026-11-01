@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 // Test-side environment. Values are read from apps/v2/.env.development (the DEV Supabase project)
 // and never printed. The suite refuses to run when that Supabase URL equals the production one in
-// the repo root .env.production, so a misconfigured file can never point the cleanup at production.
+// the repo root .env.production or PROD_SUPABASE_URL (set in CI, where it is required), so a
+// misconfigured file or secret can never point the cleanup at production.
 
 const APP_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
@@ -53,8 +54,13 @@ export function supabaseConfig() {
   if (!url || !secretKey) throw new Error('E2E needs VITE_SUPABASE_URL and SUPABASE_SECRET_KEY in apps/v2/.env.development')
 
   const production = parseEnvFile(resolve(APP_DIR, '..', '..', '.env.production'))
-  const prodUrl = production.NEXT_PUBLIC_SUPABASE_URL || production.SUPABASE_URL || production.VITE_SUPABASE_URL || ''
-  if (prodUrl && hostOf(prodUrl) === hostOf(url)) {
+  const fileProdUrl = production.NEXT_PUBLIC_SUPABASE_URL || production.SUPABASE_URL || production.VITE_SUPABASE_URL || ''
+  // CI has no .env.production; the workflow passes the production Supabase URL as PROD_SUPABASE_URL.
+  const prodUrls = [fileProdUrl, process.env.PROD_SUPABASE_URL || ''].filter(Boolean)
+  if (process.env.CI && prodUrls.length === 0) {
+    throw new Error('Refusing to run in CI: set PROD_SUPABASE_URL so the suite can prove it is not pointed at production.')
+  }
+  if (prodUrls.some((prodUrl) => hostOf(prodUrl) === hostOf(url))) {
     throw new Error('Refusing to run: the E2E Supabase project matches the production project. Use the dev project only.')
   }
   return { url, secretKey }

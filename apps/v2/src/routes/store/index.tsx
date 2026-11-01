@@ -12,7 +12,7 @@ import { CDN_TAG, publicPageHeaders } from '~/server/http/cache-headers'
 
 export const Route = createFileRoute('/store/')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
-  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
+  // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor.
   headers: () => publicPageHeaders([CDN_TAG.products]),
   validateSearch: validateStoreSearch,
   loaderDeps: ({ search }) => search,
@@ -21,7 +21,6 @@ export const Route = createFileRoute('/store/')({
       const page = await context.queryClient.query(productQueries.list(storeSearchToListParams(deps)))
       return { error: false, items: page.products.map((p) => ({ handle: p.handle, title: p.title })) }
     } catch {
-      // The page exists; the catalog is temporarily unavailable. Render the v1 error state (200).
       return { error: true, items: [] }
     }
   },

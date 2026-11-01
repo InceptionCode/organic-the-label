@@ -4,7 +4,7 @@ import { buttonClasses } from '~/ui/button'
 const classes = buttonClasses({ size: 'lg', className: 'w-full justify-center' })
 
 /**
- * Hands off to Shopify's hosted checkout in the same tab (owner decision 2026-10-18; no target="_blank").
+ * Hands off to Shopify's hosted checkout in the same tab.
  * Disabled while there is no checkout URL or a cart mutation is running, so the shopper never checks
  * out a cart that is about to change. `checkout_clicked` fires on the real click; the queue's pagehide
  * flush sends it as the tab leaves for Shopify.

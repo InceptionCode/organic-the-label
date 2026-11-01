@@ -104,6 +104,37 @@ test.describe('public routes @smoke', () => {
     expect(res.headers()['cache-control']).toBe('no-store')
   })
 
+  // Phase 08.0: same signed scheme and CSRF exemption as purge.
+  test('/api/cache/flush rejects an unsigned POST', async ({ request }) => {
+    const res = await request.post('/api/cache/flush', { data: { scope: 'all' } })
+    expect([401, 503]).toContain(res.status())
+    expect(res.headers()['cache-control']).toBe('no-store')
+    expect(res.headers()['x-robots-tag']).toContain('noindex')
+  })
+
+  // Phase 08.1: v1 links in already-sent emails 308 to the v2 paths with the query string intact.
+  const LEGACY: { from: string; to: string }[] = [
+    {
+      from: '/api/auth/confirm?token_hash=abc&type=email&next=/explore',
+      to: '/auth/confirm?token_hash=abc&type=email&next=/explore',
+    },
+    {
+      from: '/api/auth/confirm?token_hash=xyz&type=recovery&next=%2Flogin%2Freset-password',
+      to: '/auth/confirm?token_hash=xyz&type=recovery&next=%2Flogin%2Freset-password',
+    },
+    { from: '/api/resources/download/abc-123?utm_source=email', to: '/free/download/abc-123?utm_source=email' },
+    { from: '/api/composition/download/lofi-loop?ref=v1', to: '/compositions/download/lofi-loop?ref=v1' },
+    { from: '/api/composition/download/lofi-loop', to: '/compositions/download/lofi-loop' },
+  ]
+  for (const { from, to } of LEGACY) {
+    test(`legacy ${from} 308s`, async ({ request }) => {
+      const res = await request.get(from, { maxRedirects: 0 })
+      expect(res.status()).toBe(308)
+      expect(res.headers()['location']).toBe(to)
+      expect(res.headers()['cache-control']).toBe('no-store')
+    })
+  }
+
   test('non-production responses carry X-Robots-Tag', async ({ request }) => {
     const res = await request.get('/')
     expect(res.headers()['x-robots-tag']).toContain('noindex')

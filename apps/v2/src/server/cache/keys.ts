@@ -1,5 +1,4 @@
-// Cache key contract (00-architecture section 7). apps/api busts product:handle:<h>,
-// shopify:products:*, compositions:* and free-resources:* on webhooks, so keep these shapes exact.
+// Cache key contract
 export const keys = {
   productByHandle: (h: string) => `product:handle:${h}`,
   productList: (sig: string) => `shopify:products:list:${sig}`,
@@ -26,8 +25,8 @@ export const keys = {
   freeResourceFeatured: () => 'free-resources:featured',
 } as const
 
-// Seconds. Webhook busting keeps long TTLs safe. product and productList match v1
-// (products-details-cache 30 days, products-cache 900s; pages/product.md, pages/store.md).
+// Seconds. Webhook busting keeps long TTLs safe.
+// (products-details-cache 30 days, products-cache 900s;
 export const ttl = {
   product: 60 * 60 * 24 * 30,
   productList: 900,
@@ -36,13 +35,10 @@ export const ttl = {
   productSearch: 300,
   productsByIds: 3600,
   compositions: 3600,
-  /** pages/search.md: search results are short-lived. */
   search: 300,
   freeResources: 3600,
   /** Instagram thumbnails are signed URLs that expire within hours; do not raise this. */
   workWithMe: 3600,
-  /** v1 compositions-cache revalidate (pages/compositions.md). */
   compositionsList: 900,
-  /** v1 get-free-resource revalidate (pages/free.md). */
   freeResource: 300,
 } as const

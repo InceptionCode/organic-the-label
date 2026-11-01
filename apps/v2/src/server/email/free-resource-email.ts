@@ -1,4 +1,4 @@
-// The free resource download email (port of v1 lib/email/resend.ts sendFreeResourceEmail). Pure
+// The free resource download email. Pure
 // builder: the request service sends it through the shared Resend client. Every interpolated value
 // is escaped (v1 put the first name into the HTML raw).
 

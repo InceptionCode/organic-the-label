@@ -118,7 +118,6 @@ function RootLayout() {
         </Suspense>
       )}
       <AuthSync />
-      {/* Phase 07.7: once-per-session intro. Client-only, decides after load; the overlay is a lazy chunk. */}
       <SplashGate />
     </CartDrawerProvider>
   )

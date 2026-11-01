@@ -47,7 +47,7 @@ export function extFromUrl(url: string, fallback: string): string {
   }
 }
 
-class TooLargeError extends Error {}
+class TooLargeError extends Error { }
 
 async function fetchBytes(fetchImpl: typeof fetch, url: string, label: string): Promise<Uint8Array> {
   const res = await fetchImpl(url, { redirect: 'follow', signal: AbortSignal.timeout(30_000) })
@@ -129,7 +129,7 @@ export async function handleCompositionDownload(request: Request, slug: string, 
   if (audio.byteLength + terms.byteLength > MAX_ZIP_BYTES) return jsonError(413, 'This download is too large to serve.')
 
   const folder = slug.replace(/[^\w-]/g, '') || 'loop'
-  const audioExt = extFromUrl(row.audio_file_url!, 'wav')
+  const audioExt = extFromUrl(row.audio_file_url!, 'mp3')
   const termsExt = extFromUrl(row.terms_file_url!, 'txt')
   const audioName = row.audio_file_name ? safeFileName(row.audio_file_name, `${slug}.${audioExt}`) : `${slug}.${audioExt}`
   const zipped = createZip([

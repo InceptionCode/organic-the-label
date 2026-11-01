@@ -1,9 +1,7 @@
 import { createHmac } from "node:crypto";
 
-// Vercel CDN purge for the v2 site (v2 phase 07.8). After a Redis bust, cache.ts POSTs the matching
-// cache tags to ${V2_SITE_URL}/api/cache/purge, signed with CACHE_PURGE_SECRET. Non-fatal by design:
-// Redis is the source of truth and v2's CDN copies expire within 60s anyway, so a failed purge is
-// logged and never fails or retries the webhook. v1 is not involved.
+// Vercel CDN purge for the v2 site. After a Redis bust, cache.ts POSTs the matching
+// cache tags to ${V2_SITE_URL}/api/cache/purge, signed with CACHE_PURGE_SECRET. Non-fatal by design.
 
 const TAG = "[cache]";
 const PURGE_PATH = "/api/cache/purge";

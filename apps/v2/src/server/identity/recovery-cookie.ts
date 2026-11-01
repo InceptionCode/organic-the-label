@@ -27,11 +27,11 @@ export function isValidRecoveryCookie(
   if (!value || !userId) return false
   const parts = value.split('.')
   if (parts.length !== 3) return false
-  const [cookieUser, expiresAt, mac] = parts as [string, string, string]
+  const [cookieUser, expiresAt, hmac] = parts as [string, string, string]
   if (cookieUser !== userId) return false
   const exp = Number(expiresAt)
   if (!Number.isInteger(exp) || exp < nowSeconds) return false
   const expected = Buffer.from(sign(`${cookieUser}.${expiresAt}`, secret))
-  const given = Buffer.from(mac)
+  const given = Buffer.from(hmac)
   return expected.length === given.length && timingSafeEqual(expected, given)
 }

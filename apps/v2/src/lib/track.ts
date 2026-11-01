@@ -1,6 +1,6 @@
 import type { ActivityEventType } from '~/server/activity/schema'
 
-// Client activity queue (phase 06.4). Events wait in memory and leave in one beacon when the queue
+// Client activity queue. Events wait in memory and leave in one beacon when the queue
 // reaches 20, 10 seconds after the first queued event, or when the page is hidden or unloaded, so
 // navigation never waits on tracking. No-op during SSR and for automated browsers. Keep this module
 // tiny: it ships in the entry chunk (the cart provider calls it).
@@ -46,7 +46,7 @@ export function createTracker(env: TrackerEnv) {
         credentials: 'same-origin',
         keepalive: true,
       })
-      .catch(() => {})
+      .catch(() => { })
   }
 
   const flush = () => {

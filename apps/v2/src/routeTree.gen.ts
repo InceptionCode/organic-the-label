@@ -30,10 +30,14 @@ import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as LoginResetPasswordRouteImport } from './routes/login/reset-password'
 import { Route as StoreIndexRouteImport } from './routes/store/index'
 import { Route as StoreHandleRouteImport } from './routes/store/$handle'
+import { Route as ApiAuthConfirmRouteImport } from './routes/api/auth/confirm'
+import { Route as ApiCacheFlushRouteImport } from './routes/api/cache/flush'
 import { Route as ApiCachePurgeRouteImport } from './routes/api/cache/purge'
 import { Route as CompositionsDownloadSlugRouteImport } from './routes/compositions/download.$slug'
 import { Route as FreeDownloadIdRouteImport } from './routes/free/download.$id'
+import { Route as ApiCompositionDownloadSlugRouteImport } from './routes/api/composition/download.$slug'
 import { Route as ApiInstagramVideoIdRouteImport } from './routes/api/instagram/video.$id'
+import { Route as ApiResourcesDownloadIdRouteImport } from './routes/api/resources/download.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -140,6 +144,16 @@ const StoreHandleRoute = StoreHandleRouteImport.update({
   path: '/store/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthConfirmRoute = ApiAuthConfirmRouteImport.update({
+  id: '/api/auth/confirm',
+  path: '/api/auth/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCacheFlushRoute = ApiCacheFlushRouteImport.update({
+  id: '/api/cache/flush',
+  path: '/api/cache/flush',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCachePurgeRoute = ApiCachePurgeRouteImport.update({
   id: '/api/cache/purge',
   path: '/api/cache/purge',
@@ -156,9 +170,20 @@ const FreeDownloadIdRoute = FreeDownloadIdRouteImport.update({
   path: '/free/download/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompositionDownloadSlugRoute =
+  ApiCompositionDownloadSlugRouteImport.update({
+    id: '/api/composition/download/$slug',
+    path: '/api/composition/download/$slug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiInstagramVideoIdRoute = ApiInstagramVideoIdRouteImport.update({
   id: '/api/instagram/video/$id',
   path: '/api/instagram/video/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiResourcesDownloadIdRoute = ApiResourcesDownloadIdRouteImport.update({
+  id: '/api/resources/download/$id',
+  path: '/api/resources/download/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -183,10 +208,14 @@ export interface FileRoutesByFullPath {
   '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/api/auth/confirm': typeof ApiAuthConfirmRoute
+  '/api/cache/flush': typeof ApiCacheFlushRoute
   '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/composition/download/$slug': typeof ApiCompositionDownloadSlugRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
+  '/api/resources/download/$id': typeof ApiResourcesDownloadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -209,10 +238,14 @@ export interface FileRoutesByTo {
   '/free': typeof FreeIndexRoute
   '/login': typeof LoginIndexRoute
   '/store': typeof StoreIndexRoute
+  '/api/auth/confirm': typeof ApiAuthConfirmRoute
+  '/api/cache/flush': typeof ApiCacheFlushRoute
   '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/composition/download/$slug': typeof ApiCompositionDownloadSlugRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
+  '/api/resources/download/$id': typeof ApiResourcesDownloadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -237,10 +270,14 @@ export interface FileRoutesById {
   '/free/': typeof FreeIndexRoute
   '/login/': typeof LoginIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/api/auth/confirm': typeof ApiAuthConfirmRoute
+  '/api/cache/flush': typeof ApiCacheFlushRoute
   '/api/cache/purge': typeof ApiCachePurgeRoute
   '/compositions/download/$slug': typeof CompositionsDownloadSlugRoute
   '/free/download/$id': typeof FreeDownloadIdRoute
+  '/api/composition/download/$slug': typeof ApiCompositionDownloadSlugRoute
   '/api/instagram/video/$id': typeof ApiInstagramVideoIdRoute
+  '/api/resources/download/$id': typeof ApiResourcesDownloadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -265,10 +302,14 @@ export interface FileRouteTypes {
     | '/free/'
     | '/login/'
     | '/store/'
+    | '/api/auth/confirm'
+    | '/api/cache/flush'
     | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
+    | '/api/composition/download/$slug'
     | '/api/instagram/video/$id'
+    | '/api/resources/download/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -291,10 +332,14 @@ export interface FileRouteTypes {
     | '/free'
     | '/login'
     | '/store'
+    | '/api/auth/confirm'
+    | '/api/cache/flush'
     | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
+    | '/api/composition/download/$slug'
     | '/api/instagram/video/$id'
+    | '/api/resources/download/$id'
   id:
     | '__root__'
     | '/'
@@ -318,10 +363,14 @@ export interface FileRouteTypes {
     | '/free/'
     | '/login/'
     | '/store/'
+    | '/api/auth/confirm'
+    | '/api/cache/flush'
     | '/api/cache/purge'
     | '/compositions/download/$slug'
     | '/free/download/$id'
+    | '/api/composition/download/$slug'
     | '/api/instagram/video/$id'
+    | '/api/resources/download/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -345,10 +394,14 @@ export interface RootRouteChildren {
   FreeIndexRoute: typeof FreeIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   StoreIndexRoute: typeof StoreIndexRoute
+  ApiAuthConfirmRoute: typeof ApiAuthConfirmRoute
+  ApiCacheFlushRoute: typeof ApiCacheFlushRoute
   ApiCachePurgeRoute: typeof ApiCachePurgeRoute
   CompositionsDownloadSlugRoute: typeof CompositionsDownloadSlugRoute
   FreeDownloadIdRoute: typeof FreeDownloadIdRoute
+  ApiCompositionDownloadSlugRoute: typeof ApiCompositionDownloadSlugRoute
   ApiInstagramVideoIdRoute: typeof ApiInstagramVideoIdRoute
+  ApiResourcesDownloadIdRoute: typeof ApiResourcesDownloadIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -500,6 +553,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/confirm': {
+      id: '/api/auth/confirm'
+      path: '/api/auth/confirm'
+      fullPath: '/api/auth/confirm'
+      preLoaderRoute: typeof ApiAuthConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cache/flush': {
+      id: '/api/cache/flush'
+      path: '/api/cache/flush'
+      fullPath: '/api/cache/flush'
+      preLoaderRoute: typeof ApiCacheFlushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cache/purge': {
       id: '/api/cache/purge'
       path: '/api/cache/purge'
@@ -521,11 +588,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FreeDownloadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/composition/download/$slug': {
+      id: '/api/composition/download/$slug'
+      path: '/api/composition/download/$slug'
+      fullPath: '/api/composition/download/$slug'
+      preLoaderRoute: typeof ApiCompositionDownloadSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/instagram/video/$id': {
       id: '/api/instagram/video/$id'
       path: '/api/instagram/video/$id'
       fullPath: '/api/instagram/video/$id'
       preLoaderRoute: typeof ApiInstagramVideoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/resources/download/$id': {
+      id: '/api/resources/download/$id'
+      path: '/api/resources/download/$id'
+      fullPath: '/api/resources/download/$id'
+      preLoaderRoute: typeof ApiResourcesDownloadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -563,10 +644,14 @@ const rootRouteChildren: RootRouteChildren = {
   FreeIndexRoute: FreeIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   StoreIndexRoute: StoreIndexRoute,
+  ApiAuthConfirmRoute: ApiAuthConfirmRoute,
+  ApiCacheFlushRoute: ApiCacheFlushRoute,
   ApiCachePurgeRoute: ApiCachePurgeRoute,
   CompositionsDownloadSlugRoute: CompositionsDownloadSlugRoute,
   FreeDownloadIdRoute: FreeDownloadIdRoute,
+  ApiCompositionDownloadSlugRoute: ApiCompositionDownloadSlugRoute,
   ApiInstagramVideoIdRoute: ApiInstagramVideoIdRoute,
+  ApiResourcesDownloadIdRoute: ApiResourcesDownloadIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

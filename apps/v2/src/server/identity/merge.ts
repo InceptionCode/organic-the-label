@@ -26,7 +26,6 @@ export async function claimGuestEntitlements(
   if (error) throw new Error(`Failed to claim guest entitlements: ${error.message}`)
 }
 
-// Every step is a filtered update, so running it again changes nothing.
 export async function mergeVisitor(
   { userId, email, emailVerified, anonToken }: MergeVisitorInput,
   client: SupabaseClient = createSupabaseAdminClient(),
