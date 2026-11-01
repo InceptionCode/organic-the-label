@@ -68,7 +68,7 @@ export function supabaseConfig() {
 
 /** Shopify product GID for a handle, read from the dev Storefront API with the app's own token. */
 export async function productGid(handle: string): Promise<string> {
-  const domain = value('SHOPIFY_DEV_STORE_DOMAIN').replace(/^https?:\/\//, '').replace(/\/+$/, '')
+  const domain = (value('SHOPIFY_STORE_DOMAIN') || value('SHOPIFY_DEV_STORE_DOMAIN')).replace(/^https?:\/\//, '').replace(/\/+$/, '')
   const version = value('SHOPIFY_STOREFRONT_API_VERSION')
   const token = value('SHOPIFY_STOREFRONT_ACCESS_TOKEN')
   const res = await fetch(`https://${domain}/api/${version}/graphql.json`, {
