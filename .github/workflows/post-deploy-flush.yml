@@ -36,26 +36,36 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event.deployment_status.state == 'success' && (
         (vars.V2_PRODUCTION_ENVIRONMENT != '' && github.event.deployment.environment == vars.V2_PRODUCTION_ENVIRONMENT) ||
-        (vars.V2_DEV_ENVIRONMENT != '' && github.event.deployment.environment == vars.V2_DEV_ENVIRONMENT &&
-          github.event.deployment.ref == (vars.V2_DEV_BRANCH || 'dev'))
+        (vars.V2_DEV_ENVIRONMENT != '' && github.event.deployment.environment == vars.V2_DEV_ENVIRONMENT)
       ))
     outputs:
       target: ${{ steps.target.outputs.target }}
     steps:
+      # Vercel sets deployment.ref to the commit SHA, not the branch name, so a dev deploy is recognised
+      # by its SHA being the current tip of the dev branch. Other Preview deploys (feature branches) skip.
       - name: Pick production or dev
         id: target
         env:
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TARGET: ${{ inputs.target }}
           DEPLOY_ENV: ${{ github.event.deployment.environment }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
           PRODUCTION_ENV: ${{ vars.V2_PRODUCTION_ENVIRONMENT }}
+          DEV_BRANCH: ${{ vars.V2_DEV_BRANCH || 'dev' }}
+          REPO: ${{ github.repository }}
         run: |
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             target="$INPUT_TARGET"
           elif [ -n "$PRODUCTION_ENV" ] && [ "$DEPLOY_ENV" = "$PRODUCTION_ENV" ]; then
             target=production
           else
-            target=dev
+            dev_tip="$(git ls-remote "https://github.com/${REPO}.git" "refs/heads/${DEV_BRANCH}" | cut -f1)"
+            if [ -n "$dev_tip" ] && [ "$dev_tip" = "$DEPLOY_SHA" ]; then
+              target=dev
+            else
+              echo "Preview deploy of ${DEPLOY_SHA} is not the tip of ${DEV_BRANCH}; nothing to flush."
+              target=none
+            fi
           fi
           echo "Flushing v2 ${target}"
           echo "target=${target}" >> "$GITHUB_OUTPUT"
@@ -63,6 +73,7 @@ jobs:
   flush:
     name: Flush v2 caches (${{ needs.resolve.outputs.target }})
     needs: resolve
+    if: needs.resolve.outputs.target == 'production' || needs.resolve.outputs.target == 'dev'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: ${{ needs.resolve.outputs.target == 'production' && 'production' || 'preview' }}
