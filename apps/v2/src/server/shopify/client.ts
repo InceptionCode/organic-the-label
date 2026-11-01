@@ -72,7 +72,7 @@ export function createShopifyClient(config: ShopifyClientConfig) {
 }
 
 export const shopifyQuery = createShopifyClient({
-  storeDomain: env.SHOPIFY_DEV_STORE_DOMAIN,
+  storeDomain: env.SHOPIFY_STORE_DOMAIN,
   accessToken: env.SHOPIFY_STOREFRONT_ACCESS_TOKEN,
   apiVersion: env.SHOPIFY_STOREFRONT_API_VERSION,
 })
