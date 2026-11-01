@@ -18,22 +18,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 10
+          bun-version: 1.4.2
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 23
-          cache: pnpm
+          node-version: 24
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build release notes
-        run: pnpm exec git-cliff --latest --strip all --output RELEASE_NOTES.md
+        run: bunx git-cliff --latest --strip all --output RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

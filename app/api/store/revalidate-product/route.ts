@@ -46,5 +46,7 @@ export async function POST(req: Request) {
     revalidateTag(`product:handle:${payload.handle}`, "max");
   }
 
+  revalidateTag("shopify:products", "max");
+
   return NextResponse.json({ ok: true });
 }

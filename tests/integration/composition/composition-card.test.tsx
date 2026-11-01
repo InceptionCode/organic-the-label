@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'bun:test'
 import { render, screen, fireEvent, waitFor } from '../../utils/render'
 import { CompositionCard } from '@/app/compositions/components/composition-card'
 import {

@@ -15,5 +15,6 @@ export const getCachedProducts = (searchParams: NormalizedSearchParams, productT
     ["shopify:productsPage:v2", productTable, ...buildFilterKey(searchParams)],
     {
       revalidate: 900,
+      tags: ["shopify:products"],
     }
   )();

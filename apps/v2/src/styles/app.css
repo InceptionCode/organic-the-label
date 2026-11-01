@@ -1,0 +1,1053 @@
+/* Organic Sonics v2 design tokens and utilities.
+   Values follow public/brand-assets/organic-sonics-brand-guidelines.png and the flat, full-page
+   direction in docs/internal-docs/codebase_migration_docs/design-direction.md.
+   Dark is the default theme; light lives under .light. */
+
+@import "tailwindcss";
+/* Self-hosted fonts. wght.css covers all subsets via unicode-range; browsers fetch latin only. */
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource/bebas-neue/latin-400.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Map design tokens into Tailwind theme slots */
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-geist-mono);
+
+  /* Core color tokens */
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--text-primary);
+
+  --color-card: var(--bg-elevated);
+  --color-card-foreground: var(--text-primary);
+
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+
+  --color-primary: var(--accent-primary);
+  --color-primary-foreground: var(--accent-contrast);
+
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text-primary);
+
+  --color-muted: var(--surface-1);
+  --color-muted-foreground: var(--text-muted);
+
+  --color-accent: var(--accent-primary);
+  --color-accent-foreground: var(--accent-contrast);
+
+  --color-destructive: var(--danger);
+  --color-border: var(--border-default);
+  --color-input: var(--surface-2);
+  --color-ring: var(--accent-primary);
+
+  /* Brand color tokens exposed as Tailwind utilities */
+  --color-brand-red: var(--accent-primary);
+  --color-brand-beige: var(--accent-secondary);
+  --color-sand: var(--band-sand-bg);
+  --color-on-sand: var(--band-sand-fg);
+
+  /* Radius: flat scale. Imagery uses none. */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─────────────────────────────────────────────────────────
+   DARK (default brand experience): red, beige, black
+───────────────────────────────────────────────────────── */
+:root,
+.dark {
+  color-scheme: dark;
+  --radius: 4px;
+
+  --bg-canvas: #070707;
+  --bg-subtle: #0C0C0C;
+  --bg-elevated: #101010;
+  --bg-overlay: rgba(7, 7, 7, 0.86);
+
+  --surface-1: #101010;
+  --surface-2: #171717;
+  --surface-3: #1F1F1F;
+
+  --text-primary: #F7F3EB;   /* 18.2:1 on canvas */
+  --text-secondary: #D9C7A7; /* 12.2:1 */
+  --text-muted: #958B7C;     /* 6.0:1 on canvas, 5.4:1 on surface-2 */
+  --text-disabled: #4A4438;
+
+  /* Bone hairlines */
+  --border-subtle: rgba(247, 243, 235, 0.08);
+  --border-default: rgba(247, 243, 235, 0.12);
+  --border-strong: rgba(247, 243, 235, 0.22);
+  --border-focus: rgba(229, 83, 75, 0.80);
+
+  /* Brand red. Fill only; red text uses --accent-text. */
+  --accent-primary: #B31919;       /* bone text on it 6.2:1 */
+  --accent-primary-hover: #C21F1F; /* bone text on it 5.4:1 */
+  --accent-primary-soft: rgba(179, 25, 25, 0.16);
+  --accent-contrast: #F7F3EB;
+  --accent-text: #E5534B;          /* 5.4:1 on canvas, 4.8:1 on surface-2 */
+
+  /* Brand beige */
+  --accent-secondary: #D9C7A7;
+  --accent-secondary-hover: #E6D7BC;
+  --accent-secondary-soft: rgba(217, 199, 167, 0.14);
+
+  /* Sand band: one per page, for the contrast moment */
+  --band-sand-bg: #D9C7A7;
+  --band-sand-fg: #070707;         /* 12.2:1 */
+  --band-sand-muted: #5E4C36;      /* 4.9:1 */
+
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #E5534B;
+  --info: #38bdf8;
+
+  /* Content sits flat; only floating layers (drawer, menu, dialog, sticky bar) cast a shadow. */
+  --shadow-sm-premium: none;
+  --shadow-md-premium: none;
+  --shadow-lg-premium: var(--shadow-float);
+  --shadow-glow: 0 0 0 1px var(--border-strong);
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.45);
+
+  --motion-fast: 150ms;
+  --motion-medium: 200ms;
+  --motion-slow: 250ms;
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Fonts: Bebas Neue headings (brand continuity, user decision 2026-10-28), Inter body/UI */
+  --font-body: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Bebas Neue', system-ui, sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+}
+
+/* ─────────────────────────────────────────────────────────
+   LIGHT (kept for later; not a migration goal): red, beige, white
+───────────────────────────────────────────────────────── */
+.light {
+  color-scheme: light;
+
+  --bg-canvas: #F7F3EB;
+  --bg-subtle: #EFE8DA;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(7, 7, 7, 0.72);
+
+  --surface-1: #FFFFFF;
+  --surface-2: #F7F3EB;
+  --surface-3: #EFE8DA;
+
+  --text-primary: #070707;   /* 18.2:1 on canvas */
+  --text-secondary: #5C4A33; /* 7.6:1 */
+  --text-muted: #6B6152;     /* 5.5:1 */
+  --text-disabled: #AFA090;
+
+  --border-subtle: rgba(7, 7, 7, 0.08);
+  --border-default: rgba(7, 7, 7, 0.12);
+  --border-strong: rgba(7, 7, 7, 0.22);
+  --border-focus: rgba(179, 25, 25, 0.70);
+
+  --accent-primary: #B31919;       /* 6.2:1 on canvas */
+  --accent-primary-hover: #951414; /* bone text on it 8.0:1 */
+  --accent-primary-soft: rgba(179, 25, 25, 0.10);
+  --accent-contrast: #F7F3EB;
+  --accent-text: #B31919;
+
+  --accent-secondary: #8A7250;
+  --accent-secondary-hover: #705C3E;
+  --accent-secondary-soft: rgba(138, 114, 80, 0.12);
+
+  --band-sand-bg: #D9C7A7;
+  --band-sand-fg: #070707;
+  --band-sand-muted: #5E4C36;
+
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #B31919;
+  --info: #0ea5e9;
+
+  --shadow-sm-premium: none;
+  --shadow-md-premium: none;
+  --shadow-lg-premium: var(--shadow-float);
+  --shadow-glow: 0 0 0 1px var(--border-strong);
+  --shadow-float: 0 1px 2px rgba(7, 7, 7, 0.06), 0 12px 40px rgba(7, 7, 7, 0.10);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Global link defaults: red text token (the fill red fails contrast as text on black) */
+  a:not([class]) {
+    color: var(--accent-text);
+    /* Underlined at rest: inside text, color alone must not mark a link (WCAG 1.4.1, phase 07.5). */
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft), opacity var(--motion-fast) var(--ease-soft);
+  }
+  a:not([class]):hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+  a:not([class]):focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer utilities {
+  /* ── Scrollbar ── */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+  /* Semantic color classes below are plain CSS, so Tailwind variants (hover:, lg:) do not
+     apply to them, and `text-primary` / `text-muted` / `text-secondary` / `text-accent` also
+     exist as theme utilities (fill red, surface, ...). The variant forms the app uses are
+     spelled out after this block so they resolve to the semantic tokens. */
+
+  /* ── Background ── */
+  .bg-canvas        { background-color: var(--bg-canvas); }
+  .bg-surface-1     { background-color: var(--surface-1); }
+  .bg-surface-2     { background-color: var(--surface-2); }
+  .bg-surface-3     { background-color: var(--surface-3); }
+  .bg-overlay-surface { background-color: var(--bg-overlay); }
+  .bg-accent        { background-color: var(--accent-primary); color: var(--accent-contrast); }
+  .bg-accent-soft   { background-color: var(--accent-primary-soft); }
+  .bg-accent-secondary-soft { background-color: var(--accent-secondary-soft); }
+
+  /* ── Text ── */
+  .text-primary   { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-muted     { color: var(--text-muted); }
+  .text-disabled  { color: var(--text-disabled); }
+  .text-accent    { color: var(--accent-text); }
+  .text-accent-secondary { color: var(--accent-secondary); }
+
+  /* ── Borders ── */
+  .border-subtle  { border-color: var(--border-subtle); }
+  .border-default { border-color: var(--border-default); }
+  .border-strong  { border-color: var(--border-strong); }
+
+  /* ── Variant forms in use ── */
+  .hover\:text-primary:hover,
+  .focus-visible\:text-primary:focus-visible { color: var(--text-primary); }
+  .placeholder\:text-muted::placeholder { color: var(--text-muted); }
+  .hover\:bg-surface-2:hover,
+  .focus-visible\:bg-surface-2:focus-visible,
+  .active\:bg-surface-2:active { background-color: var(--surface-2); }
+  .hover\:bg-surface-3:hover,
+  .active\:bg-surface-3:active { background-color: var(--surface-3); }
+  .hover\:border-default:hover { border-color: var(--border-default); }
+  .hover\:border-strong:hover { border-color: var(--border-strong); }
+
+  /* ── Shadows ── */
+  .shadow-sm-premium  { box-shadow: var(--shadow-sm-premium); }
+  .shadow-md-premium  { box-shadow: var(--shadow-md-premium); }
+  .shadow-lg-premium  { box-shadow: var(--shadow-lg-premium); }
+  .shadow-glow        { box-shadow: var(--shadow-glow); }
+  .shadow-float       { box-shadow: var(--shadow-float); }
+
+  /* ── Sand band (one per page) ── */
+  .band-sand {
+    background-color: var(--band-sand-bg);
+    color: var(--band-sand-fg);
+    --text-primary: var(--band-sand-fg);
+    --text-secondary: var(--band-sand-fg);
+    --text-muted: var(--band-sand-muted);
+    --border-subtle: rgba(7, 7, 7, 0.10);
+    --border-default: rgba(7, 7, 7, 0.16);
+    --border-strong: rgba(7, 7, 7, 0.28);
+    --accent-text: #8E1414;
+  }
+
+  /* Hairline rule used in place of card borders */
+  .hairline-t { border-top: 1px solid var(--border-subtle); }
+  .hairline-b { border-bottom: 1px solid var(--border-subtle); }
+
+  .ring-focus {
+    box-shadow: 0 0 0 1px var(--border-focus),
+                0 0 0 4px color-mix(in srgb, var(--border-focus) 40%, transparent);
+  }
+
+  /* ── Layout primitives ── */
+  .page-shell {
+    min-height: 100dvh;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Full-width page frame: wide max, generous gutters (24 / 40 / 56px). */
+  .content-container,
+  .content-container-xl {
+    width: 100%;
+    max-width: 100rem;
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .content-container, .content-container-xl {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .content-container, .content-container-xl {
+      padding-inline: 3.5rem;
+    }
+  }
+
+  /* Section rhythm (brand guide): standard 56 / 72 / 96, hero 72 / 96 / 120. */
+  .section-wrapper,
+  .section-y-standard { padding-block: 3.5rem; }
+  .section-y-hero    { padding-block: 4.5rem; }
+  .section-y-compact { padding-block: 2.5rem; }
+
+  @media (min-width: 768px) {
+    .section-wrapper, .section-y-standard { padding-block: 4.5rem; }
+    .section-y-hero    { padding-block: 6rem; }
+    .section-y-compact { padding-block: 3rem; }
+  }
+
+  @media (min-width: 1280px) {
+    .section-wrapper, .section-y-standard { padding-block: 6rem; }
+    .section-y-hero    { padding-block: 7.5rem; }
+  }
+
+  /* ── Cards ──
+     Legacy surface for pages not yet redesigned: flat, hairline, small radius. New work should
+     not wrap content groups in cards (see design-direction.md). */
+  .card-base {
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: none;
+  }
+
+  .card-padding-sm { padding: 1rem; }
+  .card-padding-md { padding: 1.25rem; }
+  .card-padding-lg { padding: 1.5rem; }
+
+  .card-hover {
+    transition:
+      border-color var(--motion-medium) var(--ease-soft),
+      background-color var(--motion-medium) var(--ease-soft);
+  }
+
+  .card-hover:hover {
+    border-color: var(--border-strong);
+    background-color: var(--surface-2);
+  }
+
+  /* ── Typography scale ──
+     Headings: Bebas Neue (single weight 400, caps-only glyphs), slightly open tracking,
+     tight leading. Body: Inter. ── */
+  .text-display-xl {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    font-size: clamp(4rem, 11vw, 11rem);
+    line-height: 0.88;
+  }
+
+  .text-display-l {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    font-size: clamp(3.5rem, 8vw, 7.5rem);
+    line-height: 0.9;
+  }
+
+  .text-display-m {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    font-size: clamp(2.75rem, 5.5vw, 5rem);
+    line-height: 0.92;
+  }
+
+  .text-h1 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-size: clamp(2.5rem, 4.5vw, 4rem);
+    line-height: 0.95;
+  }
+
+  .text-h2 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 0.96;
+  }
+
+  .text-h3 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-size: 1.875rem;
+    line-height: 1;
+  }
+
+  .text-h4 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+
+  .text-h5 {
+    font-family: var(--font-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  /* Section and column labels: plain sentence case, not a tracked-out eyebrow. */
+  .text-label {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+    color: var(--text-muted);
+  }
+
+  .text-body-l {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1.125rem;
+    line-height: 1.875rem;
+  }
+
+  .text-body-m {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.7rem;
+  }
+
+  .text-body-s {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+  }
+
+  .text-caption {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    line-height: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .meta {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    line-height: 1.1rem;
+    color: var(--text-muted);
+  }
+
+  .price-text {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Links ── */
+  .link {
+    color: var(--accent-text);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft);
+    font-weight: 500;
+  }
+  .link:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+  .link-muted {
+    color: var(--text-muted);
+    text-underline-offset: 3px;
+    transition: color var(--motion-fast) var(--ease-soft);
+  }
+  .link-muted:hover {
+    color: var(--text-primary);
+  }
+
+  /* ── Liquid glass card ── */
+  .card-glass {
+    background: rgba(247, 243, 235, 0.03);
+    border: 1px solid var(--border-subtle);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    transition: border-color 200ms ease;
+  }
+  .card-glass:hover {
+    border-color: var(--border-strong);
+  }
+
+  /* ── Sonic visual animations (email section) ── */
+  @keyframes sonic-ring-expand {
+    0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0.65; }
+    100% { transform: translate(-50%, -50%) scale(3.8); opacity: 0; }
+  }
+  @keyframes sonic-center-glow {
+    0%, 100% {
+      box-shadow: 0 0 8px 2px rgba(179, 25, 25, 0.65), 0 0 22px rgba(179, 25, 25, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 18px 5px rgba(179, 25, 25, 0.95), 0 0 44px rgba(179, 25, 25, 0.55);
+    }
+  }
+
+  /* ── Work With Me: premium card with red edge and hover glow ──
+     v1 transitioned box-shadow and border-color; v2 keeps the same resting and hover looks but
+     paints the hover glow and border on ::after and fades only its opacity (transform/opacity rule). */
+  .wwm-card {
+    position: relative;
+    background-color: var(--surface-1);
+    border: 1px solid rgba(179, 25, 25, 0.16);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md-premium);
+    transition: transform var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 1;
+    height: 2px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(90deg, var(--accent-primary), rgba(179, 25, 25, 0.05));
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-card::after,
+  .wwm-tile::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: 1px solid rgba(179, 25, 25, 0.4);
+    box-shadow: var(--shadow-glow), var(--shadow-lg-premium);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-card:hover { transform: translateY(-3px); }
+  .wwm-card:hover::before,
+  .wwm-card:hover::after,
+  .wwm-tile:hover::after,
+  .wwm-tile:has(:focus-visible)::after { opacity: 1; }
+
+  .wwm-tile {
+    position: relative;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(179, 25, 25, 0.16);
+    box-shadow: var(--shadow-md-premium);
+    transition: transform var(--motion-medium) var(--ease-soft);
+  }
+  .wwm-tile::after { border-color: rgba(179, 25, 25, 0.5); }
+  .wwm-tile:hover { transform: translateY(-3px); }
+
+  .wwm-pill {
+    position: relative;
+    isolation: isolate;
+    transition: transform var(--motion-fast) var(--ease-soft);
+  }
+  .wwm-pill::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    border: 1px solid rgba(179, 25, 25, 0.55);
+    background-color: var(--surface-2);
+    box-shadow: 0 0 0 1px rgba(179, 25, 25, 0.25), 0 0 22px rgba(179, 25, 25, 0.14);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--motion-fast) var(--ease-soft);
+  }
+  .wwm-pill:hover { transform: translateY(-2px); }
+  .wwm-pill:hover::after { opacity: 1; }
+  .wwm-pill:active { transform: translateY(0) scale(0.98); }
+
+  /* ── Work With Me: ambient drift and marquee ── */
+  @keyframes wwm-drift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(0, -1.5%, 0) scale(1.06); }
+  }
+  .wwm-drift { animation: wwm-drift 26s ease-in-out infinite alternate; }
+
+  @keyframes wwm-marquee {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+  .wwm-marquee-track {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    animation: wwm-marquee 62s linear infinite;
+    will-change: transform;
+  }
+  .wwm-marquee:hover .wwm-marquee-track { animation-play-state: paused; }
+
+  /* ── Animated grain ── */
+  @keyframes grain-shift {
+    0%, 100% { transform: translate(0, 0); }
+    10%       { transform: translate(-3%, -3%); }
+    20%       { transform: translate(3%, 1%); }
+    30%       { transform: translate(-1%, 4%); }
+    40%       { transform: translate(4%, -2%); }
+    50%       { transform: translate(-2%, 3%); }
+    60%       { transform: translate(3%, -4%); }
+    70%       { transform: translate(-4%, 2%); }
+    80%       { transform: translate(2%, -1%); }
+    90%       { transform: translate(-3%, 3%); }
+  }
+  .grain-animated {
+    animation: grain-shift 8s steps(1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwm-drift { animation: none; }
+    .wwm-marquee-track { animation: none; }
+    .grain-animated { animation: none; }
+  }
+
+  /* ── Interaction helpers ── */
+  .transition-soft {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-duration: var(--motion-medium);
+    transition-timing-function: var(--ease-soft);
+  }
+
+  /* Flat direction: no lift. Kept as a name because un-redesigned pages still apply it. */
+  .hover-lift {
+    transition: border-color var(--motion-medium) var(--ease-soft);
+  }
+
+  .hover-lift:hover {
+    border-color: var(--border-strong);
+  }
+
+  /* Underline link used for secondary actions (replaces boxed ghost buttons). */
+  .link-underline {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+    transition: text-decoration-color var(--motion-fast) var(--ease-soft), color var(--motion-fast) var(--ease-soft);
+  }
+  .link-underline:hover {
+    text-decoration-color: var(--accent-text);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Shell primitives (phase 03): scroll lock, native <dialog> motion
+───────────────────────────────────────────────────────── */
+@layer components {
+  html.scroll-locked {
+    overflow: hidden;
+  }
+  html.scroll-locked-gutter {
+    scrollbar-gutter: stable;
+  }
+
+  /* Native <dialog>: closed dialogs stay display:none; display and overlay transition
+     discretely so the exit animation can finish. Only transform and opacity animate. */
+  .os-dialog,
+  .os-drawer {
+    transition:
+      transform var(--motion-slow) var(--ease-soft),
+      opacity var(--motion-slow) var(--ease-soft),
+      overlay var(--motion-slow) allow-discrete,
+      display var(--motion-slow) allow-discrete;
+  }
+  .os-dialog::backdrop,
+  .os-drawer::backdrop {
+    /* v1 drawer overlay intent: bg-overlay-surface/80 */
+    background-color: color-mix(in srgb, var(--bg-overlay) 80%, transparent);
+    opacity: 0;
+    transition:
+      opacity var(--motion-slow) var(--ease-soft),
+      overlay var(--motion-slow) allow-discrete,
+      display var(--motion-slow) allow-discrete;
+  }
+  .os-dialog[open]::backdrop,
+  .os-drawer[open]::backdrop {
+    opacity: 1;
+  }
+
+  .os-dialog { opacity: 0; transform: translateY(8px) scale(0.98); }
+  .os-dialog[open] { opacity: 1; transform: none; }
+
+  .os-drawer { transform: translateX(100%); }
+  .os-drawer[open] { transform: translateX(0); }
+  .os-drawer-bottom { transform: translateY(100%); }
+  .os-drawer-bottom[open] { transform: translateY(0); }
+
+  @starting-style {
+    .os-dialog[open] { opacity: 0; transform: translateY(8px) scale(0.98); }
+    .os-drawer[open] { transform: translateX(100%); }
+    .os-drawer-bottom[open] { transform: translateY(100%); }
+    .os-dialog[open]::backdrop,
+    .os-drawer[open]::backdrop { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-dialog,
+    .os-drawer,
+    .os-dialog::backdrop,
+    .os-drawer::backdrop {
+      transition: none;
+    }
+  }
+}
+
+@layer components {
+  /* Mobile menu: full-screen panel, mounts on open, so @starting-style gives the entry fade-rise. */
+  .os-menu-panel {
+    transition:
+      opacity var(--motion-slow) var(--ease-spring),
+      transform 320ms var(--ease-spring);
+  }
+  .os-menu-overlay { transition: opacity var(--motion-slow) var(--ease-soft); }
+  @starting-style {
+    .os-menu-panel { opacity: 0; transform: translateY(-8px); }
+    .os-menu-overlay { opacity: 0; }
+  }
+
+  /* Sticky product bar: v1's framer-motion enter/exit as CSS (opacity + transform only). */
+  .os-sticky-bar {
+    transition:
+      opacity 350ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 350ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 350ms allow-discrete;
+  }
+  .os-sticky-bar[data-visible='false'] {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+    visibility: hidden;
+  }
+  .os-sticky-bar[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+  }
+
+  @keyframes os-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes os-slide-in { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
+  .os-fade-in { animation: os-fade-in 250ms var(--ease-soft); }
+  .os-slide-in { animation: os-slide-in 250ms var(--ease-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-menu-panel, .os-menu-overlay, .os-sticky-bar { transition: none; }
+    .os-fade-in, .os-slide-in { animation: none; }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Phase 05 pages: store header entrance and product grid stagger.
+   Transform and opacity only; spring ease from v1 (EASE_SPRING).
+───────────────────────────────────────────────────────── */
+@layer components {
+  @keyframes os-rise-in {
+    from { opacity: 0; transform: translateY(var(--rise-from, 24px)); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Product grid: v1 framer-motion fade-up, delay (i % 4) * 0.05s. */
+  .os-rise {
+    animation: os-rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--col, 0) * 0.05s);
+  }
+
+  /* Collection header entrance (v1 collection-header.tsx motion values). */
+  .os-enter {
+    animation: os-rise-in var(--enter-duration, 0.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--enter-delay, 0s);
+  }
+
+  /* Slide only, visible from the first frame: for an LCP heading, where starting at opacity 0 delays
+     the LCP mark until the fade begins (owner decision 2026-10-29, store heading). */
+  @keyframes os-slide-up-in {
+    from { transform: translateY(var(--rise-from, 24px)); }
+    to { transform: none; }
+  }
+  .os-enter-slide {
+    animation: os-slide-up-in var(--enter-duration, 0.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--enter-delay, 0s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-rise, .os-enter, .os-enter-slide { animation: none; }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Phase 05 group B: home, explore, search.
+   v1 framer-motion effects as CSS. Transform and opacity only; all off under reduced motion.
+───────────────────────────────────────────────────────── */
+@layer components {
+  /* Shared film grain (v1 repeated this SVG data URI inline in every section). */
+  .grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px;
+    opacity: var(--grain-opacity, 0.04);
+  }
+
+  /* RevealSection (ui/reveal-section.tsx): hidden only when JS runs and motion is allowed. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .os-reveal {
+      transition:
+        opacity 0.65s cubic-bezier(0.22, 0.61, 0.36, 1),
+        transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .os-reveal:not([data-revealed]) {
+      opacity: 0;
+      transform: translateY(var(--reveal-distance, 28px));
+    }
+    /* Staggered children (browse by type): v1 0.5s spring, delay i * 0.05s. */
+    .os-reveal .os-reveal-item {
+      transition:
+        opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: calc(var(--i, 0) * 0.05s);
+    }
+    .os-reveal:not([data-revealed]) .os-reveal-item {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
+  /* Home hero entrance (v1 EASE_SPRING [0.16, 1, 0.3, 1]). */
+  @keyframes os-hero-rise {
+    from { opacity: 0; transform: translateY(var(--rise, 16px)); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes os-hero-line {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes os-chevron-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+  .os-hero-rise {
+    animation: os-hero-rise var(--dur, 0.6s) cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--delay, 0s);
+  }
+  .os-hero-line {
+    transform-origin: left;
+    animation: os-hero-line 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.9s both;
+  }
+  .os-chevron {
+    animation: os-chevron-bounce 2s ease-in-out infinite;
+  }
+
+  /* Featured kits row: edge mask on the row only, hidden scrollbar. */
+  .os-edge-mask {
+    mask-image: linear-gradient(to right, transparent 0, black 60px, black calc(100% - 60px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 60px, black calc(100% - 60px), transparent 100%);
+  }
+
+  /* Home email visual: soft top and bottom edges as a band (below lg); from lg also fades in from the left. */
+  .os-email-visual-mask {
+    --fade-y: linear-gradient(to bottom, transparent, black 18%, black 62%, transparent);
+    mask-image: var(--fade-y);
+    -webkit-mask-image: var(--fade-y);
+  }
+  @media (min-width: 1024px) {
+    .os-email-visual-mask {
+      --fade-y: linear-gradient(to bottom, transparent, black 14%, black 86%, transparent);
+      --fade-x: linear-gradient(to right, transparent, black 22%);
+      mask-image: var(--fade-x), var(--fade-y);
+      -webkit-mask-image: var(--fade-x), var(--fade-y);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+  }
+
+  /* Membership CTA glow (v1 used JS onMouseEnter); a pseudo-element so only opacity animates. */
+  .os-glow {
+    position: relative;
+    isolation: isolate;
+  }
+  .os-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 1px rgba(179, 25, 25, 0.5), 0 0 28px rgba(179, 25, 25, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+  }
+  .os-glow:hover::after,
+  .os-glow:focus-visible::after {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-hero-rise, .os-hero-line, .os-chevron { animation: none; }
+    .os-glow::after { transition: none; }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   Phase 05 group D: work with me, contact, newsletter.
+   v1 framer-motion effects as CSS. Transform and opacity only; all off under reduced motion.
+───────────────────────────────────────────────────────── */
+@layer components {
+  /* In-page anchors (#work-with-me-inquiry) scroll smoothly, so CTAs work without JS. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:has(.wwm-page) { scroll-behavior: smooth; }
+  }
+
+  /* Hero: title lines rise out of an overflow-hidden mask; rule draws in (v1 delays). */
+  @keyframes wwm-line-up {
+    from { transform: translateY(110%); }
+    to { transform: none; }
+  }
+  @keyframes wwm-scale-x {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .wwm-line {
+    display: block;
+    animation: wwm-line-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--delay, 0s);
+  }
+  .wwm-hero-rule {
+    transform-origin: left;
+    animation: wwm-scale-x 1s cubic-bezier(0.16, 1, 0.3, 1) 0.62s both;
+  }
+  .wwm-fade {
+    animation: os-fade-in 0.5s ease-out 0.8s both;
+  }
+
+  /* Pulsing eyebrow dot: opacity 1 -> 0.35 -> 1, scale 1 -> 0.8 -> 1, 2.4s. */
+  @keyframes wwm-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
+  }
+  .wwm-dot { animation: wwm-dot 2.4s ease-in-out infinite; }
+
+  /* CTA band button: scale 1 -> 1.03 -> 1 every 3s. */
+  @keyframes wwm-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  .wwm-pulse { animation: wwm-pulse 3s ease-in-out infinite; }
+
+  /* Marquee rotating copy: keyed enter, y 8 -> 0 with opacity (v1 0.6s spring). */
+  @keyframes wwm-swap-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  .wwm-swap { animation: wwm-swap-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Section heading rule: scaleX when 60% visible. Hidden only when JS runs and motion is allowed. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    .wwm-rule {
+      transform-origin: left;
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .wwm-rule:not([data-revealed]) { transform: scaleX(0); }
+  }
+
+  /* Placement cards: pointer tilt from --px/--py (set on pointermove) plus an idle drift. */
+  @keyframes wwm-idle-tilt {
+    0%, 100% { transform: perspective(1000px) rotateX(1.4deg) rotateY(-1.6deg); }
+    50% { transform: perspective(1000px) rotateX(-1.4deg) rotateY(1.6deg); }
+  }
+  @keyframes wwm-idle-shift {
+    0%, 100% { transform: translate3d(5px, -5px, 0); }
+    50% { transform: translate3d(-5px, 5px, 0); }
+  }
+  .wwm-tilt {
+    transform: perspective(1000px) rotateX(calc(var(--py, 0) * -5deg)) rotateY(calc(var(--px, 0) * 5deg));
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wwm-shift {
+    transform: translate3d(calc(var(--px, 0) * 10px), calc(var(--py, 0) * 10px), 0);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .wwm-idle { animation: wwm-idle-tilt 14s ease-in-out infinite; animation-delay: var(--phase, 0s); }
+    .wwm-idle-img { animation: wwm-idle-shift 20s ease-in-out infinite; animation-delay: var(--phase, 0s); }
+  }
+  @media (hover: none), (prefers-reduced-motion: reduce) {
+    .wwm-tilt, .wwm-shift { transform: none; }
+  }
+  /* Expand reflow through the View Transitions API: spring-like ease (v1 stiffness 120, damping 22). */
+  ::view-transition-group(*) {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.22, 1.12, 0.36, 1);
+  }
+
+  /* Recent posts poster row (SSR, reduced motion, Save-Data): native horizontal scroll snap. */
+  .wwm-snap {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .wwm-snap::-webkit-scrollbar { display: none; }
+  .wwm-snap > * { scroll-snap-align: center; }
+
+  /* Contact and newsletter success swap: fade in on insertion. */
+  .os-swap-in {
+    transition: opacity 0.3s var(--ease-soft);
+  }
+  @starting-style {
+    .os-swap-in { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwm-line, .wwm-hero-rule, .wwm-fade, .wwm-dot, .wwm-pulse, .wwm-swap { animation: none; }
+    .os-swap-in { transition: none; }
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+  }
+}

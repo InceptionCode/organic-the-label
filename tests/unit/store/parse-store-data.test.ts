@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { parseStoreData } from '@/lib/store/parse-store-data'
 import type { ProductsPageResponse } from '@/lib/Shopify/queries'
 
