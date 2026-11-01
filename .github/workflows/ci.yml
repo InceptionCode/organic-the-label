@@ -185,5 +185,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: apps/v2/playwright-report/
+          # The CI reporter is `github` (no HTML report); test-results holds each failure's trace.zip
+          # and error-context.md. Open a trace with `bunx playwright show-trace <trace.zip>`.
+          path: |
+            apps/v2/playwright-report/
+            apps/v2/test-results/
           retention-days: 7

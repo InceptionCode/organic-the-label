@@ -107,8 +107,11 @@ test.describe('store filters', () => {
   test('product card play: one preview at a time', async ({ page }) => {
     await page.goto('/store')
     await waitForHydration(page)
-    const first = page.getByRole('button', { name: /^(Play|Pause) Wave Pack preview$/ })
-    const second = page.getByRole('button', { name: /^(Play|Pause) Organic Sonics - Raw Pack preview$/ })
+    // Any two cards: product titles in the dev store change, so never match a title here.
+    const previews = page.getByRole('button', { name: /^(Play|Pause) .+ preview$/ })
+    await expect(previews.nth(1)).toBeVisible()
+    const first = previews.nth(0)
+    const second = previews.nth(1)
     await first.click()
     await expect(first).toHaveAttribute('aria-pressed', 'true')
     await second.click()

@@ -6,10 +6,18 @@ type NetworkNavigator = Navigator & { connection?: { saveData?: boolean } }
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 
-/** True when heavy visuals must not load: reduced motion or Save-Data. */
+/**
+ * True when heavy visuals must not load: reduced motion, Save-Data, or an automated browser
+ * (navigator.webdriver, same rule as the splash and tracking). CI runners have no GPU, so WebGL falls
+ * back to software rendering and can starve the main thread; the poster is what automation sees.
+ */
 export function prefersStaticVisuals() {
   if (typeof window === 'undefined') return true
-  return window.matchMedia(REDUCED_MOTION).matches || (navigator as NetworkNavigator).connection?.saveData === true
+  return (
+    window.matchMedia(REDUCED_MOTION).matches ||
+    (navigator as NetworkNavigator).connection?.saveData === true ||
+    navigator.webdriver === true
+  )
 }
 
 type LazyVisualProps<P extends object> = {
