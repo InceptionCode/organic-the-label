@@ -4,6 +4,69 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [2.0.0] - 2026-11-04
+
+### ✨ Highlights
+
+Organic Sonics v2 is a full rebuild of the site, now live on organicsonics.com.
+
+- **New app:** rebuilt on TanStack Start with server rendering, replacing the Next.js site. Webhooks and scheduled jobs moved to a separate Hono service (`apps/api`), and the repo is now a bun monorepo.
+- **Redesign:** every page redesigned and built mobile-first, with a new flat, full-page design.
+- **SEO:** page titles and descriptions, canonical URLs, Open Graph tags, structured data, a sitemap and robots.txt on all public pages. Preview sites are not indexed.
+- **Accounts:** password, magic link and password reset flows. Anonymous visitors are tracked only after they do something stateful, and purchases made as a guest attach to the account with the same verified email.
+- **Performance:** a 150 KB budget on the startup bundle, enforced in CI. Heavy visuals load late, and pages for signed-out visitors are cached on the CDN and cleared by webhooks.
+- **Personalization groundwork:** activity tracking and saved preferences. The newsletter checkbox now really subscribes and unsubscribes.
+- **Testing and CI:** Playwright end-to-end and accessibility tests, new bun-based CI for v2 and `apps/api`, and a cache flush after each deploy.
+- **Links:** old v1 sign-in and download links redirect to their v2 paths, so emails already sent keep working.
+
+### 🚀 Features
+
+- Activity tracking, preferences and email events logic ([`dcf2507`](https://github.com/InceptionCode/organic-the-label/commit/dcf2507132f79c816fac273357107b1b4bc41c20))
+- Completed redesign and build of all pages ([`3149ee4`](https://github.com/InceptionCode/organic-the-label/commit/3149ee469b2c98a9369d5670905ebf1e9459ac0f))
+- Visuals and shell components, initial site design plumming ([`a9771e0`](https://github.com/InceptionCode/organic-the-label/commit/a9771e0da61290acec56b50a8123b1a949dc60d5))
+- Additional v2 plumming and auth flows ([`1bbd2b8`](https://github.com/InceptionCode/organic-the-label/commit/1bbd2b8d7b2de7beee90be570eb2e6d4b8794f2b))
+- Vercel deploy config + complete auth foundation ([`856bc99`](https://github.com/InceptionCode/organic-the-label/commit/856bc99714cc2721d4f60c9d309858e4d906dcfd))
+- Add email+password sign in and sign up auth functions ([`63349cb`](https://github.com/InceptionCode/organic-the-label/commit/63349cb4aaf828c640e1c5a125ac8358b988efc3))
+- Phase 5 — data layer + complete auth foundation ([`47f0439`](https://github.com/InceptionCode/organic-the-label/commit/47f04392a25e04aa309883dad7e9742381aed417))
+- Phase 4 — Supabase auth migration ([`742ce8b`](https://github.com/InceptionCode/organic-the-label/commit/742ce8b6a47e84fa5a274e4fd5f8856cf6ca5e0b))
+- Phase 3 — tanstack start 1.168 scaffold ([`4a73807`](https://github.com/InceptionCode/organic-the-label/commit/4a73807b04aa21955f866ebaecbad0582463f159))
+- Phase 2 — hono api layer scaffold ([`da77514`](https://github.com/InceptionCode/organic-the-label/commit/da77514dd648af0271b25c609b033ab72e37cbe9))
+- Phase 1 — monorepo architecture + bun migration ([`e602900`](https://github.com/InceptionCode/organic-the-label/commit/e60290025b48512d529ce7fe4fd3c6c40beb2420))
+
+### 🐛 Bug Fixes
+
+- Production now reads the correct env ([`5ec9112`](https://github.com/InceptionCode/organic-the-label/commit/5ec9112f07f90a765ef4d272690977f11ec5f8ff))
+- Fix missing product issue ([`8f1ecb0`](https://github.com/InceptionCode/organic-the-label/commit/8f1ecb00086dfcbcae32a59446d24509f3eb5682))
+- Small update to deploy flush, dev merge ([`7a06e19`](https://github.com/InceptionCode/organic-the-label/commit/7a06e19be6ff09cd20b7a1b435f9a85a144926b5))
+- V1 broken due to Supabase HCAPTCHA site protection rule ([`1191554`](https://github.com/InceptionCode/organic-the-label/commit/119155419df861e07ff84d2a73f891727a36e1a5))
+- Bun-types failed Vercel build ([`cc44f57`](https://github.com/InceptionCode/organic-the-label/commit/cc44f578d5b239e221df10b2f74ed90e222f3705))
+- Fix tsc cast and vercel output directory AGAIN ([`c35a3cc`](https://github.com/InceptionCode/organic-the-label/commit/c35a3cc99c4dbbc5fe646601bfe4b75b4f6f655b))
+- Fix tsc cast and vercel output directory ([`950dc64`](https://github.com/InceptionCode/organic-the-label/commit/950dc64bf9dbbeb4c3cc7b3c16fa92da218a96f0))
+- Resolve vercel build failures ([`1ab5f09`](https://github.com/InceptionCode/organic-the-label/commit/1ab5f090517ce47821eab31ac015be36e1dcd174))
+- Cast bun headers type to fix tsc error on vercel build ([`7e48878`](https://github.com/InceptionCode/organic-the-label/commit/7e488787ec8f05751adab6a6a96cb4561ddfe88e))
+- Wire middleware/auth.ts and guard json parse in revalidate-product ([`7e89a5d`](https://github.com/InceptionCode/organic-the-label/commit/7e89a5d992bde78a88e7f3cadcffc19a03dfdd21))
+
+### ⚡ Performance
+
+- Caching improvements and other optimizations ([`70eb181`](https://github.com/InceptionCode/organic-the-label/commit/70eb18118b9ce97011ce28b3b28c09688126244d))
+- Full e2e suite and performance enhancements ([`ff26481`](https://github.com/InceptionCode/organic-the-label/commit/ff264819ea0c31af67489c9aad6429f8de96dbc7))
+
+### 🚜 Refactor
+
+- Replan a v1 lift and prep new apps ([`f5123fe`](https://github.com/InceptionCode/organic-the-label/commit/f5123fea5765f6c1c948493fc740caec2dea93c6))
+
+### ⚙️ CI & Build
+
+- Stable build for v2 ([`1f79fbb`](https://github.com/InceptionCode/organic-the-label/commit/1f79fbbe0dcd1766700a651a0d9a1f893b426907))
+- Apps/api vercel build fix ([`cc798fb`](https://github.com/InceptionCode/organic-the-label/commit/cc798fbfb8d4102d94192609f85fb5018f781fbc))
+- Robot.txt, sitemapping, other seo logic ([`73d6745`](https://github.com/InceptionCode/organic-the-label/commit/73d6745890dd4bd99c94e5c463d943e4d2e10783))
+- Additional v2 plumming and service/fn modules ([`b46e043`](https://github.com/InceptionCode/organic-the-label/commit/b46e043d3d338cdd122347b0fea01540f4c69822))
+- Routing, env and vercel setup ([`d8b057d`](https://github.com/InceptionCode/organic-the-label/commit/d8b057d99d9dd83f12789d2f3565a69111b0c609))
+
+### 🧹 Chores
+
+- Dead code cleanup and dependency audit ([`ac805e7`](https://github.com/InceptionCode/organic-the-label/commit/ac805e791bebc8ec81b4572f4bed9bae51fffb3f))
+- Auto-delete vite config timestamp files on dev start ([`43f4c43`](https://github.com/InceptionCode/organic-the-label/commit/43f4c437881ec94852833326ada9506d42ac559e))
 ## [1.9.0] - 2026-10-25
 
 ### 🚀 Features
