@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { deleteAffinity } from '~/server/personalization/invalidate'
 import { DEFAULT_PREFERENCES, knownGenres, knownProductTypes, type Preferences } from './options'
 
 // user_preferences reads and writes. `client` must be the user-scoped (cookie) client so RLS
@@ -19,7 +20,7 @@ function fromRow(row: PreferencesRow | null): Preferences {
     favoriteGenres: knownGenres(row.favorite_genres),
     favoriteProductTypes: knownProductTypes(row.favorite_product_types),
     marketingOptIn: row.marketing_opt_in ?? false,
-    personalizationOptIn: row.personalization_opt_in ?? false,
+    personalizationOptIn: row.personalization_opt_in ?? true,
   }
 }
 
@@ -34,8 +35,13 @@ export async function getPreferences(client: SupabaseClient, userId: string): Pr
   return fromRow(data)
 }
 
-/** Upserts on user_id (insert when the row is missing) and returns what was stored. */
-export async function updatePreferences(client: SupabaseClient, userId: string, prefs: Preferences): Promise<Preferences> {
+/** Upserts on user_id (insert when the row is missing), drops the user's cached scores, and returns what was stored. */
+export async function updatePreferences(
+  client: SupabaseClient,
+  userId: string,
+  prefs: Preferences,
+  clearAffinity: (userId: string) => Promise<void> = deleteAffinity,
+): Promise<Preferences> {
   const { data, error } = await client
     .from('user_preferences')
     .upsert(
@@ -51,5 +57,6 @@ export async function updatePreferences(client: SupabaseClient, userId: string, 
     .select(COLUMNS)
     .single<PreferencesRow>()
   if (error || !data) throw new Error(`Failed to save preferences: ${error?.message ?? 'no row'}`)
+  await clearAffinity(userId)
   return fromRow(data)
 }

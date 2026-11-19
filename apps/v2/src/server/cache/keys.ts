@@ -23,6 +23,8 @@ export const keys = {
   compositionsListBy: (sig: string) => `compositions:list:${sig}`,
   /** /free: the featured row, else the starter kit (pages/free.md). */
   freeResourceFeatured: () => 'free-resources:featured',
+  /** Interest scores for one user (phase 09). Per-user data: production and dev need separate databases. */
+  personalizationAffinity: (userId: string) => `personalization:affinity:${userId}`,
 } as const
 
 // Seconds. Webhook busting keeps long TTLs safe.
@@ -41,4 +43,5 @@ export const ttl = {
   workWithMe: 3600,
   compositionsList: 900,
   freeResource: 300,
+  personalizationAffinity: 60 * 60 * 3,
 } as const

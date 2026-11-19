@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Pause, Play } from 'lucide-react'
 import { claimPlayback, releasePlayback } from '~/components/audio/exclusive-playback'
@@ -24,6 +24,8 @@ type ProductCardProps = {
   product: ProductSummary
   /** Only the store's first card when it is the LCP element. */
   priority?: boolean
+  /** Called when either product link is followed (a click or a middle click). */
+  onLinkFollow?: () => void
 }
 
 /**
@@ -34,17 +36,20 @@ type ProductCardProps = {
  * access action instead of add-to-cart: "Access" for a direct download, otherwise "Request access"
  * (a prefilled /contact request; no paid product has a direct source today).
  */
-export function ProductCard({ product, priority = false }: ProductCardProps) {
+export function ProductCard({ product, priority = false, onLinkFollow }: ProductCardProps) {
   const ownedEntry = useOwnedProducts().get(product.id)
   const owned = !!ownedEntry
   const tags = product.tags.filter((t) => t !== 'exclusive').slice(0, 2).map(tagLabel)
   const preview = product.audioPreview?.preview_url ? product.audioPreview : null
   const meta = [product.category && capitalize(product.category), ...tags].filter(Boolean)
+  const followProps = onLinkFollow
+    ? { onClick: onLinkFollow, onAuxClick: (event: MouseEvent) => event.button === 1 && onLinkFollow() }
+    : undefined
 
   return (
     <article data-testid="product-card" className="group relative flex h-full w-full flex-col">
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-surface-1">
-        <Link to="/store/$handle" params={{ handle: product.handle }} tabIndex={-1} aria-hidden="true" className="absolute inset-0 block">
+        <Link to="/store/$handle" params={{ handle: product.handle }} tabIndex={-1} aria-hidden="true" className="absolute inset-0 block" {...followProps}>
           {product.image?.url ? (
             <ShopifyImage
               src={product.image.url}
@@ -80,6 +85,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           to="/store/$handle"
           params={{ handle: product.handle }}
           data-testid="product-card-link"
+          {...followProps}
           className={cn('min-w-0 rounded-sm text-body-m font-medium leading-snug text-primary transition-colors duration-150 hover:text-[color:var(--text-secondary)] active:opacity-70', focusRing)}
         >
           <span className="line-clamp-2">{product.title}</span>

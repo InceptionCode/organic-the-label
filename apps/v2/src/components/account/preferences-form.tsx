@@ -3,6 +3,7 @@ import { mutationOptions, useMutation, useQueryClient, type QueryClient } from '
 import { Link } from '@tanstack/react-router'
 import { FormAlert, SubmitButton, textButtonClasses } from '~/components/auth/form-bits'
 import { updatePreferencesFn } from '~/fns/preferences.fn'
+import { RECOMMENDATIONS_KEY } from '~/queries/personalization'
 import { preferencesQueries } from '~/queries/preferences'
 import type { NewsletterSyncStatus } from '~/server/preferences/newsletter-sync'
 import {
@@ -20,7 +21,11 @@ function updatePreferencesMutation(queryClient: QueryClient) {
   return mutationOptions({
     mutationKey: ['account', 'preferences', 'update'],
     mutationFn: (input: PreferencesInput) => updatePreferencesFn({ data: input }),
-    onSuccess: (saved) => queryClient.setQueryData(preferencesQueries.current().queryKey, saved.preferences),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(preferencesQueries.current().queryKey, saved.preferences)
+      // The next page asks again, so turning recommendations off (or changing favorites) shows at once.
+      queryClient.removeQueries({ queryKey: RECOMMENDATIONS_KEY })
+    },
   })
 }
 
@@ -116,8 +121,9 @@ export function PreferencesForm({ preferences, emailVerified }: { preferences: P
               </span>
             </Checkbox>
             <Checkbox name="personalizationOptIn" defaultChecked={preferences.personalizationOptIn}>
-              <span className="block text-body-m text-primary">Personalize my recommendations</span>
-              <span className="block text-body-s text-muted">Use what I browse and play here to suggest sounds. Only used to personalize and improve the site, never shared with third parties.</span>
+              <span className="block text-body-m text-primary">Recommend sounds for me</span>
+              {/* Keep in step with the footer notice and the signup note. */}
+              <span className="block text-body-s text-muted">On by default. Uses your favorites and what you browse and play here. Uncheck to turn recommendations off. Only used to recommend sounds and improve the site, never shared with advertisers or other third parties.</span>
             </Checkbox>
           </OptionGroup>
         </div>

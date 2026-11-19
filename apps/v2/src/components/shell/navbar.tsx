@@ -41,8 +41,7 @@ export function Navbar() {
                 alt="Organic Sonics"
                 width={40}
                 height={40}
-                // Above the fold on every page (and the home LCP element, since the hero headline animates in).
-                fetchPriority="high"
+                fetchPriority={pathname === '/' ? 'high' : undefined}
                 className="object-contain size-10"
               />
               <span className="text-primary hidden sm:block font-heading text-[1.5rem] leading-none tracking-[0.05em] pt-0.5">
