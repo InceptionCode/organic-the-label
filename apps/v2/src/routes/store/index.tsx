@@ -2,7 +2,9 @@ import type { ReactNode } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { CollectionHeader } from '~/components/store/collection-header'
 import { StoreFilters } from '~/components/store/store-filters'
+import { StoreForYou } from '~/components/store/store-for-you'
 import { StoreError, StoreResults, StoreResultsSkeleton } from '~/components/store/store-results'
+import { isDefaultStoreView } from '~/lib/recommendation-slots'
 import { storeSearchToListParams, validateStoreSearch } from '~/lib/store-search'
 import { useTrackOnMount } from '~/lib/use-track-on-mount'
 import { productQueries } from '~/queries/products'
@@ -58,7 +60,7 @@ function StoreLayout({ results }: { results: ReactNode }) {
       <CollectionHeader />
       <StoreFilters search={search} />
       <div className="content-container pb-16 pt-4 md:pb-24 md:pt-6">
-        {/* Phase 09 personalization slot (v1 PersonalizedContent) goes here. */}
+        {isDefaultStoreView(search) && <StoreForYou />}
         {results}
       </div>
     </>

@@ -8,6 +8,7 @@ import { ExploreHero } from './explore-hero'
 import { ExploreMembershipUpsell } from './explore-membership-upsell'
 import { ExploreNewArrivals } from './explore-new-arrivals'
 import { ExploreCommunitySection, ExploreDiscoverySection, ExploreNewsSection } from './explore-placeholder-sections'
+import { ExploreRecommended } from './explore-recommended'
 import { ExploreSectionWrapper } from './explore-section-wrapper'
 import { visibleExploreSections, type ExploreSectionId, type ExploreSectionMetadata } from './explore-sections'
 
@@ -22,11 +23,13 @@ const variantFor = (id: ExploreSectionId) => (id === 'explore-hero' ? 'hero' : i
 /**
  * The anonymous default render of /explore (what crawlers and signed-out visitors get): header,
  * hero, real new products, recent loops, free resources, membership. Flagged placeholder sections
- * slot in by registry order. Personalization (phase 09) only ever adds to this for signed-in users.
+ * slot in by registry order. Recommendations (phase 09) only ever add to this for signed-in users;
+ * they render their own section because an empty result collapses all of it, spacing included.
  */
 export function ExploreShell({ available }: { available: ExploreAvailability }) {
   const renderers: Record<ExploreSectionId, Renderer | null> = {
     'explore-hero': (m) => <ExploreHero metadata={m} />,
+    'explore-recommended': null,
     'explore-new-arrivals': available.products ? (m) => <ExploreNewArrivals metadata={m} /> : null,
     'explore-compositions': available.compositions ? (m) => <ExploreCompositions metadata={m} /> : null,
     'explore-free-resources': available.freeResources ? (m) => <ExploreFreeResources metadata={m} /> : null,
@@ -41,6 +44,7 @@ export function ExploreShell({ available }: { available: ExploreAvailability }) 
     <div>
       <ExploreHeader />
       {visibleExploreSections(exploreFlags).map((m) => {
+        if (m.id === 'explore-recommended') return <ExploreRecommended key={m.id} metadata={m} />
         const render = renderers[m.id]
         if (!render) return null
         return (

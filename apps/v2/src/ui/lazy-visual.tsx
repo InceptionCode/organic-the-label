@@ -20,6 +20,34 @@ export function prefersStaticVisuals() {
   )
 }
 
+const SOFTWARE_RENDERER = /swiftshader|llvmpipe|softpipe|software|basic render|microsoft basic/i
+let slowWebGL: boolean | undefined
+
+/**
+ * True when WebGL is missing or software-rendered (SwiftShader, llvmpipe): no GPU, so every shader
+ * frame is rasterized on the CPU and the main thread waits on it (PageSpeed's mobile run measured ~21s
+ * of blocking on /store from one header shader). Probed once, lazily, from an idle callback.
+ */
+export function hasSlowWebGL() {
+  if (slowWebGL !== undefined) return slowWebGL
+  try {
+    const canvas = document.createElement('canvas')
+    // failIfMajorPerformanceCaveat makes the browser refuse a software-backed context outright.
+    const gl = canvas.getContext('webgl', { failIfMajorPerformanceCaveat: true })
+    if (!gl) {
+      slowWebGL = true
+    } else {
+      const info = gl.getExtension('WEBGL_debug_renderer_info')
+      const renderer = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? '')
+      slowWebGL = SOFTWARE_RENDERER.test(renderer)
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
+    }
+  } catch {
+    slowWebGL = true
+  }
+  return slowWebGL
+}
+
 type LazyVisualProps<P extends object> = {
   /** Dynamic import of the visual module. The only way a visual may be referenced. */
   load: () => Promise<{ default: ComponentType<P> }>
@@ -29,15 +57,18 @@ type LazyVisualProps<P extends object> = {
   props?: P
   /** Extra media query gate, e.g. '(min-width: 768px)'. Below it the poster stays. */
   media?: string
+  /** The visual renders with WebGL: keep the poster when WebGL is missing or software-rendered. */
+  webgl?: boolean
 }
 
 /**
  * Mounts a heavy WebGL/shader visual only when all hold: the element is within 200px of the
  * viewport, the page has finished loading and the browser is idle (so the visual never competes with
- * the LCP resources), prefers-reduced-motion is not `reduce`, and Save-Data is off.
+ * the LCP resources), prefers-reduced-motion is not `reduce`, Save-Data is off, and (for `webgl`
+ * visuals) the browser has a hardware WebGL renderer.
  * Otherwise the poster stays. The visual module is fetched only once those gates pass.
  */
-export function LazyVisual<P extends object>({ load, poster, className, props, media }: LazyVisualProps<P>) {
+export function LazyVisual<P extends object>({ load, poster, className, props, media, webgl = false }: LazyVisualProps<P>) {
   const ref = useRef<HTMLDivElement>(null)
   const [Visual] = useState(() => lazy(load))
   const [active, setActive] = useState(false)
@@ -59,7 +90,10 @@ export function LazyVisual<P extends object>({ load, poster, className, props, m
         (entries) => {
           if (!entries.some((e) => e.isIntersecting)) return
           observer?.disconnect()
-          cancelIdle = whenLoadedAndIdle(() => setActive(true))
+          cancelIdle = whenLoadedAndIdle(() => {
+            if (webgl && hasSlowWebGL()) return
+            setActive(true)
+          })
         },
         { rootMargin: '200px' },
       )
@@ -80,7 +114,7 @@ export function LazyVisual<P extends object>({ load, poster, className, props, m
       observer?.disconnect()
       cancelIdle()
     }
-  }, [media])
+  }, [media, webgl])
 
   return (
     <div ref={ref} className={cn('relative', className)} data-visual-state={active ? 'live' : 'poster'}>

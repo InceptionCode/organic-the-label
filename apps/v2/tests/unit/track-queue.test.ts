@@ -115,6 +115,14 @@ describe('client track queue', () => {
     expect(f.beacons).toHaveLength(0)
   })
 
+  test('offer_viewed is per product, so several in one second are all kept', async () => {
+    const f = fakeEnv()
+    const { track, flush } = createTracker(f.env)
+    for (const rank of [1, 2, 3, 4]) track('offer_viewed', { slot: 'store', productId: `p${rank}`, rank, source: 'rules' })
+    flush()
+    expect((await eventsIn(f.beacons[0]!.body)).map((e) => e.eventProperties.rank)).toEqual([1, 2, 3, 4])
+  })
+
   test('dedupes a repeated view of the same path within one second (strict mode)', async () => {
     const f = fakeEnv()
     const { track, flush } = createTracker(f.env)

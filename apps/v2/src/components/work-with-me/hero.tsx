@@ -37,7 +37,8 @@ export function Hero({ artist }: { artist: SpotifyArtist | null }) {
               alt=""
               width={640}
               height={640}
-              decoding="async"
+              // The mobile LCP element: fetch it ahead of the scripts and fonts (React carries this to its preload).
+              fetchPriority="high"
               className="absolute inset-0 size-full object-cover object-[50%_30%] opacity-80 grayscale md:hidden"
             />
           ) : null}

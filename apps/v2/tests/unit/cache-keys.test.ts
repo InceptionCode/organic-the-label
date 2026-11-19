@@ -26,13 +26,20 @@ describe('cache keys', () => {
 
   // TTL-only keys, deliberately outside the apps/api busting contract (pages/work-with-me.md).
   const ttlOnly: string[] = [keys.workWithMeSpotify(), keys.workWithMeYoutube(), keys.workWithMeInstagram()]
+  // Per-user scores (phase 09): expire by TTL, and saving preferences deletes them.
+  const perUser: string[] = [keys.personalizationAffinity('u1')]
 
   test('every key builder is covered by the samples', () => {
-    expect(samples.length + ttlOnly.length).toBe(Object.keys(keys).length)
+    expect(samples.length + ttlOnly.length + perUser.length).toBe(Object.keys(keys).length)
   })
 
   test.each(ttlOnly)('%s is TTL only (no busted prefix)', (key) => {
     expect(key.startsWith('work-with-me:')).toBe(true)
+    expect(BUSTED.some((re) => re.test(key))).toBe(false)
+  })
+
+  test.each(perUser)('%s has its own prefix, which the flush covers and no webhook busts', (key) => {
+    expect(key.startsWith('personalization:')).toBe(true)
     expect(BUSTED.some((re) => re.test(key))).toBe(false)
   })
 

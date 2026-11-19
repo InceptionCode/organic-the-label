@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Port of v1 lib/supabase/event.schema.ts plus the three v2-only events the owner approved on
-// 2026-10-29. Zod only, no server imports. This is the allow-list for client events: server-only
+// 2026-10-29 and the two recommendation slot events (phase 09.5: { slot, productId, rank, source }). Zod only, no server imports. This is the allow-list for client events: server-only
 // events (downloads, support requests, subscriptions) are never accepted from /api/track.
 // activity_events.event_type is plain text in the database, so adding a type needs no migration.
 export const EVENT_TYPES = [
@@ -17,6 +17,8 @@ export const EVENT_TYPES = [
   'preview_playlist_completed',
   'access_requested',
   'search_filter_changed',
+  'offer_viewed',
+  'offer_clicked',
 ] as const
 
 export type ActivityEventType = (typeof EVENT_TYPES)[number]

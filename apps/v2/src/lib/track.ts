@@ -67,7 +67,8 @@ export function createTracker(env: TrackerEnv) {
   const track = (eventType: ActivityEventType, eventProperties: TrackProperties = {}) => {
     if (env.navigator.webdriver) return
     if (new TextEncoder().encode(JSON.stringify(eventProperties)).length > MAX_PROPERTIES_BYTES) return
-    if (eventType.endsWith('_viewed')) {
+    // offer_viewed is per product (several in one page and second); the slot sends each one once.
+    if (eventType.endsWith('_viewed') && eventType !== 'offer_viewed') {
       const key = `${eventType} ${env.location.pathname}`
       const now = env.now()
       const last = lastView.get(key)
