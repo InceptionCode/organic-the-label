@@ -5,8 +5,6 @@ import type { ExploreSectionMetadata } from './explore-sections'
 
 type ExploreHeroProps = {
   metadata: ExploreSectionMetadata
-  /** Phase 09 seam: AI personalization ("Recommended for you") renders here for signed-in users. */
-  personalized?: never
 }
 
 /**

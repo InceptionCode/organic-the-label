@@ -61,6 +61,7 @@ export function LazyAuroraWaves({ className, ...props }: BoxProps & { speed?: nu
     <LazyVisual
       className={className}
       load={() => import('./aurora-waves')}
+      webgl
       poster={<Poster background={AURORA_POSTER} grain={0} />}
       props={props}
     />
@@ -72,6 +73,7 @@ export function LazyEmailVisual({ className, ...props }: BoxProps & Omit<EmailVi
     <LazyVisual
       className={className}
       load={() => import('./email-visual')}
+      webgl
       poster={<Poster background={EMAIL_POSTER} grain={0.022} />}
       props={props}
     />
@@ -111,7 +113,7 @@ export function LazyParticlePortrait({
   // The poster matches the state the data implies: the wordmark when there is no portrait image.
   const poster = !props.imageUrl && props.wordmark ? <WordmarkPoster text={props.wordmark} /> : <Poster background={PORTRAIT_POSTER} />
   return (
-    <LazyVisual className={className} load={() => import('./particle-portrait')} poster={poster} props={props} media={media} />
+    <LazyVisual className={className} load={() => import('./particle-portrait')} poster={poster} props={props} media={media} webgl />
   )
 }
 
@@ -120,6 +122,7 @@ export function LazyGrainGradient({ className, ...props }: BoxProps & Omit<Grain
     <LazyVisual
       className={className}
       load={() => import('./grain-gradient')}
+      webgl
       poster={<Poster background={GRAIN_POSTER} grain={0.05} />}
       props={props}
     />

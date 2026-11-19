@@ -89,6 +89,7 @@ test.describe('private server fns', () => {
       ['account.fn.ts', 'getOwnedProductsFn'],
       ['account.fn.ts', 'getAccountSummaryFn'],
       ['preferences.fn.ts', 'getPreferencesFn'],
+      ['personalization.fn.ts', 'getRecommendationsFn'],
     ] as const) {
       // A cross-site call is refused by the CSRF middleware first.
       const crossSite = await request.get(`/_serverFn/${id(file, name)}`, { headers: { 'x-tsr-serverFn': 'true', 'Sec-Fetch-Site': 'cross-site' } })

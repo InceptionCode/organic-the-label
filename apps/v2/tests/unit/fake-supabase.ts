@@ -16,6 +16,7 @@ export function fakeSupabase(respond: Responder = () => ({ data: null, error: nu
         insert: (payload: unknown) => ((call.op = 'insert'), (call.payload = payload), builder),
         eq: (col: string, val: unknown) => (call.filters.push(['eq', col, val]), builder),
         is: (col: string, val: unknown) => (call.filters.push(['is', col, val]), builder),
+        in: (col: string, val: unknown) => (call.filters.push(['in', col, val]), builder),
         or: (expr: string) => (call.filters.push(['or', expr, null]), builder),
         order: (col: string, opts?: unknown) => (call.filters.push(['order', col, opts]), builder),
         limit: (n: number) => (call.filters.push(['limit', 'limit', n]), builder),

@@ -47,7 +47,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
   favoriteGenres: [],
   favoriteProductTypes: [],
   marketingOptIn: false,
-  personalizationOptIn: false,
+  personalizationOptIn: true,
 }
 
 /** Stored values that are no longer options (a Store filter was renamed or removed) are dropped. */

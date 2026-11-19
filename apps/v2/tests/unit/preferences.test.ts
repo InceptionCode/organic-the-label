@@ -31,7 +31,28 @@ describe('preferences service', () => {
     }))
     const prefs = await getPreferences(client, 'u1')
     expect(calls[0]).toMatchObject({ table: 'user_preferences', op: 'select', filters: [['eq', 'user_id', 'u1']] })
-    expect(prefs).toEqual({ favoriteGenres: ['trap'], favoriteProductTypes: ['kit'], marketingOptIn: true, personalizationOptIn: false })
+    // A missing personalization value reads as on (phase 09.1).
+    expect(prefs).toEqual({ favoriteGenres: ['trap'], favoriteProductTypes: ['kit'], marketingOptIn: true, personalizationOptIn: true })
+  })
+
+  test('a stored false stays off', async () => {
+    const { client } = fakeSupabase(() => ({
+      data: { favorite_genres: [], favorite_product_types: [], marketing_opt_in: false, personalization_opt_in: false },
+      error: null,
+    }))
+    expect((await getPreferences(client, 'u1')).personalizationOptIn).toBe(false)
+  })
+
+  test('saving deletes the cached scores, but a failed save does not', async () => {
+    const row = { favorite_genres: [], favorite_product_types: [], marketing_opt_in: false, personalization_opt_in: false }
+    const cleared: string[] = []
+    const clear = async (userId: string) => void cleared.push(userId)
+    await updatePreferences(fakeSupabase(() => ({ data: row, error: null })).client, 'u1', DEFAULT_PREFERENCES, clear)
+    expect(cleared).toEqual(['u1'])
+
+    const failing = fakeSupabase(() => ({ data: null, error: { message: 'denied' } })).client
+    await expect(updatePreferences(failing, 'u2', DEFAULT_PREFERENCES, clear)).rejects.toThrow('denied')
+    expect(cleared).toEqual(['u1'])
   })
 
   test('a missing row reads as the defaults', async () => {

@@ -66,6 +66,20 @@ export function supabaseConfig() {
   return { url, secretKey }
 }
 
+/**
+ * Drops the test user's cached scores from the DEV Redis, because specs write preferences straight to
+ * the database and so skip the app's own delete. No-op when Redis is not configured.
+ */
+export async function clearAffinityCache(userId: string): Promise<void> {
+  const url = value('UPSTASH_REDIS_REST_URL')
+  const token = value('UPSTASH_REDIS_REST_TOKEN')
+  if (!url || !token) return
+  supabaseConfig() // Same production guard as every other write the suite makes.
+  const key = encodeURIComponent(`personalization:affinity:${userId}`)
+  const res = await fetch(`${url}/del/${key}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) throw new Error(`Redis del failed with ${res.status}`)
+}
+
 /** Shopify product GID for a handle, read from the dev Storefront API with the app's own token. */
 export async function productGid(handle: string): Promise<string> {
   const domain = (value('SHOPIFY_STORE_DOMAIN') || value('SHOPIFY_DEV_STORE_DOMAIN')).replace(/^https?:\/\//, '').replace(/\/+$/, '')

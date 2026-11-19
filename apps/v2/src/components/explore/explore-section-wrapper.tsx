@@ -14,10 +14,13 @@ export const exploreFocusRing =
 export function ExploreSectionWrapper({
   metadata,
   variant = 'standard',
+  reveal = variant !== 'hero',
   children,
 }: {
   metadata: ExploreSectionMetadata
   variant?: 'hero' | 'standard' | 'sand'
+  /** Scroll fade-in. Off for the hero and for sections that replace a skeleton already on screen. */
+  reveal?: boolean
   children: ReactNode
 }) {
   const content = <div className="content-container">{children}</div>
@@ -31,7 +34,7 @@ export function ExploreSectionWrapper({
         variant === 'sand' && 'band-sand section-y-standard',
       )}
     >
-      {variant === 'hero' ? content : <RevealSection threshold={0.08} distance={32}>{content}</RevealSection>}
+      {reveal ? <RevealSection threshold={0.08} distance={32}>{content}</RevealSection> : content}
     </section>
   )
 }

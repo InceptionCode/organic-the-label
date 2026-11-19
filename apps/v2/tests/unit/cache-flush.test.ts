@@ -57,6 +57,7 @@ const KEYS = [
   'compositions:slug:lofi',
   'free-resources:list',
   'work-with-me:spotify',
+  'personalization:affinity:u1',
   'unrelated:key',
   'visitor:123',
 ]
@@ -97,8 +98,8 @@ describe('handleFlushRequest', () => {
     const body = (await res.json()) as Record<string, unknown>
     expect(body).toEqual({
       ok: true,
-      redis: { 'product:*': 2, 'shopify:products:*': 3, 'compositions:*': 2, 'free-resources:*': 1, 'work-with-me:*': 1 },
-      deletedTotal: 9,
+      redis: { 'product:*': 2, 'shopify:products:*': 3, 'compositions:*': 2, 'free-resources:*': 1, 'work-with-me:*': 1, 'personalization:*': 1 },
+      deletedTotal: 10,
       invalidated: ['products', 'compositions', 'free-resources'],
     })
     expect(Object.keys(body.redis as object)).toEqual([...FLUSH_PATTERNS])
@@ -165,7 +166,7 @@ describe('handleFlushRequest', () => {
     const off = deps({ available: () => false })
     const res = await handleFlushRequest(signedRequest('{}'), off.deps)
     expect(res.status).toBe(503)
-    expect(((await res.json()) as { deletedTotal: number }).deletedTotal).toBe(9)
+    expect(((await res.json()) as { deletedTotal: number }).deletedTotal).toBe(10)
     expect(off.invalidate).not.toHaveBeenCalled()
 
     const failing = deps({ invalidate: async () => Promise.reject(new Error('429')) })
