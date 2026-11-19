@@ -68,6 +68,10 @@ export function SignupForm() {
         <SubmitButton pending={pending} disabled={!form.valid || !captcha.token}>
           Create account
         </SubmitButton>
+        <p className="text-body-s text-muted">
+          We recommend sounds based on your favorites and what you browse and play here. You can turn this off in your account. We never
+          share this data with advertisers or other third parties.
+        </p>
       </form>
       {sentTo ? <CheckEmailDialog email={sentTo} open={dialogOpen} onClose={() => setDialogOpen(false)} /> : null}
     </AuthCard>

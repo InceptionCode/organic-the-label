@@ -2,6 +2,7 @@ import type { ExploreFeatureFlags } from './explore-flags'
 
 export type ExploreSectionId =
   | 'explore-hero'
+  | 'explore-recommended'
   | 'explore-new-arrivals'
   | 'explore-compositions'
   | 'explore-free-resources'
@@ -14,7 +15,7 @@ export type ExploreSectionId =
 export type ExploreSectionMetadata = {
   id: ExploreSectionId
   label: string
-  /** null: always rendered (part of the anonymous default). */
+  /** null: not behind a flag. All of these are the anonymous default except explore-recommended (signed-in only). */
   flagKey: keyof ExploreFeatureFlags | null
   /** v1 section_view_explore_* keys, kept as inert data (pages/explore.md open decision 1). */
   trackingKey: string | null
@@ -23,6 +24,7 @@ export type ExploreSectionMetadata = {
 /** Render order. The data sections hide themselves when their source is empty or unavailable. */
 export const EXPLORE_SECTIONS: readonly ExploreSectionMetadata[] = [
   { id: 'explore-hero', label: 'Explore hero', flagKey: null, trackingKey: 'section_view_explore_hero' },
+  { id: 'explore-recommended', label: 'Recommended for you', flagKey: null, trackingKey: null },
   { id: 'explore-new-arrivals', label: 'New kits and packs', flagKey: null, trackingKey: 'section_view_explore_resources' },
   { id: 'explore-compositions', label: 'Free loops', flagKey: null, trackingKey: null },
   { id: 'explore-free-resources', label: 'Free resources', flagKey: null, trackingKey: null },

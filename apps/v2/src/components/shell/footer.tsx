@@ -68,10 +68,10 @@ export function Footer() {
         <div className="py-6 flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-6 border-t border-subtle">
           <div className="flex flex-col gap-2">
             <p className="text-label">© {year} Organic Sonics. All rights reserved.</p>
-            {/* Activity tracking notice (phase 06). There is no privacy page yet; keep this in step with the account preferences note. */}
+            {/* Activity and recommendations notice (phases 06 and 09). There is no privacy page yet; keep this in step with the account preferences note and the signup note. */}
             <p className="text-label font-normal max-w-[62ch]">
-              We record what you browse and play here only to personalize your experience and improve the site. We never sell it or
-              share it with advertisers or other third parties.
+              We record what you browse and play here only to recommend sounds and improve the site. Recommendations are on for accounts
+              and can be turned off in your account. We never sell this data or share it with advertisers or other third parties.
             </p>
           </div>
           <p className="text-label sm:shrink-0">Made for producers, by producers.</p>

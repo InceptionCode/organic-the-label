@@ -33,6 +33,10 @@ export default function GrainGradient({
       noise={noise}
       speed={0.6}
       shape="corners"
+      // The library renders at >= 2x by default. A soft gradient doesn't need it: render at device
+      // density and cap the canvas at ~1MP, which keeps per-frame fragment work bounded on phones.
+      minPixelRatio={1}
+      maxPixelCount={1_000_000}
       style={{ position: 'absolute', inset: 0, ...style }}
     />
   )

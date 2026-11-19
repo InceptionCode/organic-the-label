@@ -15,7 +15,7 @@ const TAG = '[api/cache/flush]'
 export const CACHE_FLUSH_PATH = '/api/cache/flush'
 
 /** Every Redis key family v2 writes (src/server/cache/keys.ts). Keep in sync with that file. */
-export const FLUSH_PATTERNS = ['product:*', 'shopify:products:*', 'compositions:*', 'free-resources:*', 'work-with-me:*'] as const
+export const FLUSH_PATTERNS = ['product:*', 'shopify:products:*', 'compositions:*', 'free-resources:*', 'work-with-me:*', 'personalization:*'] as const
 
 /** Every CDN tag family (CDN_TAG). Per-product tags are covered by `products`, which every page carries. */
 export const FLUSH_TAGS: string[] = [CDN_TAG.products, CDN_TAG.compositions, CDN_TAG.freeResources]
