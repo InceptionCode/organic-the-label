@@ -5,13 +5,14 @@ export const MediaAssetKindSchema = z.enum([
   "composition_preview",
   "composition_bundle",
   "free_resource_bundle",
+  "site_image",
 ])
 export type MediaAssetKind = z.infer<typeof MediaAssetKindSchema>
 
 export const MediaAssetStatusSchema = z.enum(["uploading", "ready", "failed"])
 export type MediaAssetStatus = z.infer<typeof MediaAssetStatusSchema>
 
-export const MediaAssetOwnerTypeSchema = z.enum(["product", "composition", "free_resource"])
+export const MediaAssetOwnerTypeSchema = z.enum(["product", "composition", "free_resource", "site_content"])
 export type MediaAssetOwnerType = z.infer<typeof MediaAssetOwnerTypeSchema>
 
 export const MEDIA_ASSET_MIME: Record<MediaAssetKind, string> = {
@@ -19,6 +20,7 @@ export const MEDIA_ASSET_MIME: Record<MediaAssetKind, string> = {
   composition_preview: "audio/mpeg",
   composition_bundle: "application/zip",
   free_resource_bundle: "application/zip",
+  site_image: "image/png",
 }
 
 /** Row in `public.media_assets`: one per file the admin app uploads to Shopify Files. */
@@ -46,7 +48,7 @@ export type MediaAsset = z.infer<typeof MediaAssetSchema>
 /** Payload the admin client sends before uploading (server validates again). */
 export const MediaAssetUploadRequestSchema = z.object({
   kind: MediaAssetKindSchema,
-  filename: z.string().min(1).max(200).regex(/^[a-z0-9][a-z0-9\-.]*\.(mp3|zip)$/, "Unexpected filename"),
+  filename: z.string().min(1).max(200).regex(/^[a-z0-9][a-z0-9\-.]*\.(mp3|zip|png)$/, "Unexpected filename"),
   bytes: z.number().int().positive(),
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   duration_seconds: z.number().positive().nullable().optional(),

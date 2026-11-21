@@ -3,6 +3,13 @@ import {
   buildAudioPreviewUrlsMetafield,
   buildWhatsIncludedMetafield,
   CompositionBundleManifestSchema,
+  MAX_PLACEMENTS,
+  MEDIA_ASSET_MIME,
+  MediaAssetUploadRequestSchema,
+  MusoScreenshotSchema,
+  PlacementListSchema,
+  SiteContentKeySchema,
+  supportReplyEmailsCustomer,
   defaultPreviewSpec,
   digitalDownloadFileName,
   fitsShopifyFiles,
@@ -321,5 +328,74 @@ describe("limits", () => {
     expect(fitsShopifyFiles(SHOPIFY_GENERIC_FILE_MAX_BYTES)).toBe(true)
     expect(fitsShopifyFiles(SHOPIFY_GENERIC_FILE_MAX_BYTES + 1)).toBe(false)
     expect(fitsShopifyFiles(0)).toBe(false)
+  })
+})
+
+describe("supportReplyEmailsCustomer", () => {
+  const open = { status: "open", resolution_note: null }
+  const pending = { status: "pending", resolution_note: "Send your order number." }
+
+  it("sends when the status changes to pending or closed", () => {
+    expect(supportReplyEmailsCustomer(open, { status: "pending", resolution_note: null })).toBe(true)
+    expect(supportReplyEmailsCustomer(pending, { ...pending, status: "closed" })).toBe(true)
+  })
+
+  it("sends when only the note changes at an emailable status", () => {
+    expect(supportReplyEmailsCustomer(pending, { ...pending, resolution_note: "Found it, thanks." })).toBe(true)
+  })
+
+  it("does not send for open or spam, even with a new note", () => {
+    expect(supportReplyEmailsCustomer(open, { status: "open", resolution_note: "Looking into it" })).toBe(false)
+    expect(supportReplyEmailsCustomer(pending, { status: "spam", resolution_note: "Junk" })).toBe(false)
+    expect(supportReplyEmailsCustomer(pending, { status: "open", resolution_note: "Reopened" })).toBe(false)
+  })
+
+  it("does not send when nothing meaningful changed or the note was cleared", () => {
+    expect(supportReplyEmailsCustomer(pending, pending)).toBe(false)
+    expect(supportReplyEmailsCustomer(pending, { ...pending, resolution_note: "  Send your order number.  " })).toBe(false)
+    expect(supportReplyEmailsCustomer(pending, { ...pending, resolution_note: "   " })).toBe(false)
+    expect(supportReplyEmailsCustomer(pending, { ...pending, resolution_note: null })).toBe(false)
+  })
+})
+
+describe("site content", () => {
+  const placement = { artist: "RRForeverSolid", track: "Muddies", role: "Producer" }
+
+  it("accepts placements with and without a Spotify track link", () => {
+    const list = [placement, { ...placement, href: "https://open.spotify.com/track/7sjmDwOaN9WBPj73uDxYlg?si=abc" }]
+    expect(PlacementListSchema.safeParse(list).success).toBe(true)
+  })
+
+  it("rejects non-track links, blank fields, and empty or oversized lists", () => {
+    expect(PlacementListSchema.safeParse([{ ...placement, href: "https://open.spotify.com/album/abc" }]).success).toBe(false)
+    expect(PlacementListSchema.safeParse([{ ...placement, href: "https://evil.example/track/abc" }]).success).toBe(false)
+    expect(PlacementListSchema.safeParse([{ ...placement, artist: "  " }]).success).toBe(false)
+    expect(PlacementListSchema.safeParse([]).success).toBe(false)
+    expect(PlacementListSchema.safeParse(Array(MAX_PLACEMENTS + 1).fill(placement)).success).toBe(false)
+  })
+
+  it("only accepts Muso screenshots on the Shopify CDN over https", () => {
+    expect(MusoScreenshotSchema.safeParse({ url: `${CDN}/muso.png` }).success).toBe(true)
+    expect(MusoScreenshotSchema.safeParse({ url: "http://cdn.shopify.com/muso.png" }).success).toBe(false)
+    expect(MusoScreenshotSchema.safeParse({ url: "https://cdn.shopify.com.evil.example/muso.png" }).success).toBe(false)
+    expect(MusoScreenshotSchema.safeParse({ url: "/muso-screenshot.png" }).success).toBe(false)
+  })
+
+  it("only knows the fixed slots", () => {
+    expect(SiteContentKeySchema.safeParse("work_with_me_muso").success).toBe(true)
+    expect(SiteContentKeySchema.safeParse("homepage_hero").success).toBe(false)
+  })
+
+  it("allows PNG uploads for site images", () => {
+    expect(MEDIA_ASSET_MIME.site_image).toBe("image/png")
+    const upload = {
+      kind: "site_image",
+      filename: "muso-screenshot-abc123.png",
+      bytes: 1024,
+      sha256: SHA,
+      owner_type: "site_content",
+      owner_ref: "work_with_me_muso",
+    }
+    expect(MediaAssetUploadRequestSchema.safeParse(upload).success).toBe(true)
   })
 })
