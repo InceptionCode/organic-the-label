@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { z } from 'zod'
-import { PRODUCT_HANDLE_TAG } from '~/server/http/cache-headers'
+import { CDN_TAG, PRODUCT_HANDLE_TAG } from '~/server/http/cache-headers'
 
 // POST /api/cache/purge. apps/api calls this after each Redis bust so the CDN copies of
 // the pages tagged with that family (server/http/cache-headers.ts) are invalidated too. Framework-free
@@ -27,7 +27,7 @@ const PRODUCT_TAG_PREFIX = 'product:'
 
 /** The exact tag shapes v2 sets on cached responses; anything else is a 400. */
 export function isAllowedTag(tag: string): boolean {
-  if (tag === 'products' || tag === 'compositions' || tag === 'free-resources') return true
+  if ((Object.values(CDN_TAG) as string[]).includes(tag)) return true
   return tag.startsWith(PRODUCT_TAG_PREFIX) && PRODUCT_HANDLE_TAG.test(tag.slice(PRODUCT_TAG_PREFIX.length))
 }
 

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
 import { createHmac } from "node:crypto";
-import { bustCompositionsCache, bustFreeResourcesCache, bustProductCache } from "../src/lib/cache.ts";
+import { bustCompositionsCache, bustFreeResourcesCache, bustProductCache, bustWorkWithMeCache } from "../src/lib/cache.ts";
+import { TABLE_BUST } from "../src/routes/compositions.ts";
 import { productPurgeTags, purgeCdnTags, resetCdnPurgeWarning } from "../src/lib/cdn-purge.ts";
 
 // Fake fetch only: no request leaves the process. Redis env is unset, so the busts skip Redis and
@@ -112,5 +113,17 @@ describe("busts purge the matching tags", () => {
     await expect(bustProductCache("wave-pack")).resolves.toBeUndefined();
     await expect(bustCompositionsCache()).resolves.toBeUndefined();
     await expect(bustFreeResourcesCache()).resolves.toBeUndefined();
+    await expect(bustWorkWithMeCache()).resolves.toBeUndefined();
+  });
+
+  test("bustWorkWithMeCache purges only the work-with-me tag", async () => {
+    await bustWorkWithMeCache();
+    expect(calls.map(tagsOf)).toEqual([["work-with-me"]]);
+  });
+
+  test("a site_content change busts the Work With Me cache", () => {
+    expect(TABLE_BUST.site_content).toBe(bustWorkWithMeCache);
+    expect(TABLE_BUST.compositions).toBe(bustCompositionsCache);
+    expect(TABLE_BUST.free_resources).toBe(bustFreeResourcesCache);
   });
 });

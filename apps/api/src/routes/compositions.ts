@@ -1,13 +1,15 @@
 import { Hono } from "hono";
-import { bustCompositionsCache, bustFreeResourcesCache } from "../lib/cache.ts";
+import { bustCompositionsCache, bustFreeResourcesCache, bustWorkWithMeCache } from "../lib/cache.ts";
 import { verifySharedSecret } from "../middleware/auth.ts";
 import { compositionWebhookSchema, type CompositionWebhookPayload } from "../schemas/index.ts";
 
 const TAG = "[/webhooks/compositions]";
 
-const TABLE_BUST: Record<string, () => Promise<void>> = {
+/** Which cache a Supabase row change busts. Anything unlisted busts compositions (the original table). */
+export const TABLE_BUST: Record<string, () => Promise<void>> = {
   compositions: bustCompositionsCache,
   free_resources: bustFreeResourcesCache,
+  site_content: bustWorkWithMeCache,
 };
 
 const app = new Hono();

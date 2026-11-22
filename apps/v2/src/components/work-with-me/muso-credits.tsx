@@ -1,11 +1,14 @@
 import { BadgeCheck, ExternalLink } from 'lucide-react'
-import { MUSO_PROFILE_URL, MUSO_SCREENSHOT_URL } from '~/lib/work-with-me-content'
+import { MUSO_PROFILE_URL } from '~/lib/work-with-me-content'
 
 const focusRing =
   'outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg-canvas)]'
 
-/** The Muso.ai discography, unboxed: the screenshot (radius 0) links out, the copy and link sit below. */
-export function MusoCredits() {
+/**
+ * The Muso.ai discography, unboxed: the screenshot (radius 0) links out, the copy and link sit below.
+ * `screenshotUrl` is the admin's upload (site_content) or the bundled /muso-screenshot.png.
+ */
+export function MusoCredits({ screenshotUrl }: { screenshotUrl: string }) {
   return (
     <div>
       <a
@@ -16,7 +19,7 @@ export function MusoCredits() {
         className={`group relative block aspect-[915/950] overflow-hidden bg-surface-1 active:opacity-90 ${focusRing}`}
       >
         <img
-          src={MUSO_SCREENSHOT_URL}
+          src={screenshotUrl}
           alt="JUICEMAN's verified production credits, as listed on Muso.ai"
           width={915}
           height={950}

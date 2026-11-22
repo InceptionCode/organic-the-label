@@ -10,7 +10,7 @@ import { CDN_TAG, publicPageHeaders } from '~/server/http/cache-headers'
 export const Route = createFileRoute('/work-with-me')({
   codeSplitGroupings: [['component', 'pendingComponent'], ['errorComponent'], ['notFoundComponent']],
   // Anonymous HTML is CDN-cached; the cache guard makes it private whenever it could be per-visitor (phase 07.3).
-  headers: () => publicPageHeaders([CDN_TAG.products]),
+  headers: () => publicPageHeaders([CDN_TAG.products, CDN_TAG.workWithMe]),
   loader: async ({ context }) => {
     const qc = context.queryClient
     // The hero needs the artist; recent posts stream in after the shell. Neither ever throws.

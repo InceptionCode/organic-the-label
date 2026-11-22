@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import { keys, ttl } from '~/server/cache/keys'
 
 // Patterns apps/api busts (apps/api/src/lib/cache.ts).
-const BUSTED = [/^product:handle:.+/, /^shopify:products:.+/, /^compositions:.+/, /^free-resources:.+/]
+const BUSTED = [/^product:handle:.+/, /^shopify:products:.+/, /^compositions:.+/, /^free-resources:.+/, /^work-with-me:spotify$/]
 
 describe('cache keys', () => {
   const samples: string[] = [
@@ -22,10 +22,12 @@ describe('cache keys', () => {
     keys.freeResourcesSitemap(),
     keys.compositionsListBy('range=all|sort=newest|tags=-|search=-'),
     keys.freeResourceFeatured(),
+    // Carries site_content, so apps/api deletes this exact key (bustWorkWithMeCache).
+    keys.workWithMeSpotify(),
   ]
 
   // TTL-only keys, deliberately outside the apps/api busting contract (pages/work-with-me.md).
-  const ttlOnly: string[] = [keys.workWithMeSpotify(), keys.workWithMeYoutube(), keys.workWithMeInstagram()]
+  const ttlOnly: string[] = [keys.workWithMeYoutube(), keys.workWithMeInstagram()]
   // Per-user scores (phase 09): expire by TTL, and saving preferences deletes them.
   const perUser: string[] = [keys.personalizationAffinity('u1')]
 

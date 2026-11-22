@@ -18,7 +18,7 @@ export const CACHE_FLUSH_PATH = '/api/cache/flush'
 export const FLUSH_PATTERNS = ['product:*', 'shopify:products:*', 'compositions:*', 'free-resources:*', 'work-with-me:*', 'personalization:*'] as const
 
 /** Every CDN tag family (CDN_TAG). Per-product tags are covered by `products`, which every page carries. */
-export const FLUSH_TAGS: string[] = [CDN_TAG.products, CDN_TAG.compositions, CDN_TAG.freeResources]
+export const FLUSH_TAGS: string[] = Object.values(CDN_TAG)
 
 /** SCAN page size hint and DEL batch size. */
 export const FLUSH_BATCH = 500

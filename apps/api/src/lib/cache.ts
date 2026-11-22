@@ -61,3 +61,18 @@ export async function bustFreeResourcesCache(): Promise<void> {
   await scanAndDelete("free-resources:*");
   await purgeCdnTags(["free-resources"]);
 }
+
+// Work With Me: the admin's site_content rows (placements, Muso screenshot) ride in v2's
+// `work-with-me:spotify` payload. Delete only that key, so the YouTube and Instagram caches stay warm,
+// then purge the /work-with-me page from the CDN.
+export const WORK_WITH_ME_CONTENT_KEY = "work-with-me:spotify";
+
+export async function bustWorkWithMeCache(): Promise<void> {
+  const redis = getRedis();
+  if (!redis) {
+    console.warn("[cache] Redis not configured — skipping work with me cache bust");
+  } else {
+    await redis.del(WORK_WITH_ME_CONTENT_KEY);
+  }
+  await purgeCdnTags(["work-with-me"]);
+}
