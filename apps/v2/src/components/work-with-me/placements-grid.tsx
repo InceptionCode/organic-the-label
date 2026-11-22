@@ -71,8 +71,11 @@ function PlacementRow({ placement, index }: { placement: EnrichedPlacement; inde
   )
 }
 
+/** How many placements the page shows; the admin editor marks the same count as "On the site". */
+const PLACEMENTS_SHOWN = 5
+
 export function PlacementsGrid({ placements, musoScreenshotUrl }: { placements: EnrichedPlacement[]; musoScreenshotUrl: string }) {
-  const shown = placements.slice(0, 3)
+  const shown = placements.slice(0, PLACEMENTS_SHOWN)
 
   return (
     <section aria-labelledby="wwm-placements-title" className="content-container section-y-standard">
