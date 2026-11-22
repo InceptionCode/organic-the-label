@@ -15,7 +15,11 @@ export const keys = {
   freeResourcesList: () => 'free-resources:list',
   freeResourceBySlug: (s: string) => `free-resources:slug:${s}`,
   freeResourcesSitemap: () => 'free-resources:sitemap',
-  /** Work With Me (pages/work-with-me.md): TTL only, not part of the apps/api busting contract. */
+  /**
+   * Work With Me (pages/work-with-me.md). The Spotify payload also carries the admin-edited
+   * site_content (placements, Muso screenshot), so apps/api deletes this exact key when site_content
+   * changes. YouTube and Instagram are TTL only, outside the busting contract.
+   */
   workWithMeSpotify: () => 'work-with-me:spotify',
   workWithMeYoutube: () => 'work-with-me:youtube',
   workWithMeInstagram: () => 'work-with-me:instagram',

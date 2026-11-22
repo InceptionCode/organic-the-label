@@ -8,7 +8,13 @@ export const PRIVATE_NO_STORE = 'private, no-store'
 // Vercel CDN cache tags. One tag per Redis key family.
 // Every public page carries `products`: the root loader dehydrates productQueries.newest(5) for the sticky bar.
 
-export const CDN_TAG = { products: 'products', compositions: 'compositions', freeResources: 'free-resources' } as const
+export const CDN_TAG = {
+  products: 'products',
+  compositions: 'compositions',
+  freeResources: 'free-resources',
+  /** /work-with-me: purged when the admin edits site_content (placements, Muso screenshot). */
+  workWithMe: 'work-with-me',
+} as const
 export type CdnTag = (typeof CDN_TAG)[keyof typeof CDN_TAG] | `product:${string}`
 
 /** Shopify handles are lowercase ASCII and hyphens; anything else gets no per-product tag (`products` still covers it). */

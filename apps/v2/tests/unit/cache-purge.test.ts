@@ -32,7 +32,7 @@ function deps(overrides: Partial<PurgeDeps> = {}) {
 
 describe('isAllowedTag', () => {
   test('accepts the families v2 tags responses with', () => {
-    for (const tag of ['products', 'compositions', 'free-resources', 'product:wave-pack', 'product:808s']) expect(isAllowedTag(tag)).toBe(true)
+    for (const tag of ['products', 'compositions', 'free-resources', 'work-with-me', 'product:wave-pack', 'product:808s']) expect(isAllowedTag(tag)).toBe(true)
   })
   test('rejects anything else', () => {
     for (const tag of ['', '*', 'Products', 'product:', 'product:Wave', 'product:a,b', 'product:a b', 'compositions:list', `product:${'a'.repeat(201)}`]) {

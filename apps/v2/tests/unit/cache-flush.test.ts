@@ -100,7 +100,7 @@ describe('handleFlushRequest', () => {
       ok: true,
       redis: { 'product:*': 2, 'shopify:products:*': 3, 'compositions:*': 2, 'free-resources:*': 1, 'work-with-me:*': 1, 'personalization:*': 1 },
       deletedTotal: 10,
-      invalidated: ['products', 'compositions', 'free-resources'],
+      invalidated: ['products', 'compositions', 'free-resources', 'work-with-me'],
     })
     expect(Object.keys(body.redis as object)).toEqual([...FLUSH_PATTERNS])
     expect([...redis.store].sort()).toEqual(['unrelated:key', 'visitor:123'])

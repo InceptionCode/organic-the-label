@@ -71,7 +71,7 @@ function PlacementRow({ placement, index }: { placement: EnrichedPlacement; inde
   )
 }
 
-export function PlacementsGrid({ placements }: { placements: EnrichedPlacement[] }) {
+export function PlacementsGrid({ placements, musoScreenshotUrl }: { placements: EnrichedPlacement[]; musoScreenshotUrl: string }) {
   const shown = placements.slice(0, 3)
 
   return (
@@ -101,7 +101,7 @@ export function PlacementsGrid({ placements }: { placements: EnrichedPlacement[]
 
         <div className={shown.length > 0 ? 'lg:col-span-5 lg:col-start-8' : 'max-w-[560px]'}>
           {shown.length > 0 ? <p className="mb-4 text-label">Full discography</p> : null}
-          <MusoCredits />
+          <MusoCredits screenshotUrl={musoScreenshotUrl} />
         </div>
       </div>
     </section>

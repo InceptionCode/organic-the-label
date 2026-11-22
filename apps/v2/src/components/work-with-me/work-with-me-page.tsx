@@ -25,7 +25,7 @@ export function WorkWithMePage() {
         <BioRow verified={data.artist !== null} />
       </RevealSection>
       <RevealSection threshold={0.08} distance={40}>
-        <PlacementsGrid placements={data.placements} />
+        <PlacementsGrid placements={data.placements} musoScreenshotUrl={data.musoScreenshotUrl} />
       </RevealSection>
       <RevealSection threshold={0.08} distance={40}>
         <ArtistLinks />

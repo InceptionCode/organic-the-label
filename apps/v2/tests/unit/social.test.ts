@@ -1,10 +1,10 @@
-import { describe, expect, mock, test } from 'bun:test'
+import { describe, expect, mock, spyOn, test } from 'bun:test'
 import { createCache, type CacheStore } from '~/server/cache/redis'
-import { PERSON_SAME_AS, PLACEMENTS, YOUTUBE_HANDLE } from '~/lib/work-with-me-content'
+import { MUSO_SCREENSHOT_URL, PERSON_SAME_AS, PLACEMENTS, YOUTUBE_HANDLE } from '~/lib/work-with-me-content'
 import { instagramEmbedSrc, spotifyEmbedSrc, spotifyIdFromUrl, youtubeHandleFromUrl } from '~/lib/work-with-me-embeds'
 import { createInstagramClient, INSTAGRAM_MEDIA_ID } from '~/server/social/instagram'
 import { createSpotifyClient, type SpotifyClient } from '~/server/social/spotify'
-import { getRecentPosts, getWorkWithMeSpotify } from '~/server/social/work-with-me'
+import { contentFromRows, getRecentPosts, getWorkWithMeSpotify } from '~/server/social/work-with-me'
 import { createYouTubeClient } from '~/server/social/youtube'
 
 const silent = { warn: () => {}, error: () => {} }
@@ -223,6 +223,7 @@ describe('instagram client', () => {
 })
 
 describe('work with me aggregation and caching', () => {
+  const noRows = async () => []
   const fakeSpotify = (artist: boolean): SpotifyClient => ({
     getArtist: mock(async () =>
       artist ? { id: 'a', name: 'JUICEMAN', imageUrl: 'img', followers: 10, genres: [], spotifyUrl: 'u' } : null,
@@ -235,7 +236,7 @@ describe('work with me aggregation and caching', () => {
     const { store, getCached } = memoryCache()
     const client = fakeSpotify(false)
     client.getTrack = mock(async () => null)
-    const result = await getWorkWithMeSpotify({ spotify: client, getCached })
+    const result = await getWorkWithMeSpotify({ spotify: client, getCached, readSiteContent: noRows })
     expect(result.artist).toBeNull()
     expect(result.releases).toEqual([])
     expect(result.placements).toHaveLength(PLACEMENTS.length)
@@ -246,10 +247,10 @@ describe('work with me aggregation and caching', () => {
   test('with an artist: placements enriched and the result cached under work-with-me:spotify', async () => {
     const { store, getCached } = memoryCache()
     const client = fakeSpotify(true)
-    const result = await getWorkWithMeSpotify({ spotify: client, getCached })
+    const result = await getWorkWithMeSpotify({ spotify: client, getCached, readSiteContent: noRows })
     expect(result.placements[0]?.artworkUrl).toBe('art-2dscDmPAiY0NoCZImNXXCR')
     expect(store.has('work-with-me:spotify')).toBe(true)
-    await getWorkWithMeSpotify({ spotify: client, getCached })
+    await getWorkWithMeSpotify({ spotify: client, getCached, readSiteContent: noRows })
     expect(client.getArtist).toHaveBeenCalledTimes(1)
   })
 
@@ -268,5 +269,45 @@ describe('work with me aggregation and caching', () => {
     expect(posts.instagram.map((p) => p.videoUrl)).toEqual(['/api/instagram/video/1_2', null])
     expect(store.has('work-with-me:youtube')).toBe(false)
     expect(store.has('work-with-me:instagram')).toBe(true)
+  })
+
+  const EDITED = [{ artist: 'New Artist', track: 'New Song', role: 'Producer', href: 'https://open.spotify.com/track/abc123' }]
+  const MUSO = 'https://cdn.shopify.com/s/files/1/0/files/muso-abc.png'
+
+  test('site_content rows replace the bundled placements and screenshot', async () => {
+    const { getCached } = memoryCache()
+    const readSiteContent = async () => [
+      { key: 'work_with_me_placements', value: EDITED },
+      { key: 'work_with_me_muso', value: { url: MUSO } },
+    ]
+    const result = await getWorkWithMeSpotify({ spotify: fakeSpotify(true), getCached, readSiteContent })
+    expect(result.placements.map((p) => p.track)).toEqual(['New Song'])
+    expect(result.placements[0]?.artworkUrl).toBe('art-abc123')
+    expect(result.musoScreenshotUrl).toBe(MUSO)
+  })
+
+  test('a missing or invalid row falls back on its own', () => {
+    expect(contentFromRows([])).toEqual({ placements: PLACEMENTS, musoScreenshotUrl: MUSO_SCREENSHOT_URL })
+    const mixed = contentFromRows([
+      { key: 'work_with_me_placements', value: [] },
+      { key: 'work_with_me_muso', value: { url: MUSO } },
+    ])
+    expect(mixed.placements).toBe(PLACEMENTS)
+    expect(mixed.musoScreenshotUrl).toBe(MUSO)
+    const offHost = contentFromRows([{ key: 'work_with_me_muso', value: { url: 'https://evil.example/x.png' } }])
+    expect(offHost.musoScreenshotUrl).toBe(MUSO_SCREENSHOT_URL)
+  })
+
+  test('a failed site_content read serves the defaults and is not cached', async () => {
+    const { store, getCached } = memoryCache()
+    const errorSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const readSiteContent = async () => {
+      throw new Error('down')
+    }
+    const result = await getWorkWithMeSpotify({ spotify: fakeSpotify(true), getCached, readSiteContent })
+    expect(result.placements).toHaveLength(PLACEMENTS.length)
+    expect(result.musoScreenshotUrl).toBe(MUSO_SCREENSHOT_URL)
+    expect(store.has('work-with-me:spotify')).toBe(false)
+    errorSpy.mockRestore()
   })
 })
